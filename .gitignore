@@ -1,0 +1,8 @@
+unnecessary/
+*.o
+*.a
+*.exe
+*.out
+*.app
+*.swp
+*.log
