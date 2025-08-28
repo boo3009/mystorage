@@ -1,7 +1,11 @@
 #include "db.h"
 
 Database::Database(QObject *parent) : QObject(parent) {  }
-Database::~Database() {  }
+Database::~Database() { 
+	if(db.isOpen())
+		db.close();
+	QSqlDatabase::removeDatabase(DB_NAME);
+}
 
 void Database::connectDatabase() {
 	if(!QFile(DB_FILE_PATH).exists())
