@@ -87,7 +87,8 @@ void MainWindow::setup_CoreWidgets() {
     mainLayout_left_itemsPB->setStyleSheet("text-align:left;");
     mainLayout_left_balancePB->setStyleSheet("text-align:left;");
     mainLayout_left_quitPB->setStyleSheet("text-align:left;");
-  mainLayout_left->addSpacing(50);
+  mainLayout_left=new QVBoxLayout();
+	mainLayout_left->addSpacing(50);
   mainLayout_left->addWidget(mainLayout_left_incomePB);
   mainLayout_left->addWidget(mainLayout_left_outcomePB);
   mainLayout_left->addWidget(mainLayout_left_itemsPB);
@@ -112,45 +113,46 @@ void MainWindow::setup_CoreWidgets() {
 void MainWindow::setup_SignalSlots() {
 //-------------------------mainLayouts left side PB's connects
 	connect(mainLayout_left_quitPB,&QPushButton::clicked,this,&QApplication::quit);
-	connect(mainLayout_left_incomePB,&QPushButton::clicked,
-	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(0); });
-	connect(mainLayout_left_outcomePB,&QPushButton::clicked,
-	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(1); });
+//	connect(mainLayout_left_incomePB,&QPushButton::clicked,
+//	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(0); });
+//	connect(mainLayout_left_outcomePB,&QPushButton::clicked,
+//	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(1); });
 	connect(mainLayout_left_itemsPB,&QPushButton::clicked,
-	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(2); });
-	connect(mainLayout_left_balancePB,&QPushButton::clicked,
-	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(3); });
+	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(0); });
+//	connect(mainLayout_left_balancePB,&QPushButton::clicked,
+//	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(3); });
 //-------------------------itemsModelView connects
-	connect(itemsModelView_widget_addItemPB,&QPushButton::clicked,this,&MainWindow::itemDialog_add);
-	connect(itemsModelView_widget_editItemPB,&QPushButton::clicked,
-	/*----*/this, &MainWindow::emit_signal_clickedEdit);
-	connect(this,&MainWindow::signal_clickedEdit,this,slot_EditItem);
-  connect(itemDialog,&ItemDialog::signal_ready,this,&MainWindow::slot_UpdateModels);
-	connect(itemsView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(slot_EditItem(QModelIndex)));
+	connect(itemsModelView_widget_addItemPB,&QPushButton::clicked,this,&MainWindow::slot_itemDialog_add);
+//	connect(itemsModelView_widget_editItemPB,&QPushButton::clicked,
+//	/*----*/this, &MainWindow::signal_clickedEdit);
+//	connect(this,&MainWindow::signal_clickedEdit,this,&MainWindow::slot_EditItem);
+//	connect(itemsView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(slot_EditItem(QModelIndex)));
 }
 
-void MainWindow::itemDialog_add() {
-  ItemDialog *itemDialog=new ItemDialog(itemsModel,itemsView);
-  itemDialog->exec();
+void MainWindow::slot_itemDialog_add() {
+  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView);
+  obj_itemDialog->exec();
   QModelIndex i=itemsModel->index(itemsModel->rowCount()-1,0); //get added item's qmodelindex
   itemsView->setCurrentIndex(i); //select added row (after adding)
+	
+	connect(obj_itemDialog,&ItemDialog::signal_ready,this,&MainWindow::slot_UpdateModels);
 }
 
 void MainWindow::slot_UpdateModels() {
   itemsModel->select();
 }
 
-void MainWindow::slot_EditItem(QModelIndex index) {
-  ItemDialog *itemDialog=new ItemDialog(itemsModel,itemsView,index.row());
-  itemDialog->setWindowTitle("Editing an item");
-  itemDialog->exec();
-  itemsView->setCurrentIndex(index); //select edited row (after editing)
-}
-
-void MainWindow::emit_signal_clickedEdit() {
-  QModelIndex i=itemsView->currentIndex(); 
-  if(!i.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
-  } else
-      emit signal_clickedEdit(i);
-}
+//void MainWindow::slot_EditItem(QModelIndex index) {
+//  ItemDialog *itemDialog=new ItemDialog(itemsModel,itemsView,index.row());
+//  itemDialog->setWindowTitle("Editing an item");
+//  itemDialog->exec();
+//  itemsView->setCurrentIndex(index); //select edited row (after editing)
+//}
+//
+//void MainWindow::emit_signal_clickedEdit() {
+//  QModelIndex i=itemsView->currentIndex(); 
+//  if(!i.isValid()) {
+//    QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
+//  } else
+//      emit signal_clickedEdit(i);
+//}

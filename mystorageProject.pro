@@ -17,8 +17,10 @@ CONFIG+=debug
 
 # Input
 HEADERS += db.h \
-           mainWindow.h
+           mainWindow.h\
+					 itemDialog.h
 SOURCES += db.cpp \
-           main.cpp \
-           mainWindow.cpp
-RESOURCES += resources.qrc
+           mainWindow.cpp\
+					 itemDialog.cpp\
+           main.cpp 
+# RESOURCES += resources.qrc

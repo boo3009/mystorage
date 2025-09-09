@@ -19,7 +19,7 @@
 #include <QDebug>
 
 #include "db.h"
-#include "ItemDialog.h"
+#include "itemDialog.h"
 
 
 class MainWindow:public QMainWindow {
@@ -62,9 +62,11 @@ private:
 	void setup_itemsModelView();	
 signals:
 	void signal_clickedEdit();
+	void signal_addItem();
 private slots:
-	void slot_EditItem();
 	void slot_UpdateModels();
+//	void slot_editItem();
+	void slot_itemDialog_add();
 };
 
 #endif

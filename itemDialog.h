@@ -16,8 +16,7 @@
 class ItemDialog : public QDialog {
   Q_OBJECT
 public:
-  explicit ItemDialog(QSqlTableModel *model, QTableView *view,int row=-1,
-										  bool needCopy=false,QWidget *parent=0);
+  explicit ItemDialog(QSqlTableModel *model, QTableView *view,int row=-1,bool copy=false,QWidget *parent=0);
 private:
   QSqlTableModel *ptr_itemsModel;
   QTableView *ptr_itemsView;
@@ -29,9 +28,14 @@ private:
   QLineEdit *lineEdit;
   QPushButton *savePB;
   QPushButton *cancelPB;
-
+//---------main setup-----------
   void setup_Widget();
   void setup_ModelandMapper();
+//---------helper functions-----	
+	void func_addItem();
+	void func_editItem(int);
+	void func_copyItem(int);
+	void func_removeItem(int);
 signals:
   void signal_ready();
 private slots:
