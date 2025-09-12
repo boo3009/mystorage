@@ -34,10 +34,12 @@ void MainWindow::setup_itemsModelView() {
   itemsModel->setHeaderData(0, Qt::Horizontal, "id");
   itemsModel->setHeaderData(1, Qt::Horizontal, "List of items");
   itemsModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
+	itemsModel->setSort(0,Qt::AscendingOrder);
 //------------------------------create "View" for items table
   itemsView=new QTableView();
-  itemsView->setModel(itemsModel);
-  itemsView->setSelectionMode(QAbstractItemView::SingleSelection);
+	itemsView->setModel(itemsModel);
+  itemsView->sortByColumn(0,Qt::AscendingOrder); /*finded out that view needed sort too*/
+	itemsView->setSelectionMode(QAbstractItemView::SingleSelection);
   itemsView->setSelectionBehavior(QAbstractItemView::SelectRows);
   itemsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
   itemsView->setColumnHidden(0,true);
@@ -71,6 +73,7 @@ void MainWindow::setup_itemsModelView() {
   itemsModelView_widget_buttonsLayout->addWidget(itemsModelView_widget_removeItemPB);
   itemsModelView_widget_buttonsLayout->addStretch();
   itemsModelView_widget_mainLayout->addLayout(itemsModelView_widget_buttonsLayout);
+
 }
 
 void MainWindow::setup_CoreWidgets() {
@@ -113,46 +116,97 @@ void MainWindow::setup_CoreWidgets() {
 void MainWindow::setup_SignalSlots() {
 //-------------------------mainLayouts left side PB's connects
 	connect(mainLayout_left_quitPB,&QPushButton::clicked,this,&QApplication::quit);
-//	connect(mainLayout_left_incomePB,&QPushButton::clicked,
-//	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(0); });
-//	connect(mainLayout_left_outcomePB,&QPushButton::clicked,
-//	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(1); });
+	connect(mainLayout_left_incomePB,&QPushButton::clicked,
+	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(0); });
+	connect(mainLayout_left_outcomePB,&QPushButton::clicked,
+	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(1); });
 	connect(mainLayout_left_itemsPB,&QPushButton::clicked,
 	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(0); });
-//	connect(mainLayout_left_balancePB,&QPushButton::clicked,
-//	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(3); });
+	connect(mainLayout_left_balancePB,&QPushButton::clicked,
+	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(3); });
 //-------------------------itemsModelView connects
-	connect(itemsModelView_widget_addItemPB,&QPushButton::clicked,this,&MainWindow::slot_itemDialog_add);
-//	connect(itemsModelView_widget_editItemPB,&QPushButton::clicked,
-//	/*----*/this, &MainWindow::signal_clickedEdit);
-//	connect(this,&MainWindow::signal_clickedEdit,this,&MainWindow::slot_EditItem);
-//	connect(itemsView,SIGNAL(doubleClicked(QModelIndex)),this,SLOT(slot_EditItem(QModelIndex)));
+	connect(itemsModelView_widget_addItemPB,&QPushButton::clicked,
+  /*----*/this,&MainWindow::slot_itemDialog_add);
+	connect(itemsModelView_widget_editItemPB,&QPushButton::clicked,
+	/*----*/this,&MainWindow::slot_itemDialog_edit);
+	connect(itemsView,&QTableView::doubleClicked,this,&MainWindow::slot_editItemByDoubleClick);
+	connect(itemsModelView_widget_copyItemPB,&QPushButton::clicked,
+	/*----*/this,&MainWindow::slot_itemDialog_copy);
+	connect(itemsModelView_widget_removeItemPB,&QPushButton::clicked,this,&MainWindow::slot_itemsModelView_remove);
 }
 
-void MainWindow::slot_itemDialog_add() {
-  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView);
-  obj_itemDialog->exec();
-  QModelIndex i=itemsModel->index(itemsModel->rowCount()-1,0); //get added item's qmodelindex
-  itemsView->setCurrentIndex(i); //select added row (after adding)
-	
-	connect(obj_itemDialog,&ItemDialog::signal_ready,this,&MainWindow::slot_UpdateModels);
-}
-
-void MainWindow::slot_UpdateModels() {
+void MainWindow::slot_updateModels() {
   itemsModel->select();
 }
 
-//void MainWindow::slot_EditItem(QModelIndex index) {
-//  ItemDialog *itemDialog=new ItemDialog(itemsModel,itemsView,index.row());
-//  itemDialog->setWindowTitle("Editing an item");
-//  itemDialog->exec();
-//  itemsView->setCurrentIndex(index); //select edited row (after editing)
-//}
-//
-//void MainWindow::emit_signal_clickedEdit() {
-//  QModelIndex i=itemsView->currentIndex(); 
-//  if(!i.isValid()) {
-//    QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
-//  } else
-//      emit signal_clickedEdit(i);
-//}
+void MainWindow::slot_itemDialog_add() {
+  QModelIndex index=itemsView->currentIndex();
+	int before=itemsModel->rowCount();
+	ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView);
+  obj_itemDialog->exec();
+  int after=itemsModel->rowCount();
+	if(after!=before) {
+  	QModelIndex i=itemsModel->index(itemsModel->rowCount()-1,0); //get added item's qmodelindex
+		itemsView->setCurrentIndex(i); //select added row (after adding)
+	} else
+			itemsView->setCurrentIndex(index);
+	connect(obj_itemDialog,&ItemDialog::signal_ready,this,&MainWindow::slot_updateModels);
+	delete obj_itemDialog;
+	obj_itemDialog=nullptr;
+}
+
+void MainWindow::slot_editItemByDoubleClick(QModelIndex index) {
+  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,index.row());
+  obj_itemDialog->setWindowTitle("Editing an item");
+  obj_itemDialog->exec();
+  itemsView->setCurrentIndex(index); //select edited row (after editing)
+	connect(obj_itemDialog,&ItemDialog::signal_ready,this,&MainWindow::slot_updateModels);
+	delete obj_itemDialog;
+	obj_itemDialog=nullptr;
+}
+
+void MainWindow::slot_itemDialog_edit() {
+  QModelIndex index=itemsView->currentIndex(); 
+  if(!index.isValid()) {
+    QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
+		return;
+	}
+  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,index.row());
+  obj_itemDialog->setWindowTitle("Editing an item");
+  obj_itemDialog->exec();
+  itemsView->setCurrentIndex(index); //select edited row (after editing)
+	connect(obj_itemDialog,&ItemDialog::signal_ready,this,&MainWindow::slot_updateModels);
+	delete obj_itemDialog;
+	obj_itemDialog=nullptr;
+}
+
+void MainWindow::slot_itemDialog_copy() {
+  QModelIndex index=itemsView->currentIndex(); 
+  if(!index.isValid()) {
+    QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
+		return;
+	}
+  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,index.row(),true);
+  obj_itemDialog->setWindowTitle("Copying an item");
+  obj_itemDialog->exec();
+  itemsView->setCurrentIndex(index); //select the same row, dont change the focus
+	connect(obj_itemDialog,&ItemDialog::signal_ready,this,&MainWindow::slot_updateModels);
+	delete obj_itemDialog;
+	obj_itemDialog=nullptr;
+}
+
+void MainWindow::slot_itemsModelView_remove() {
+	QModelIndex index=itemsView->currentIndex();
+  if(!index.isValid()) {
+    QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
+		return;
+	}
+	QModelIndex newindex;
+	if(index.row()==itemsModel->rowCount()-1)
+		newindex=itemsModel->index(index.row()-1,1);
+	else
+		newindex=index;
+	itemsModel->removeRow(index.row());
+	itemsModel->submitAll();
+	itemsView->setCurrentIndex(newindex);
+}

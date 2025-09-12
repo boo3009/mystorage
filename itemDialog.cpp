@@ -43,7 +43,6 @@ void ItemDialog::setup_ModelandMapper() {
 
 void ItemDialog::func_addItem() {
 	ptr_itemsModel->insertRow(ptr_itemsModel->rowCount(QModelIndex()));
-	qDebug()<<"the row count is:"<<ptr_itemsModel->rowCount(QModelIndex());
 	ptr_itemsView->setRowHidden(ptr_itemsModel->rowCount()-1,true);
 	mapper->toLast();
 }
@@ -54,28 +53,41 @@ void ItemDialog::func_editItem(int row) {
 
 void ItemDialog::func_copyItem(int row) {
 	ptr_itemsModel->insertRow(ptr_itemsModel->rowCount(QModelIndex()));
-	QVariant var=ptr_itemsModel->data(ptr_itemsModel->index(row,1),Qt::EditRole);
-	QString str=var.toString();
-	QModelIndex i=ptr_itemsModel->index(ptr_itemsModel->rowCount()-1,1);
-	ptr_itemsModel->setData(i,str,Qt::EditRole);
+	QString str=ptr_itemsModel->data(ptr_itemsModel->index(row,1),Qt::EditRole).toString();
+	QModelIndex index=ptr_itemsModel->index(ptr_itemsModel->rowCount()-1,1);
+	ptr_itemsModel->setData(index,str,Qt::EditRole);
 	ptr_itemsView->setRowHidden(ptr_itemsModel->rowCount()-1,true);
 	mapper->toLast();
 }
 
-void ItemDialog::func_removeItem(int row) {
-//--------need to be filled---------	
-}
-
 void ItemDialog::slot_saveItem() {
   if(lineEdit->text().isEmpty()) {
-    ptr_itemsModel->removeRow(ptr_itemsModel->rowCount()-1);
-    this->close();
-  }
+    QMessageBox::information(nullptr,"Warning message","Empty line, fill it out please!");
+  	return;
+	}
+	if(func_isItemRepeated(lineEdit->text())) {
+    QMessageBox::information(nullptr,"Warning message","Item with that name already exists,insert the new one!");
+		return;
+	}
   ptr_itemsView->setRowHidden(ptr_itemsModel->rowCount()-1,false);
   mapper->submit();      
   ptr_itemsModel->submitAll();
   emit signal_ready();
   this->close();
+}
+
+bool ItemDialog::func_isItemRepeated(QString name) {
+  QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+	QSqlQuery query(retrieveDB);
+	QString str=QString("select item_name from items");
+	query.prepare(str);
+	query.exec();
+	while(query.next()) {
+		QString tmp=query.value(0).toString();
+		if(tmp==name)
+			return true;
+	}
+	return false;
 }
 
 void ItemDialog::slot_cancelItem() {

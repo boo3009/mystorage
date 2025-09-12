@@ -12,6 +12,7 @@
 #include <QtSql>
 #include <QSqlQuery>
 #include <QSqlTableModel>
+#include <QSortFilterProxyModel>
 #include <QTableView>
 #include <QDataWidgetMapper>
 #include <QHeaderView>
@@ -42,6 +43,7 @@ private:
 	QStackedWidget *mainLayout_middle_stack;
 //--------------------------middle part: List of items
 	QSqlTableModel *itemsModel;
+	QSortFilterProxyModel *proxyModel;
 	QTableView *itemsView;
 	QHeaderView *itemsView_header;
 	QWidget *itemsModelView_widget;
@@ -61,12 +63,14 @@ private:
 	
 	void setup_itemsModelView();	
 signals:
-	void signal_clickedEdit();
-	void signal_addItem();
+
 private slots:
-	void slot_UpdateModels();
-//	void slot_editItem();
+	void slot_updateModels();
 	void slot_itemDialog_add();
+	void slot_itemDialog_edit();
+	void slot_editItemByDoubleClick(QModelIndex);
+	void slot_itemDialog_copy();
+	void slot_itemsModelView_remove();
 };
 
 #endif

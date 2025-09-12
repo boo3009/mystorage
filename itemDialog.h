@@ -13,6 +13,8 @@
 #include <QSqlQuery>
 #include <QDebug>
 
+#include "db.h"
+
 class ItemDialog : public QDialog {
   Q_OBJECT
 public:
@@ -35,7 +37,7 @@ private:
 	void func_addItem();
 	void func_editItem(int);
 	void func_copyItem(int);
-	void func_removeItem(int);
+	bool func_isItemRepeated(QString);
 signals:
   void signal_ready();
 private slots:
