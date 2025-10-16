@@ -43,7 +43,6 @@ private:
 	QStackedWidget *mainLayout_middle_stack;
 //--------------------------middle part: List of items
 	QSqlTableModel *itemsModel;
-	QSortFilterProxyModel *proxyModel;
 	QTableView *itemsView;
 	QHeaderView *itemsView_header;
 	QWidget *itemsModelView_widget;
@@ -53,24 +52,52 @@ private:
 	QPushButton *itemsModelView_widget_editItemPB;
 	QPushButton *itemsModelView_widget_copyItemPB;
 	QPushButton *itemsModelView_widget_removeItemPB;
+//--------------------------middle part: Income
+	QSqlTableModel *incomeModel;
+	QTableView *incomeView;
+	QHeaderView *incomeView_header;
+	QWidget *incomeModelView_widget;
+	QHBoxLayout *incomeModelView_widget_mainLayout;
+	QVBoxLayout *incomeModelView_widget_buttonsLayout;
+	QPushButton *incomeModelView_widget_addIncomePB;
+	QPushButton *incomeModelView_widget_editIncomePB;
+	QPushButton *incomeModelView_widget_copyIncomePB;
+	QPushButton *incomeModelView_widget_removeIncomePB;
+//--------------------------middle part: Outcome
+	QSqlTableModel *outcomeModel;
+	QTableView *outcomeView;
+	QHeaderView *outcomeView_header;
+	QWidget *outcomeModelView_widget;
+	QHBoxLayout *outcomeModelView_widget_mainLayout;
+	QVBoxLayout *outcomeModelView_widget_buttonsLayout;
+	QPushButton *outcomeModelView_widget_addOutcomePB;
+	QPushButton *outcomeModelView_widget_editOutcomePB;
+	QPushButton *outcomeModelView_widget_copyOutcomePB;
+	QPushButton *outcomeModelView_widget_removeOutcomePB;
 //--------------------------pointer to "Database" object	
 	Database *dbPointer;
-//--------------------------member functions
+//--------------------------member functions Level 0
 	void connect_Database();
 	void setup_ModelViews();
 	void setup_CoreWidgets();
 	void setup_SignalSlots();
-	
+//--------------------------member functions Level 1
 	void setup_itemsModelView();	
+	void setup_incomeModelView();	
+	void setup_outcomeModelView();	
 signals:
 
 private slots:
 	void slot_updateModels();
+//--------------------------slots for items
 	void slot_itemDialog_add();
 	void slot_itemDialog_edit();
 	void slot_editItemByDoubleClick(QModelIndex);
 	void slot_itemDialog_copy();
 	void slot_itemsModelView_remove();
+//--------------------------slots for income
+
+//--------------------------slots for outcome
 };
 
 #endif

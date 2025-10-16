@@ -55,12 +55,16 @@ OBJECTS_DIR   = ./
 SOURCES       = db.cpp \
 		mainWindow.cpp \
 		itemDialog.cpp \
+		modelViews.cpp \
+		slots.cpp \
 		main.cpp moc_db.cpp \
 		moc_mainWindow.cpp \
 		moc_itemDialog.cpp
 OBJECTS       = db.o \
 		mainWindow.o \
 		itemDialog.o \
+		modelViews.o \
+		slots.o \
 		main.o \
 		moc_db.o \
 		moc_mainWindow.o \
@@ -147,6 +151,8 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		itemDialog.h db.cpp \
 		mainWindow.cpp \
 		itemDialog.cpp \
+		modelViews.cpp \
+		slots.cpp \
 		main.cpp
 QMAKE_TARGET  = mystorageProject
 DESTDIR       = 
@@ -332,7 +338,7 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents db.h mainWindow.h itemDialog.h $(DISTDIR)/
-	$(COPY_FILE) --parents db.cpp mainWindow.cpp itemDialog.cpp main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents db.cpp mainWindow.cpp itemDialog.cpp modelViews.cpp slots.cpp main.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -380,6 +386,7 @@ moc_mainWindow.cpp: mainWindow.h \
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include mainWindow.h -o moc_mainWindow.cpp
 
 moc_itemDialog.cpp: itemDialog.h \
+		db.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include itemDialog.h -o moc_itemDialog.cpp
@@ -408,8 +415,19 @@ mainWindow.o: mainWindow.cpp mainWindow.h \
 		itemDialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainWindow.o mainWindow.cpp
 
-itemDialog.o: itemDialog.cpp itemDialog.h
+itemDialog.o: itemDialog.cpp itemDialog.h \
+		db.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o itemDialog.o itemDialog.cpp
+
+modelViews.o: modelViews.cpp mainWindow.h \
+		db.h \
+		itemDialog.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o modelViews.o modelViews.cpp
+
+slots.o: slots.cpp mainWindow.h \
+		db.h \
+		itemDialog.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o slots.o slots.cpp
 
 main.o: main.cpp mainWindow.h \
 		db.h \

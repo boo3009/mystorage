@@ -22,5 +22,7 @@ HEADERS += db.h \
 SOURCES += db.cpp \
            mainWindow.cpp\
 					 itemDialog.cpp\
+					 modelViews.cpp\
+					 slots.cpp\
            main.cpp 
 # RESOURCES += resources.qrc
