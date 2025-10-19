@@ -17,12 +17,14 @@ CONFIG+=debug
 
 # Input
 HEADERS += db.h \
-           mainWindow.h\
-					 itemDialog.h
+					 itemDialog.h\
+					 incomeDialog.h\
+           mainWindow.h
 SOURCES += db.cpp \
            mainWindow.cpp\
 					 itemDialog.cpp\
 					 modelViews.cpp\
 					 slots.cpp\
+					 incomeDialog.cpp\
            main.cpp 
 # RESOURCES += resources.qrc

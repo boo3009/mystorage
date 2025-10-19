@@ -57,18 +57,22 @@ SOURCES       = db.cpp \
 		itemDialog.cpp \
 		modelViews.cpp \
 		slots.cpp \
+		incomeDialog.cpp \
 		main.cpp moc_db.cpp \
-		moc_mainWindow.cpp \
-		moc_itemDialog.cpp
+		moc_itemDialog.cpp \
+		moc_incomeDialog.cpp \
+		moc_mainWindow.cpp
 OBJECTS       = db.o \
 		mainWindow.o \
 		itemDialog.o \
 		modelViews.o \
 		slots.o \
+		incomeDialog.o \
 		main.o \
 		moc_db.o \
-		moc_mainWindow.o \
-		moc_itemDialog.o
+		moc_itemDialog.o \
+		moc_incomeDialog.o \
+		moc_mainWindow.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/unix.conf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/common/linux.conf \
@@ -147,12 +151,14 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/yacc.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		mystorageProject.pro db.h \
-		mainWindow.h \
-		itemDialog.h db.cpp \
+		itemDialog.h \
+		incomeDialog.h \
+		mainWindow.h db.cpp \
 		mainWindow.cpp \
 		itemDialog.cpp \
 		modelViews.cpp \
 		slots.cpp \
+		incomeDialog.cpp \
 		main.cpp
 QMAKE_TARGET  = mystorageProject
 DESTDIR       = 
@@ -337,8 +343,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents db.h mainWindow.h itemDialog.h $(DISTDIR)/
-	$(COPY_FILE) --parents db.cpp mainWindow.cpp itemDialog.cpp modelViews.cpp slots.cpp main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents db.h itemDialog.h incomeDialog.h mainWindow.h $(DISTDIR)/
+	$(COPY_FILE) --parents db.cpp mainWindow.cpp itemDialog.cpp modelViews.cpp slots.cpp incomeDialog.cpp main.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -370,26 +376,33 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -Wall -Wextra -dM -E -o moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_db.cpp moc_mainWindow.cpp moc_itemDialog.cpp
+compiler_moc_header_make_all: moc_db.cpp moc_itemDialog.cpp moc_incomeDialog.cpp moc_mainWindow.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_db.cpp moc_mainWindow.cpp moc_itemDialog.cpp
+	-$(DEL_FILE) moc_db.cpp moc_itemDialog.cpp moc_incomeDialog.cpp moc_mainWindow.cpp
 moc_db.cpp: db.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include db.h -o moc_db.cpp
-
-moc_mainWindow.cpp: mainWindow.h \
-		db.h \
-		itemDialog.h \
-		moc_predefs.h \
-		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include mainWindow.h -o moc_mainWindow.cpp
 
 moc_itemDialog.cpp: itemDialog.h \
 		db.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include itemDialog.h -o moc_itemDialog.cpp
+
+moc_incomeDialog.cpp: incomeDialog.h \
+		db.h \
+		moc_predefs.h \
+		/usr/lib/qt5/bin/moc
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include incomeDialog.h -o moc_incomeDialog.cpp
+
+moc_mainWindow.cpp: mainWindow.h \
+		db.h \
+		itemDialog.h \
+		incomeDialog.h \
+		moc_predefs.h \
+		/usr/lib/qt5/bin/moc
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include mainWindow.h -o moc_mainWindow.cpp
 
 compiler_moc_objc_header_make_all:
 compiler_moc_objc_header_clean:
@@ -412,7 +425,8 @@ db.o: db.cpp db.h
 
 mainWindow.o: mainWindow.cpp mainWindow.h \
 		db.h \
-		itemDialog.h
+		itemDialog.h \
+		incomeDialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainWindow.o mainWindow.cpp
 
 itemDialog.o: itemDialog.cpp itemDialog.h \
@@ -421,27 +435,37 @@ itemDialog.o: itemDialog.cpp itemDialog.h \
 
 modelViews.o: modelViews.cpp mainWindow.h \
 		db.h \
-		itemDialog.h
+		itemDialog.h \
+		incomeDialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o modelViews.o modelViews.cpp
 
 slots.o: slots.cpp mainWindow.h \
 		db.h \
-		itemDialog.h
+		itemDialog.h \
+		incomeDialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o slots.o slots.cpp
+
+incomeDialog.o: incomeDialog.cpp incomeDialog.h \
+		db.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o incomeDialog.o incomeDialog.cpp
 
 main.o: main.cpp mainWindow.h \
 		db.h \
-		itemDialog.h
+		itemDialog.h \
+		incomeDialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 moc_db.o: moc_db.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_db.o moc_db.cpp
 
-moc_mainWindow.o: moc_mainWindow.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainWindow.o moc_mainWindow.cpp
-
 moc_itemDialog.o: moc_itemDialog.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_itemDialog.o moc_itemDialog.cpp
+
+moc_incomeDialog.o: moc_incomeDialog.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_incomeDialog.o moc_incomeDialog.cpp
+
+moc_mainWindow.o: moc_mainWindow.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_mainWindow.o moc_mainWindow.cpp
 
 ####### Install
 

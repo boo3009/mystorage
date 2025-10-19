@@ -7,6 +7,7 @@
 #include <QDataWidgetMapper>
 #include <QMessageBox>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>

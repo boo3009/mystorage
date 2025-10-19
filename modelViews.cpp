@@ -77,7 +77,8 @@ void MainWindow::setup_incomeModelView() {
   incomeModel->setHeaderData(1, Qt::Horizontal, "Date");
   incomeModel->setHeaderData(2, Qt::Horizontal, "Operation");
   incomeModel->setHeaderData(3, Qt::Horizontal, "Quantity");
-  incomeModel->setHeaderData(4, Qt::Horizontal, "Comment");
+  incomeModel->setHeaderData(4, Qt::Horizontal, "Note");
+  incomeModel->setHeaderData(5, Qt::Horizontal, "Item");
   incomeModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
 	incomeModel->setSort(0,Qt::AscendingOrder);
 //------------------------------create "View" for items table

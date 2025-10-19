@@ -2,10 +2,11 @@
 
 void MainWindow::slot_updateModels() {
   itemsModel->select();
+  incomeModel->select();
 }
 
 //=================================ITEMS PART START=========================================
-//
+
 void MainWindow::slot_itemDialog_add() {
   QModelIndex index=itemsView->currentIndex();
 	int before=itemsModel->rowCount();
@@ -79,3 +80,79 @@ void MainWindow::slot_itemsModelView_remove() {
 }
 
 //=================================ITEMS PART END=========================================
+
+//=================================INCOMES PART START=========================================
+
+void MainWindow::slot_incomeDialog_add() {
+  QModelIndex index=incomeView->currentIndex();
+	int before=incomeModel->rowCount();
+	IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel);
+  obj_incomeDialog->exec();
+  int after=incomeModel->rowCount();
+	if(after!=before) {
+  	QModelIndex i=incomeModel->index(incomeModel->rowCount()-1,0); //get added income's qmodelindex
+		incomeView->setCurrentIndex(i); //select added row (after adding)
+	} else
+			incomeView->setCurrentIndex(index);
+	connect(obj_incomeDialog,&IncomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
+	delete obj_incomeDialog;
+	obj_incomeDialog=nullptr;
+}
+
+void MainWindow::slot_editIncomeByDoubleClick(QModelIndex index) {
+  IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,index.row());
+  obj_incomeDialog->setWindowTitle("Editing an income");
+  obj_incomeDialog->exec();
+  incomeView->setCurrentIndex(index); //select edited row (after editing)
+	connect(obj_incomeDialog,&IncomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
+	delete obj_incomeDialog;
+	obj_incomeDialog=nullptr;
+}
+
+void MainWindow::slot_incomeDialog_edit() {
+  QModelIndex index=incomeView->currentIndex(); 
+  if(!index.isValid()) {
+    QMessageBox::information(nullptr,"Warning message","Please, select an income before editing!");
+		return;
+	}
+  IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,index.row());
+  obj_incomeDialog->setWindowTitle("Editing an income");
+  obj_incomeDialog->exec();
+  incomeView->setCurrentIndex(index); //select edited row (after editing)
+	connect(obj_incomeDialog,&IncomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
+	delete obj_incomeDialog;
+	obj_incomeDialog=nullptr;
+}
+
+void MainWindow::slot_incomeDialog_copy() {
+  QModelIndex index=incomeView->currentIndex(); 
+  if(!index.isValid()) {
+    QMessageBox::information(nullptr,"Warning message","Please, select an income before editing!");
+		return;
+	}
+  IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,index.row(),true);
+  obj_incomeDialog->setWindowTitle("Copying an income");
+  obj_incomeDialog->exec();
+  incomeView->setCurrentIndex(index); //select the same row, dont change the focus
+	connect(obj_incomeDialog,&IncomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
+	delete obj_incomeDialog;
+	obj_incomeDialog=nullptr;
+}
+
+void MainWindow::slot_incomeModelView_remove() {
+	QModelIndex index=incomeView->currentIndex();
+  if(!index.isValid()) {
+    QMessageBox::information(nullptr,"Warning message","Please, select an income before editing!");
+		return;
+	}
+	QModelIndex newindex;
+	if(index.row()==incomeModel->rowCount()-1)
+		newindex=incomeModel->index(index.row()-1,1);
+	else
+		newindex=index;
+	incomeModel->removeRow(index.row());
+	incomeModel->submitAll();
+	incomeView->setCurrentIndex(newindex);
+}
+
+//=================================INCOMES PART END=========================================

@@ -21,6 +21,7 @@
 
 #include "db.h"
 #include "itemDialog.h"
+#include "incomeDialog.h"
 
 
 class MainWindow:public QMainWindow {
@@ -96,7 +97,11 @@ private slots:
 	void slot_itemDialog_copy();
 	void slot_itemsModelView_remove();
 //--------------------------slots for income
-
+	void slot_incomeDialog_add();
+	void slot_incomeDialog_edit();
+	void slot_editIncomeByDoubleClick(QModelIndex);
+	void slot_incomeDialog_copy();
+	void slot_incomeModelView_remove();
 //--------------------------slots for outcome
 };
 

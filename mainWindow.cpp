@@ -82,4 +82,16 @@ void MainWindow::setup_SignalSlots() {
 	connect(itemsModelView_widget_copyItemPB,&QPushButton::clicked,
 	/*----*/this,&MainWindow::slot_itemDialog_copy);
 	connect(itemsModelView_widget_removeItemPB,&QPushButton::clicked,this,&MainWindow::slot_itemsModelView_remove);
+//-------------------------incomesModelView connects
+	connect(incomeModelView_widget_addIncomePB,&QPushButton::clicked,
+  /*----*/this,&MainWindow::slot_incomeDialog_add);
+	connect(incomeModelView_widget_editIncomePB,&QPushButton::clicked,
+	/*----*/this,&MainWindow::slot_incomeDialog_edit);
+	connect(incomeView,&QTableView::doubleClicked,this,&MainWindow::slot_editIncomeByDoubleClick);
+	connect(incomeModelView_widget_copyIncomePB,&QPushButton::clicked,
+	/*----*/this,&MainWindow::slot_incomeDialog_copy);
+	connect(incomeModelView_widget_removeIncomePB,&QPushButton::clicked,this,&MainWindow::slot_incomeModelView_remove);
+	
+
+
 }
