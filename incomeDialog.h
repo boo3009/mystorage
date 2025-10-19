@@ -26,13 +26,16 @@ public:
 private:
   QSqlTableModel *ptr_incomesModel;
   QTableView *ptr_incomesView;
-  QDataWidgetMapper *mapper;
+  QDataWidgetMapper *mapper_income;
 
   QSqlTableModel *ptr_itemsModel;
   QTableView *itemsView_income;
 	QWidget *itemsView_income_widget;
 	QVBoxLayout *itemsView_income_widget_layout;
   QHeaderView *itemsView_income_header;
+	QHBoxLayout *select_buttons_layout;
+	QPushButton *selectPB;
+	QPushButton *cancel_selectPB;
 
   QVBoxLayout *mainLayout;
   QHBoxLayout *buttonsLayout;

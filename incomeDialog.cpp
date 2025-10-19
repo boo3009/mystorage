@@ -63,32 +63,51 @@ void IncomeDialog::setup_Widget() {
 } 
 
 void IncomeDialog::setup_ModelandMapper() {
-  mapper=new QDataWidgetMapper();
-  mapper->setModel(ptr_incomesModel);
-  mapper->addMapping(date_label,ptr_incomesModel->fieldIndex("date"));
-  mapper->addMapping(item_label,ptr_incomesModel->fieldIndex("item"));
-  mapper->addMapping(quantity_label,ptr_incomesModel->fieldIndex("quantity"));
-  mapper->addMapping(note_label,ptr_incomesModel->fieldIndex("note"));
-  mapper->setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
+  mapper_income=new QDataWidgetMapper();
+  mapper_income->setModel(ptr_incomesModel);
+  mapper_income->addMapping(date,ptr_incomesModel->fieldIndex("date"));
+  mapper_income->addMapping(item,ptr_incomesModel->fieldIndex("item"));
+  mapper_income->addMapping(quantity,ptr_incomesModel->fieldIndex("quantity"));
+  mapper_income->addMapping(note,ptr_incomesModel->fieldIndex("note"));
+  mapper_income->setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
 }
 
 void IncomeDialog::func_addIncome() {
 	ptr_incomesModel->insertRow(ptr_incomesModel->rowCount(QModelIndex()));
 	ptr_incomesView->setRowHidden(ptr_incomesModel->rowCount()-1,true);
-	mapper->toLast();
+	mapper_income->toLast();
 }
 
 void IncomeDialog::func_editIncome(int row) {
-	mapper->setCurrentModelIndex(ptr_incomesModel->index(row,1));
+	mapper_income->setCurrentModelIndex(ptr_incomesModel->index(row,1));
 }
 
 void IncomeDialog::func_copyIncome(int row) {
+// insert row at the end of the list
 	ptr_incomesModel->insertRow(ptr_incomesModel->rowCount(QModelIndex()));
-	QString str=ptr_incomesModel->data(ptr_incomesModel->index(row,1),Qt::EditRole).toString();
-	QModelIndex index=ptr_incomesModel->index(ptr_incomesModel->rowCount()-1,1);
-	ptr_incomesModel->setData(index,str,Qt::EditRole);
+// get every fields values from existing row (get indexes then store data)
+	QModelIndex index_date=ptr_incomesModel->index(row,1);
+	QVariant date=ptr_incomesModel->data(index_date,Qt::DisplayRole);
+	QModelIndex index_quantity=ptr_incomesModel->index(row,3);
+	QVariant quantity=ptr_incomesModel->data(index_quantity,Qt::DisplayRole);
+	QModelIndex index_note=ptr_incomesModel->index(row,4);
+	QVariant note=ptr_incomesModel->data(index_note,Qt::DisplayRole);
+	QModelIndex index_item=ptr_incomesModel->index(row,5);
+	QVariant item=ptr_incomesModel->data(index_item,Qt::DisplayRole);
+// get inserted rows number, so we can put values in that rows columns
+	int rows=ptr_incomesModel->rowCount()-1;
+// set every fields values to inserted row (get indexes then set data)
+	QModelIndex newindex_date=ptr_incomesModel->index(rows,1);
+	ptr_incomesModel->setData(newindex_date,date,Qt::EditRole);
+	QModelIndex newindex_quantity=ptr_incomesModel->index(rows,3);
+	ptr_incomesModel->setData(newindex_quantity,quantity,Qt::EditRole);
+	QModelIndex newindex_note=ptr_incomesModel->index(rows,4);
+	ptr_incomesModel->setData(newindex_note,note,Qt::EditRole);
+	QModelIndex newindex_item=ptr_incomesModel->index(rows,5);
+	ptr_incomesModel->setData(newindex_item,item,Qt::EditRole);
+// set inserted and filled out row hidden until saving (with save pb)
 	ptr_incomesView->setRowHidden(ptr_incomesModel->rowCount()-1,true);
-	mapper->toLast();
+	mapper_income->toLast();
 }
 
 void IncomeDialog::slot_openItemsList() {
@@ -118,26 +137,34 @@ void IncomeDialog::slot_openItemsList() {
   itemsView_income_header->setFont(itemsView_income_headerFont);
 
 	itemsView_income_widget_layout=new QVBoxLayout(itemsView_income_widget);
+
+	select_buttons_layout=new QHBoxLayout();
+	selectPB=new QPushButton("Select");
+	cancel_selectPB=new QPushButton("Cancel");
+	select_buttons_layout->addWidget(selectPB);
+	select_buttons_layout->addWidget(cancel_selectPB);
+	
 	itemsView_income_widget_layout->addWidget(itemsView_income);
+	itemsView_income_widget_layout->addLayout(select_buttons_layout);
 	itemsView_income_widget->show();
 
 	connect(itemsView_income,&QTableView::doubleClicked,this,&IncomeDialog::slot_passSelectedItem);
 }
 
 void IncomeDialog::slot_saveIncome() {
-  if(date_label->text().isEmpty() || item_label->text().isEmpty() || quantity_label->text().isEmpty()) {
+  if(date->text().isEmpty() || item->text().isEmpty() || quantity->text().isEmpty()) {
     QMessageBox::information(nullptr,"Warning message","Empty lines, fill them out please!");
   	return;
 	}
   ptr_incomesView->setRowHidden(ptr_incomesModel->rowCount()-1,false);
-  mapper->submit();      
+  mapper_income->submit();      
   ptr_incomesModel->submitAll();
   emit signal_ready();
   this->close();
 }
 
 void IncomeDialog::slot_cancelIncome() {
-  if(date_label->text().isEmpty() || item_label->text().isEmpty() || quantity_label->text().isEmpty())
+  if(date->text().isEmpty() || item->text().isEmpty() || quantity->text().isEmpty())
     ptr_incomesModel->removeRow(ptr_incomesModel->rowCount()-1);
   emit signal_ready();
   this->close();

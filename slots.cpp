@@ -24,6 +24,10 @@ void MainWindow::slot_itemDialog_add() {
 }
 
 void MainWindow::slot_editItemByDoubleClick(QModelIndex index) {
+  if(!index.isValid()) {
+    QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
+		return;
+	}
   ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,index.row());
   obj_itemDialog->setWindowTitle("Editing an item");
   obj_itemDialog->exec();
@@ -51,7 +55,7 @@ void MainWindow::slot_itemDialog_edit() {
 void MainWindow::slot_itemDialog_copy() {
   QModelIndex index=itemsView->currentIndex(); 
   if(!index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
+    QMessageBox::information(nullptr,"Warning message","Please, select an item before copying!");
 		return;
 	}
   ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,index.row(),true);
@@ -66,7 +70,7 @@ void MainWindow::slot_itemDialog_copy() {
 void MainWindow::slot_itemsModelView_remove() {
 	QModelIndex index=itemsView->currentIndex();
   if(!index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
+    QMessageBox::information(nullptr,"Warning message","Please, select an item before removing!");
 		return;
 	}
 	QModelIndex newindex;
@@ -76,6 +80,7 @@ void MainWindow::slot_itemsModelView_remove() {
 		newindex=index;
 	itemsModel->removeRow(index.row());
 	itemsModel->submitAll();
+	itemsModel->select();
 	itemsView->setCurrentIndex(newindex);
 }
 
@@ -85,6 +90,8 @@ void MainWindow::slot_itemsModelView_remove() {
 
 void MainWindow::slot_incomeDialog_add() {
   QModelIndex index=incomeView->currentIndex();
+	if(!index.isValid())
+		index=incomeModel->index(0,0);
 	int before=incomeModel->rowCount();
 	IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel);
   obj_incomeDialog->exec();
@@ -100,6 +107,10 @@ void MainWindow::slot_incomeDialog_add() {
 }
 
 void MainWindow::slot_editIncomeByDoubleClick(QModelIndex index) {
+  if(!index.isValid()) {
+    QMessageBox::information(nullptr,"Warning message","Please, select an income before editing!");
+		return;
+	}
   IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,index.row());
   obj_incomeDialog->setWindowTitle("Editing an income");
   obj_incomeDialog->exec();
@@ -127,7 +138,7 @@ void MainWindow::slot_incomeDialog_edit() {
 void MainWindow::slot_incomeDialog_copy() {
   QModelIndex index=incomeView->currentIndex(); 
   if(!index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Please, select an income before editing!");
+    QMessageBox::information(nullptr,"Warning message","Please, select an income before copying!");
 		return;
 	}
   IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,index.row(),true);
@@ -142,7 +153,7 @@ void MainWindow::slot_incomeDialog_copy() {
 void MainWindow::slot_incomeModelView_remove() {
 	QModelIndex index=incomeView->currentIndex();
   if(!index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Please, select an income before editing!");
+    QMessageBox::information(nullptr,"Warning message","Please, select an income before removing!");
 		return;
 	}
 	QModelIndex newindex;
@@ -152,6 +163,7 @@ void MainWindow::slot_incomeModelView_remove() {
 		newindex=index;
 	incomeModel->removeRow(index.row());
 	incomeModel->submitAll();
+	incomeModel->select();
 	incomeView->setCurrentIndex(newindex);
 }
 
