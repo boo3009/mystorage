@@ -65,7 +65,7 @@ private slots:
   void slot_saveIncome();
   void slot_cancelIncome();
   void slot_openItemsList();
-  void slot_passSelectedItem(QModelIndex);
+  void slot_passSelectedItem();
 };
 
 #endif

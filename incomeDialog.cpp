@@ -149,6 +149,9 @@ void IncomeDialog::slot_openItemsList() {
 	itemsView_income_widget->show();
 
 	connect(itemsView_income,&QTableView::doubleClicked,this,&IncomeDialog::slot_passSelectedItem);
+	connect(selectPB,&QPushButton::clicked,this,&IncomeDialog::slot_passSelectedItem);
+	connect(cancel_selectPB,&QPushButton::clicked,
+	[=]() { itemsView_income_widget->close(); });
 }
 
 void IncomeDialog::slot_saveIncome() {
@@ -170,8 +173,10 @@ void IncomeDialog::slot_cancelIncome() {
   this->close();
 }
 
-void IncomeDialog::slot_passSelectedItem(QModelIndex index) {
+void IncomeDialog::slot_passSelectedItem() {
+	QModelIndex index=itemsView_income->currentIndex();
 	QVariant data=ptr_itemsModel->data(index,Qt::DisplayRole);
 	QString str=data.toString();
 	item->setText(str);
+	itemsView_income_widget->close();
 }
