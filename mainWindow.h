@@ -75,6 +75,12 @@ private:
 	QPushButton *outcomeModelView_widget_editOutcomePB;
 	QPushButton *outcomeModelView_widget_copyOutcomePB;
 	QPushButton *outcomeModelView_widget_removeOutcomePB;
+//--------------------------middle part: Balance
+	QSqlTableModel *balanceModel;
+	QTableView *balanceView;
+	QHeaderView *balanceView_header;
+	QWidget *balanceModelView_widget;
+	QHBoxLayout *balanceModelView_widget_mainLayout;
 //--------------------------pointer to "Database" object	
 	Database *dbPointer;
 //--------------------------member functions Level 0
@@ -86,6 +92,7 @@ private:
 	void setup_itemsModelView();	
 	void setup_incomeModelView();	
 	void setup_outcomeModelView();	
+	void setup_balanceModelView();	
 signals:
 
 private slots:

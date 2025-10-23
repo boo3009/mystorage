@@ -26,6 +26,7 @@ public:
 	explicit Database(QObject *parent=0);
 	~Database();
 	void connectDatabase();
+	void fill_cells_column(uint8_t,uint8_t,uint8_t);
 private:
 	QSqlDatabase db;
 	

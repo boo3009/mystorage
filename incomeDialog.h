@@ -41,7 +41,10 @@ private:
   QHBoxLayout *buttonsLayout;
 	QLabel *date_label;
   QDateEdit *date;
+	QHBoxLayout *labels_layout;
 	QHBoxLayout *item_layout;
+	QLabel *cell_label;
+	QLineEdit *cell;
 	QLabel *item_label;
 	QLineEdit *item;
 	QPushButton *open_itemsListPB;

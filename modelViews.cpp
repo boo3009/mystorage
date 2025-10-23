@@ -201,3 +201,46 @@ void MainWindow::setup_outcomeModelView() {
   outcomeModelView_widget_buttonsLayout->addStretch();
   outcomeModelView_widget_mainLayout->addLayout(outcomeModelView_widget_buttonsLayout);
 }
+
+void MainWindow::setup_balanceModelView() {
+//------------------------------create "Model" for balance table
+  QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+	balanceModel=new QSqlTableModel(this,retrieveDB);
+	balanceModel->setTable("balance");
+  balanceModel->select();
+  if(!balanceModel->select())
+    qDebug()<<"Selecting not working in balance";
+  balanceModel->setHeaderData(0, Qt::Horizontal, "id");
+  balanceModel->setHeaderData(1, Qt::Horizontal, "Cell");
+  balanceModel->setHeaderData(2, Qt::Horizontal, "Item");
+  balanceModel->setHeaderData(3, Qt::Horizontal, "Quantity");
+  balanceModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
+	balanceModel->setSort(0,Qt::AscendingOrder);
+//------------------------------create "View" for balance table
+  balanceView=new QTableView();
+	balanceView->setModel(balanceModel);
+  balanceView->sortByColumn(0,Qt::AscendingOrder); /*finded out that view needed sort too*/
+	balanceView->setSelectionMode(QAbstractItemView::SingleSelection);
+  balanceView->setSelectionBehavior(QAbstractItemView::SelectRows);
+  balanceView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  balanceView->setColumnHidden(0,true);
+  balanceView->verticalHeader()->setVisible(false);
+//------------------------------some design tweaks for "balanceView" 
+  balanceView->setStyleSheet(
+    "QTableView {"
+			"gridline-color: #ffcab0;  border: 2px solid #ffcab0;"
+    	"background: #fdffcd;  selection-background-color: #f76b8a;}"
+    "QTableView::item { padding: 5px;}"); 
+	balanceView_header=balanceView->horizontalHeader();
+  balanceView_header->setStretchLastSection(true);
+  balanceView_header->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
+  balanceView_header->setStyleSheet(
+    "QHeaderView::section { background-color: #f95959;}");
+  QFont balanceView_headerFont("Colibri",10,QFont::Bold);
+  balanceView_header->setFont(balanceView_headerFont);
+//------------------------------setup "Widget" for "balanceView" 
+  balanceModelView_widget=new QWidget();
+	balanceModelView_widget->setFixedSize(900,800);
+  balanceModelView_widget_mainLayout=new QHBoxLayout(balanceModelView_widget);
+	balanceModelView_widget_mainLayout->addWidget(balanceView);
+}

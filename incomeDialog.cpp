@@ -24,32 +24,51 @@ void IncomeDialog::setup_Widget() {
 	date=new QDateEdit();
 	date->setDate(QDate::currentDate());
 	date->setDisplayFormat("dd/MM/yyyy");
+	date->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+//----------------item-pb-quantity------------
+//	QTableView *cell_item_quantity_income=new QTableView(this);
+//	incomeView->setModel(incomeModel);
+//  incomeView->sortByColumn(0,Qt::AscendingOrder); /*finded out that view needed sort too*/
+//	incomeView->setSelectionMode(QAbstractItemView::SingleSelection);
+//  incomeView->setSelectionBehavior(QAbstractItemView::SelectRows);
+//  incomeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+//  incomeView->setColumnHidden(0,true);
+//  incomeView->verticalHeader()->setVisible(false);
 
+
+//----------------item-pb-quantity------------
+	cell_label=new QLabel("Cell");
+	cell=new QLineEdit();
+	
 	item_label=new QLabel("Item");
 	item=new QLineEdit();
-	item_label->setBuddy(item);
+	item->setReadOnly(true);
 	open_itemsListPB=new QPushButton("->");
+	open_itemsListPB->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+  item_layout->addWidget(cell);
   item_layout->addWidget(item);
   item_layout->addWidget(open_itemsListPB);
-	
+	//------------
+	labels_layout=new QHBoxLayout();
+	labels_layout->addWidget(cell_label);
+	labels_layout->addWidget(item_label);
+	//------------
 	quantity_label=new QLabel("Quantity");
 	quantity=new QLineEdit();
-	quantity_label->setBuddy(quantity);
 	validator=new QIntValidator(0,9999,this);
 	quantity->setValidator(validator);
 
 	note_label=new QLabel("Note");
 	note=new QLineEdit();
-	note_label->setBuddy(note);
 	
   mainLayout->addWidget(date_label);
   mainLayout->addWidget(date);
-  mainLayout->addWidget(item_label);
+  mainLayout->addWidget(note_label);
+  mainLayout->addWidget(note);
+  mainLayout->addLayout(labels_layout);
   mainLayout->addLayout(item_layout);
   mainLayout->addWidget(quantity_label);
   mainLayout->addWidget(quantity);
-  mainLayout->addWidget(note_label);
-  mainLayout->addWidget(note);
 	
 	save_incomePB=new QPushButton("Save");
   cancel_incomePB=new QPushButton("Cancel");
@@ -150,8 +169,7 @@ void IncomeDialog::slot_openItemsList() {
 
 	connect(itemsView_income,&QTableView::doubleClicked,this,&IncomeDialog::slot_passSelectedItem);
 	connect(selectPB,&QPushButton::clicked,this,&IncomeDialog::slot_passSelectedItem);
-	connect(cancel_selectPB,&QPushButton::clicked,
-	[=]() { itemsView_income_widget->close(); });
+	connect(cancel_selectPB,&QPushButton::clicked,[=]() { itemsView_income_widget->close(); });
 }
 
 void IncomeDialog::slot_saveIncome() {

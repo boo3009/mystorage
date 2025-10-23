@@ -14,13 +14,14 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 void MainWindow::connect_Database() {
 	dbPointer=new Database();
 	dbPointer->connectDatabase();
+	dbPointer->fill_cells_column(2,7,18);
 }
 
 void MainWindow::setup_ModelViews() {
 	setup_itemsModelView();
 	setup_incomeModelView();
 	setup_outcomeModelView();
-//	setup_balanceModelView();
+	setup_balanceModelView();
 }
 
 void MainWindow::setup_CoreWidgets() {
@@ -53,6 +54,7 @@ void MainWindow::setup_CoreWidgets() {
 	mainLayout_middle_stack->addWidget(incomeModelView_widget);
 	mainLayout_middle_stack->addWidget(outcomeModelView_widget);
 	mainLayout_middle_stack->addWidget(itemsModelView_widget);
+	mainLayout_middle_stack->addWidget(balanceModelView_widget);
 	mainLayout_middle->addWidget(mainLayout_middle_stack);
 //---------------------------------setting mainLayout of application
 	mainLayout=new QHBoxLayout();
@@ -60,6 +62,7 @@ void MainWindow::setup_CoreWidgets() {
 	mainLayout->addSpacing(50);
 	mainLayout->addLayout(mainLayout_middle);
 	mainLayout->addStretch();
+
 }
 
 void MainWindow::setup_SignalSlots() {
