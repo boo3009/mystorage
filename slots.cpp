@@ -93,7 +93,8 @@ void MainWindow::slot_incomeDialog_add() {
 	if(!index.isValid())
 		index=incomeModel->index(0,0);
 	int before=incomeModel->rowCount();
-	IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel);
+	IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,
+																									operationsModel);
   obj_incomeDialog->exec();
   int after=incomeModel->rowCount();
 	if(after!=before) {
@@ -111,7 +112,7 @@ void MainWindow::slot_editIncomeByDoubleClick(QModelIndex index) {
     QMessageBox::information(nullptr,"Warning message","Please, select an income before editing!");
 		return;
 	}
-  IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,index.row());
+  IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,operationsModel,index.row());
   obj_incomeDialog->setWindowTitle("Editing an income");
   obj_incomeDialog->exec();
   incomeView->setCurrentIndex(index); //select edited row (after editing)
@@ -126,7 +127,7 @@ void MainWindow::slot_incomeDialog_edit() {
     QMessageBox::information(nullptr,"Warning message","Please, select an income before editing!");
 		return;
 	}
-  IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,index.row());
+  IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,operationsModel,index.row());
   obj_incomeDialog->setWindowTitle("Editing an income");
   obj_incomeDialog->exec();
   incomeView->setCurrentIndex(index); //select edited row (after editing)
@@ -141,7 +142,7 @@ void MainWindow::slot_incomeDialog_copy() {
     QMessageBox::information(nullptr,"Warning message","Please, select an income before copying!");
 		return;
 	}
-  IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,index.row(),true);
+  IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,operationsModel,index.row(),true);
   obj_incomeDialog->setWindowTitle("Copying an income");
   obj_incomeDialog->exec();
   incomeView->setCurrentIndex(index); //select the same row, dont change the focus

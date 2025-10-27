@@ -74,11 +74,11 @@ void MainWindow::setup_incomeModelView() {
   if(!incomeModel->select())
     qDebug()<<"Selecting not working in income";
   incomeModel->setHeaderData(0, Qt::Horizontal, "id");
-  incomeModel->setHeaderData(1, Qt::Horizontal, "Date");
-  incomeModel->setHeaderData(2, Qt::Horizontal, "Operation");
-  incomeModel->setHeaderData(3, Qt::Horizontal, "Quantity");
-  incomeModel->setHeaderData(4, Qt::Horizontal, "Note");
-  incomeModel->setHeaderData(5, Qt::Horizontal, "Item");
+  incomeModel->setHeaderData(1, Qt::Horizontal, "N");
+  incomeModel->setHeaderData(2, Qt::Horizontal, "Date");
+  incomeModel->setHeaderData(3, Qt::Horizontal, "Operation type");
+  incomeModel->setHeaderData(4, Qt::Horizontal, "Sum");
+  incomeModel->setHeaderData(5, Qt::Horizontal, "Note");
   incomeModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
 	incomeModel->setSort(0,Qt::AscendingOrder);
 //------------------------------create "View" for items table
@@ -90,6 +90,10 @@ void MainWindow::setup_incomeModelView() {
   incomeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
   incomeView->setColumnHidden(0,true);
   incomeView->verticalHeader()->setVisible(false);
+	incomeView->setColumnWidth(1,75);
+	incomeView->setColumnWidth(2,75);
+	incomeView->setColumnWidth(3,150);
+	incomeView->setColumnWidth(4,70);
 //------------------------------some design tweaks for "incomeView" 
   incomeView->setStyleSheet(
     "QTableView {"
@@ -143,10 +147,11 @@ void MainWindow::setup_outcomeModelView() {
   if(!outcomeModel->select())
     qDebug()<<"Selecting not working in outcome";
   outcomeModel->setHeaderData(0, Qt::Horizontal, "id");
-  outcomeModel->setHeaderData(1, Qt::Horizontal, "Date");
-  outcomeModel->setHeaderData(2, Qt::Horizontal, "Operation");
-  outcomeModel->setHeaderData(3, Qt::Horizontal, "Quantity");
-  outcomeModel->setHeaderData(4, Qt::Horizontal, "Comment");
+  outcomeModel->setHeaderData(1, Qt::Horizontal, "N");
+  outcomeModel->setHeaderData(2, Qt::Horizontal, "Date");
+  outcomeModel->setHeaderData(3, Qt::Horizontal, "Operation type");
+  outcomeModel->setHeaderData(4, Qt::Horizontal, "Sum");
+  outcomeModel->setHeaderData(5, Qt::Horizontal, "Note");
   outcomeModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
 	outcomeModel->setSort(0,Qt::AscendingOrder);
 //------------------------------create "View" for items table
@@ -158,6 +163,10 @@ void MainWindow::setup_outcomeModelView() {
   outcomeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
   outcomeView->setColumnHidden(0,true);
   outcomeView->verticalHeader()->setVisible(false);
+	outcomeView->setColumnWidth(1,75);
+	outcomeView->setColumnWidth(2,75);
+	outcomeView->setColumnWidth(3,150);
+	outcomeView->setColumnWidth(4,70);
 //------------------------------some design tweaks for "outcomeView" 
   outcomeView->setStyleSheet(
     "QTableView {"
@@ -217,12 +226,18 @@ void MainWindow::setup_balanceModelView() {
   balanceModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
 	balanceModel->setSort(0,Qt::AscendingOrder);
 //------------------------------create "View" for balance table
+	balance_proxyModel_non_empty_rows=new Proxy_model_non_empty_rows(this);
+	balance_proxyModel_non_empty_rows->setSourceModel(balanceModel);
+
   balanceView=new QTableView();
-	balanceView->setModel(balanceModel);
+//balanceView->setModel(balanceModel);
+	balanceView->setModel(balance_proxyModel_non_empty_rows);
+	
   balanceView->sortByColumn(0,Qt::AscendingOrder); /*finded out that view needed sort too*/
 	balanceView->setSelectionMode(QAbstractItemView::SingleSelection);
   balanceView->setSelectionBehavior(QAbstractItemView::SelectRows);
   balanceView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+	balanceView->resizeColumnsToContents();
   balanceView->setColumnHidden(0,true);
   balanceView->verticalHeader()->setVisible(false);
 //------------------------------some design tweaks for "balanceView" 
@@ -243,4 +258,23 @@ void MainWindow::setup_balanceModelView() {
 	balanceModelView_widget->setFixedSize(900,800);
   balanceModelView_widget_mainLayout=new QHBoxLayout(balanceModelView_widget);
 	balanceModelView_widget_mainLayout->addWidget(balanceView);
+}
+
+void MainWindow::setup_operationsModelView() {
+//------------------------------create "Model" for qtableview in operations widget
+  QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+	operationsModel=new QSqlTableModel(this,retrieveDB);
+	operationsModel->setTable("operations");
+  operationsModel->select();
+  if(!operationsModel->select())
+    qDebug()<<"Selecting not working in operations";
+  operationsModel->setHeaderData(0, Qt::Horizontal, "id");
+  operationsModel->setHeaderData(1, Qt::Horizontal, "Date");
+  operationsModel->setHeaderData(2, Qt::Horizontal, "Num");
+  operationsModel->setHeaderData(3, Qt::Horizontal, "Operation");
+  operationsModel->setHeaderData(4, Qt::Horizontal, "Cell");
+  operationsModel->setHeaderData(5, Qt::Horizontal, "Item");
+  operationsModel->setHeaderData(6, Qt::Horizontal, "Quantity");
+  operationsModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
+	operationsModel->setSort(0,Qt::AscendingOrder);
 }

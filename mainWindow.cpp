@@ -22,6 +22,7 @@ void MainWindow::setup_ModelViews() {
 	setup_incomeModelView();
 	setup_outcomeModelView();
 	setup_balanceModelView();
+	setup_operationsModelView();
 }
 
 void MainWindow::setup_CoreWidgets() {

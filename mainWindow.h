@@ -22,6 +22,7 @@
 #include "db.h"
 #include "itemDialog.h"
 #include "incomeDialog.h"
+#include "proxy_models.h"
 
 
 class MainWindow:public QMainWindow {
@@ -64,6 +65,7 @@ private:
 	QPushButton *incomeModelView_widget_editIncomePB;
 	QPushButton *incomeModelView_widget_copyIncomePB;
 	QPushButton *incomeModelView_widget_removeIncomePB;
+	QSqlTableModel *operationsModel;
 //--------------------------middle part: Outcome
 	QSqlTableModel *outcomeModel;
 	QTableView *outcomeView;
@@ -81,6 +83,7 @@ private:
 	QHeaderView *balanceView_header;
 	QWidget *balanceModelView_widget;
 	QHBoxLayout *balanceModelView_widget_mainLayout;
+	Proxy_model_non_empty_rows *balance_proxyModel_non_empty_rows;
 //--------------------------pointer to "Database" object	
 	Database *dbPointer;
 //--------------------------member functions Level 0
@@ -93,6 +96,7 @@ private:
 	void setup_incomeModelView();	
 	void setup_outcomeModelView();	
 	void setup_balanceModelView();	
+	void setup_operationsModelView();	
 signals:
 
 private slots:

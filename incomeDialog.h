@@ -4,6 +4,7 @@
 #include <QDialog>
 #include <QSqlTableModel>
 #include <QTableView>
+#include <QSortFilterProxyModel>
 #include <QHeaderView>
 #include <QDataWidgetMapper>
 #include <QMessageBox>
@@ -22,23 +23,31 @@
 class IncomeDialog : public QDialog {
   Q_OBJECT
 public:
-  explicit IncomeDialog(QSqlTableModel *model, QTableView *view,QSqlTableModel *itemsModel,int row=-1,bool copy=false,QWidget *parent=0);
+  explicit IncomeDialog(QSqlTableModel *model, QTableView *view,QSqlTableModel *itemsModel,
+ 					 	 QSqlTableModel *opModel,int row=-1,bool copy=false,QWidget *parent=0);
 private:
   QSqlTableModel *ptr_incomesModel;
   QTableView *ptr_incomesView;
   QDataWidgetMapper *mapper_income;
 
-  QSqlTableModel *ptr_itemsModel;
-  QTableView *itemsView_income;
-	QWidget *itemsView_income_widget;
-	QVBoxLayout *itemsView_income_widget_layout;
-  QHeaderView *itemsView_income_header;
-	QHBoxLayout *select_buttons_layout;
-	QPushButton *selectPB;
-	QPushButton *cancel_selectPB;
+  QSqlTableModel *ptr_itemsModel_income;
+	QWidget *items_income_widget;
+  QTableView *items_income_view;
+	QHeaderView *items_income_view_header;
+	QVBoxLayout *items_income_widget_layout;
+	QHBoxLayout *items_select_buttons_layout;
+	QPushButton *select_itemPB;
+	QPushButton *cancel_itemPB;
+
+	QSqlTableModel *ptr_operationsModel;
+	QTableView *operationsView_income;
+	QHeaderView *operationsViewHeader_income;
+	QSortFilterProxyModel *operationsProxyModel_income;
 
   QVBoxLayout *mainLayout;
   QHBoxLayout *buttonsLayout;
+	QLabel *op_number_label;
+	QLineEdit *op_number;
 	QLabel *date_label;
   QDateEdit *date;
 	QHBoxLayout *labels_layout;
@@ -48,8 +57,8 @@ private:
 	QLabel *item_label;
 	QLineEdit *item;
 	QPushButton *open_itemsListPB;
-	QLabel *quantity_label;
-	QLineEdit *quantity;
+	QLabel *sum_label;
+	QLineEdit *sum;
 	QIntValidator *validator;
 	QLabel *note_label;
 	QLineEdit *note;
@@ -67,7 +76,7 @@ signals:
 private slots:
   void slot_saveIncome();
   void slot_cancelIncome();
-  void slot_openItemsList();
+  void slot_open_itemsList(QModelIndex);
   void slot_passSelectedItem();
 };
 
