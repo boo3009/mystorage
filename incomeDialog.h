@@ -26,24 +26,30 @@ public:
   explicit IncomeDialog(QSqlTableModel *model, QTableView *view,QSqlTableModel *itemsModel,
  					 	 QSqlTableModel *opModel,int row=-1,bool copy=false,QWidget *parent=0);
 private:
+//-------pointers to constructors parameters
   QSqlTableModel *ptr_incomesModel;
   QTableView *ptr_incomesView;
-  QDataWidgetMapper *mapper_income;
-
-  QSqlTableModel *ptr_itemsModel_income;
-	QWidget *items_income_widget;
-  QTableView *items_income_view;
-	QHeaderView *items_income_view_header;
-	QVBoxLayout *items_income_widget_layout;
-	QHBoxLayout *items_select_buttons_layout;
+  QSqlTableModel *ptr_itemsModel;
+	QSqlTableModel *ptr_operationsModel;
+//-------pointer to mapper
+  QDataWidgetMapper *mapper;
+//-------selecting items part-----------		
+	QWidget *items_widget;
+  QTableView *items_view;
+	QHeaderView *items_view_header;
+	QVBoxLayout *items_widget_layout;
+	QHBoxLayout *items_buttons_layout;
 	QPushButton *select_itemPB;
 	QPushButton *cancel_itemPB;
-
-	QSqlTableModel *ptr_operationsModel;
-	QTableView *operationsView_income;
-	QHeaderView *operationsViewHeader_income;
-	QSortFilterProxyModel *operationsProxyModel_income;
-
+//-------operations view part-----------		
+	QTableView *operationsView;
+	QHeaderView *operationsView_header;
+	QSortFilterProxyModel *operations_proxymodel;
+	QPushButton *operations_addPB;
+	QPushButton *operations_copyPB;
+	QPushButton *operations_removePB;
+	QHBoxLayout *operations_buttons_layout;
+//-------main widgets of dialog part-----------		
   QVBoxLayout *mainLayout;
   QHBoxLayout *buttonsLayout;
 	QLabel *op_number_label;
@@ -56,12 +62,12 @@ private:
 	QLineEdit *cell;
 	QLabel *item_label;
 	QLineEdit *item;
-	QPushButton *open_itemsListPB;
 	QLabel *sum_label;
 	QLineEdit *sum;
 	QIntValidator *validator;
 	QLabel *note_label;
 	QLineEdit *note;
+	QPushButton *submitPB;
   QPushButton *save_incomePB;
   QPushButton *cancel_incomePB;
 //---------main setup-----------
@@ -78,6 +84,9 @@ private slots:
   void slot_cancelIncome();
   void slot_open_itemsList(QModelIndex);
   void slot_passSelectedItem();
+	void slot_add_operation();
+//	void slot_copy_operation();
+//	void slot_remove_operation();
 };
 
 #endif
