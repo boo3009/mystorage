@@ -15,6 +15,7 @@
 #include <QDateEdit>
 #include <QIntValidator>
 #include <QPushButton>
+#include <QShortcut>
 #include <QSqlQuery>
 #include <QDebug>
 
@@ -24,7 +25,7 @@ class IncomeDialog : public QDialog {
   Q_OBJECT
 public:
   explicit IncomeDialog(QSqlTableModel *model, QTableView *view,QSqlTableModel *itemsModel,
- 					 	 QSqlTableModel *opModel,int row=-1,bool copy=false,QWidget *parent=0);
+ 					 	 QSqlTableModel *opModel,int row=-1,QWidget *parent=0);
 private:
 //-------pointers to constructors parameters
   QSqlTableModel *ptr_incomesModel;
@@ -67,7 +68,6 @@ private:
 	QIntValidator *validator;
 	QLabel *note_label;
 	QLineEdit *note;
-	QPushButton *submitPB;
   QPushButton *save_incomePB;
   QPushButton *cancel_incomePB;
 //---------main setup-----------
@@ -76,7 +76,6 @@ private:
 //---------helper functions-----	
 	void func_addIncome();
 	void func_editIncome(int);
-	void func_copyIncome(int);
 signals:
   void signal_ready();
 private slots:

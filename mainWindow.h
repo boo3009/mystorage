@@ -111,7 +111,6 @@ private slots:
 	void slot_incomeDialog_add();
 	void slot_incomeDialog_edit();
 	void slot_editIncomeByDoubleClick(QModelIndex);
-	void slot_incomeDialog_copy();
 	void slot_incomeModelView_remove();
 //--------------------------slots for outcome
 };

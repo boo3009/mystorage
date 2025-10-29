@@ -113,7 +113,6 @@ void MainWindow::setup_incomeModelView() {
   incomeModelView_widget_buttonsLayout=new QVBoxLayout();
   incomeModelView_widget_addIncomePB=new QPushButton("Add income");
   incomeModelView_widget_editIncomePB=new QPushButton("Edit income");
-	incomeModelView_widget_copyIncomePB=new QPushButton("Copy income");
   incomeModelView_widget_removeIncomePB=new QPushButton("Remove income");
 
 	incomeModelView_widget->setFixedSize(900,800);
@@ -121,18 +120,15 @@ void MainWindow::setup_incomeModelView() {
 	int y=27;
   incomeModelView_widget_addIncomePB->setFixedSize(x,y);
   incomeModelView_widget_editIncomePB->setFixedSize(x,y);
-	incomeModelView_widget_copyIncomePB->setFixedSize(x,y);
   incomeModelView_widget_removeIncomePB->setFixedSize(x,y);
 	incomeModelView_widget_addIncomePB->setStyleSheet("text-align:left;");
 	incomeModelView_widget_editIncomePB->setStyleSheet("text-align:left;");
-	incomeModelView_widget_copyIncomePB->setStyleSheet("text-align:left;");
 	incomeModelView_widget_removeIncomePB->setStyleSheet("text-align:left;");
   
 	incomeModelView_widget_mainLayout->addWidget(incomeView);
   incomeModelView_widget_buttonsLayout->addSpacing(22);
   incomeModelView_widget_buttonsLayout->addWidget(incomeModelView_widget_addIncomePB);
   incomeModelView_widget_buttonsLayout->addWidget(incomeModelView_widget_editIncomePB);
-  incomeModelView_widget_buttonsLayout->addWidget(incomeModelView_widget_copyIncomePB);
   incomeModelView_widget_buttonsLayout->addWidget(incomeModelView_widget_removeIncomePB);
   incomeModelView_widget_buttonsLayout->addStretch();
   incomeModelView_widget_mainLayout->addLayout(incomeModelView_widget_buttonsLayout);

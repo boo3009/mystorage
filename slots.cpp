@@ -3,6 +3,7 @@
 void MainWindow::slot_updateModels() {
   itemsModel->select();
   incomeModel->select();
+	operationsModel->select();
 }
 
 //=================================ITEMS PART START=========================================
@@ -91,7 +92,7 @@ void MainWindow::slot_itemsModelView_remove() {
 void MainWindow::slot_incomeDialog_add() {
   QModelIndex index=incomeView->currentIndex();
 	if(!index.isValid())
-		index=incomeModel->index(0,0);
+		index=incomeModel->index(incomeModel->rowCount(),1);
 	int before=incomeModel->rowCount();
 	IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,
 																									operationsModel);
@@ -101,7 +102,7 @@ void MainWindow::slot_incomeDialog_add() {
   	QModelIndex i=incomeModel->index(incomeModel->rowCount()-1,0); //get added income's qmodelindex
 		incomeView->setCurrentIndex(i); //select added row (after adding)
 	} else
-			incomeView->setCurrentIndex(index);
+		incomeView->setCurrentIndex(index);
 	connect(obj_incomeDialog,&IncomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
 	delete obj_incomeDialog;
 	obj_incomeDialog=nullptr;
@@ -131,21 +132,6 @@ void MainWindow::slot_incomeDialog_edit() {
   obj_incomeDialog->setWindowTitle("Editing an income");
   obj_incomeDialog->exec();
   incomeView->setCurrentIndex(index); //select edited row (after editing)
-	connect(obj_incomeDialog,&IncomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
-	delete obj_incomeDialog;
-	obj_incomeDialog=nullptr;
-}
-
-void MainWindow::slot_incomeDialog_copy() {
-  QModelIndex index=incomeView->currentIndex(); 
-  if(!index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Please, select an income before copying!");
-		return;
-	}
-  IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,operationsModel,index.row(),true);
-  obj_incomeDialog->setWindowTitle("Copying an income");
-  obj_incomeDialog->exec();
-  incomeView->setCurrentIndex(index); //select the same row, dont change the focus
 	connect(obj_incomeDialog,&IncomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
 	delete obj_incomeDialog;
 	obj_incomeDialog=nullptr;

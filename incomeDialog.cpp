@@ -1,24 +1,21 @@
 #include "incomeDialog.h"
 
 IncomeDialog::IncomeDialog(QSqlTableModel *model,QTableView *view,QSqlTableModel *itemsModel,
-  QSqlTableModel *opModel,int row,bool copy,QWidget *parent) : 
-	QDialog(parent), ptr_incomesModel(model), ptr_incomesView(view), ptr_itemsModel(itemsModel), 
-	ptr_operationsModel(opModel) {
-//---body of constructor
+  QSqlTableModel *opModel,int row,QWidget *parent) : QDialog(parent), ptr_incomesModel(model),
+	ptr_incomesView(view), ptr_itemsModel(itemsModel), ptr_operationsModel(opModel) {
+//----------------------------------------------------------------------------------------
   setup_Widget();
   setup_ModelandMapper();
   if(row==-1)
   	func_addIncome();
-	else if(row!=-1 && !copy)
+	else
 		func_editIncome(row);
-	else if(copy)
-		func_copyIncome(row);
 }
 
 void IncomeDialog::setup_Widget() {
   setWindowTitle("Creating new income");
-  setFixedSize(500,800);
-	setWindowFlags(Qt::FramelessWindowHint);
+  setFixedSize(600,800);
+	this->setWindowFlags(Qt::FramelessWindowHint);
 	this->setObjectName("borders_for_income_dialog");
 	this->setStyleSheet("QWidget#borders_for_income_dialog {" 
 												"background-color: #ABE7B2; color: black;"
@@ -42,8 +39,6 @@ void IncomeDialog::setup_Widget() {
 	note_label=new QLabel("Note");
 	note=new QLineEdit();
 
-	submitPB=new QPushButton("Submit");
-	submitPB->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 //---------------------operations part-------------------
 	operationsView=new QTableView(this);
 	operationsView->setModel(ptr_operationsModel);
@@ -69,6 +64,10 @@ void IncomeDialog::setup_Widget() {
 	operations_buttons_layout->addWidget(operations_addPB);
 	operations_buttons_layout->addWidget(operations_copyPB);
 	operations_buttons_layout->addWidget(operations_removePB);
+	
+	operations_addPB->setStyleSheet("background-color: #FFC50F");
+	operations_copyPB->setStyleSheet("background-color: #FFC50F");
+	operations_removePB->setStyleSheet("background-color: #FFC50F");
 //---------------------saving buttons-------------------
 	save_incomePB=new QPushButton("Save");
   cancel_incomePB=new QPushButton("Cancel");
@@ -81,11 +80,21 @@ void IncomeDialog::setup_Widget() {
   mainLayout->addWidget(date);
   mainLayout->addWidget(note_label);
   mainLayout->addWidget(note);
-	mainLayout->addWidget(submitPB);
   mainLayout->addSpacing(30);
   mainLayout->addLayout(operations_buttons_layout); 
   mainLayout->addWidget(operationsView);
   mainLayout->addLayout(buttonsLayout); 
+//---Setting shortcuts and making pbs autodefault false, so hitting enter not activated them
+	QShortcut *shortcut_add_operation=new QShortcut(this);
+	shortcut_add_operation->setKey(Qt::SHIFT+Qt::Key_A);
+	connect(shortcut_add_operation,&QShortcut::activated,this,&IncomeDialog::slot_add_operation);
+
+	operations_addPB->setAutoDefault(false);
+	operations_copyPB->setAutoDefault(false);
+	operations_removePB->setAutoDefault(false);
+	save_incomePB->setAutoDefault(false);
+	cancel_incomePB->setAutoDefault(false);
+//------------------------------------------------------------------------------------------
 
   connect(save_incomePB,&QPushButton::clicked,this,&IncomeDialog::slot_saveIncome); 
   connect(cancel_incomePB,&QPushButton::clicked,this,&IncomeDialog::slot_cancelIncome); 
@@ -105,12 +114,16 @@ void IncomeDialog::setup_ModelandMapper() {
 }
 
 void IncomeDialog::func_addIncome() {
+//---Insert row and set mapper to it
   int row=ptr_incomesModel->rowCount();
 	ptr_incomesModel->insertRow(row);
 	mapper->setCurrentModelIndex(ptr_incomesModel->index(row,1));
+//---Get the string for operation_number and set it to lineedit op_number
 	QString num="in-"+QString::number(row+1);
 	op_number->setText(num);
+//---Set filter for operations proxymodel, so it to show operations considered to new op_number
 	operations_proxymodel->setFilterRegExp(op_number->text());
+//---Hide the newly inserted row, to unhide it only on pressing "Save" button 
 	ptr_incomesView->setRowHidden(ptr_incomesModel->rowCount()-1,true);
 }
 
@@ -119,31 +132,29 @@ void IncomeDialog::func_editIncome(int row) {
 	operations_proxymodel->setFilterRegExp(op_number->text());
 }
 
-void IncomeDialog::func_copyIncome(int row) {
-// insert row at the end of the list
-// get every fields values from existing row (get indexes then store data)
-	ptr_incomesModel->insertRow(ptr_incomesModel->rowCount(QModelIndex()));
-	QModelIndex index_date=ptr_incomesModel->index(row,1);
-	QVariant date=ptr_incomesModel->data(index_date,Qt::DisplayRole);
-	QModelIndex index_note=ptr_incomesModel->index(row,4);
-	QVariant note=ptr_incomesModel->data(index_note,Qt::DisplayRole);
-// get inserted rows number, so we can put values in that rows columns
-// set every fields values to inserted row (get indexes then set data)
-	int rows=ptr_incomesModel->rowCount()-1;
-	QModelIndex newindex_date=ptr_incomesModel->index(rows,1);
-	ptr_incomesModel->setData(newindex_date,date,Qt::EditRole);
-	QModelIndex newindex_note=ptr_incomesModel->index(rows,4);
-	ptr_incomesModel->setData(newindex_note,note,Qt::EditRole);
-// set inserted and filled out row hidden until saving (with save pb)
-	ptr_incomesView->setRowHidden(ptr_incomesModel->rowCount()-1,true);
-	mapper->toLast();
-}
-
 void IncomeDialog::slot_saveIncome() {
   if(operations_proxymodel->rowCount()==0) {
-    QMessageBox::information(nullptr,"Warning message","Empty lines, fill them out please!");
+    QMessageBox::information(nullptr,"Warning message","No operations added!");
   	return;
 	}
+//---Check if we leave any field empty. Column is set to 1 to pass id field, which is empty until submitting.
+	int sum=0;
+	for(int row=0;row!=operations_proxymodel->rowCount();++row) {
+		for(int column=1;column!=operations_proxymodel->columnCount();++column) {
+			if((operations_proxymodel->index(row,column)).data().isNull() || operations_proxymodel->index(row,6).data().toInt()==0) {
+				QMessageBox::information(nullptr,"Warning message","Empty fields in operations, or quantity is set to '0'!");
+				return;
+			}
+			if(column==6)
+				sum=sum+operations_proxymodel->index(row,column).data().toInt();
+		}
+	}
+	QModelIndex sum_index;
+	if(!ptr_incomesView->currentIndex().isValid())
+		sum_index=ptr_incomesModel->index(ptr_incomesModel->rowCount()-1,4);
+	else 
+		sum_index=ptr_incomesModel->index(ptr_incomesView->currentIndex().row(),4);
+	ptr_incomesModel->setData(sum_index,sum,Qt::EditRole);
   ptr_incomesView->setRowHidden(ptr_incomesModel->rowCount()-1,false);
   mapper->submit();      
   ptr_incomesModel->submitAll();
@@ -153,8 +164,8 @@ void IncomeDialog::slot_saveIncome() {
 }
 
 void IncomeDialog::slot_cancelIncome() {
-  if(operations_proxymodel->rowCount()==0)
-    ptr_incomesModel->removeRow(ptr_incomesModel->rowCount()-1);
+//  if(operations_proxymodel->rowCount()==0)
+//    ptr_incomesModel->removeRow(ptr_incomesModel->rowCount()-1);
   emit signal_ready();
   this->close();
 }
@@ -164,6 +175,7 @@ void IncomeDialog::slot_open_itemsList(QModelIndex index) {
 		return;
 	items_widget=new QWidget(this,Qt::Window);
 	items_widget->setFixedSize(500,300);
+//	items_widget->setWindowFlags(Qt::FramelessWindowHint);
 	
 	items_widget->setObjectName("borders_for_items_income");
 	items_widget->setStyleSheet("QWidget#borders_for_items_income {" 
