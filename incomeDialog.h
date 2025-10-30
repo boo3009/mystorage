@@ -50,6 +50,9 @@ private:
 	QPushButton *operations_copyPB;
 	QPushButton *operations_removePB;
 	QHBoxLayout *operations_buttons_layout;
+	QShortcut *shortcut_add_operation;
+	QShortcut *shortcut_copy_operation;
+	QShortcut *shortcut_remove_operation;
 //-------main widgets of dialog part-----------		
   QVBoxLayout *mainLayout;
   QHBoxLayout *buttonsLayout;
@@ -84,8 +87,8 @@ private slots:
   void slot_open_itemsList(QModelIndex);
   void slot_passSelectedItem();
 	void slot_add_operation();
-//	void slot_copy_operation();
-//	void slot_remove_operation();
+	void slot_copy_operation();
+	void slot_remove_operation();
 };
 
 #endif

@@ -85,23 +85,34 @@ void IncomeDialog::setup_Widget() {
   mainLayout->addWidget(operationsView);
   mainLayout->addLayout(buttonsLayout); 
 //---Setting shortcuts and making pbs autodefault false, so hitting enter not activated them
-	QShortcut *shortcut_add_operation=new QShortcut(this);
-	shortcut_add_operation->setKey(Qt::SHIFT+Qt::Key_A);
-	connect(shortcut_add_operation,&QShortcut::activated,this,&IncomeDialog::slot_add_operation);
-
 	operations_addPB->setAutoDefault(false);
 	operations_copyPB->setAutoDefault(false);
 	operations_removePB->setAutoDefault(false);
 	save_incomePB->setAutoDefault(false);
 	cancel_incomePB->setAutoDefault(false);
+
+	shortcut_add_operation=new QShortcut(this);
+	shortcut_add_operation->setKey(Qt::Key_F8);
+	shortcut_add_operation->setContext(Qt::WidgetWithChildrenShortcut);
+	connect(shortcut_add_operation,&QShortcut::activated,this,&IncomeDialog::slot_add_operation);
+
+	shortcut_copy_operation=new QShortcut(this);
+	shortcut_copy_operation->setKey(Qt::Key_F9);
+	shortcut_copy_operation->setContext(Qt::WidgetWithChildrenShortcut);
+	connect(shortcut_copy_operation,&QShortcut::activated,this,&IncomeDialog::slot_copy_operation);
+	
+	shortcut_remove_operation=new QShortcut(this);
+	shortcut_remove_operation->setKey(Qt::Key_Delete);
+	shortcut_remove_operation->setContext(Qt::WidgetWithChildrenShortcut);
+	connect(shortcut_remove_operation,&QShortcut::activated,this,&IncomeDialog::slot_remove_operation);
 //------------------------------------------------------------------------------------------
 
   connect(save_incomePB,&QPushButton::clicked,this,&IncomeDialog::slot_saveIncome); 
   connect(cancel_incomePB,&QPushButton::clicked,this,&IncomeDialog::slot_cancelIncome); 
   connect(operationsView,&QTableView::doubleClicked,this,&IncomeDialog::slot_open_itemsList);
 	connect(operations_addPB,&QPushButton::clicked,this,&IncomeDialog::slot_add_operation);
-//	connect(operations_copyPB,&QPushButton::clicked,this,&IncomeDialog::slot_copy_operation);
-//	connect(operations_removePB,&QPushButton::clicked,this,&IncomeDialog::slot_remove_operation);
+	connect(operations_copyPB,&QPushButton::clicked,this,&IncomeDialog::slot_copy_operation);
+	connect(operations_removePB,&QPushButton::clicked,this,&IncomeDialog::slot_remove_operation);
 } 
 
 void IncomeDialog::setup_ModelandMapper() {
@@ -138,6 +149,7 @@ void IncomeDialog::slot_saveIncome() {
   	return;
 	}
 //---Check if we leave any field empty. Column is set to 1 to pass id field, which is empty until submitting.
+//---By the way, lets get the sum of quantities and set its value to income tables according field.
 	int sum=0;
 	for(int row=0;row!=operations_proxymodel->rowCount();++row) {
 		for(int column=1;column!=operations_proxymodel->columnCount();++column) {
@@ -164,8 +176,9 @@ void IncomeDialog::slot_saveIncome() {
 }
 
 void IncomeDialog::slot_cancelIncome() {
-//  if(operations_proxymodel->rowCount()==0)
-//    ptr_incomesModel->removeRow(ptr_incomesModel->rowCount()-1);
+  if(operations_proxymodel->rowCount()==0)
+		//-----------------------NEED TO WRITE CODE FOR DATA RETRIEVING, FEX AFTER DELETION,SO DATA WRITE BACK AS IT WAS
+
   emit signal_ready();
   this->close();
 }
@@ -246,10 +259,61 @@ void IncomeDialog::slot_passSelectedItem() {
 
 void IncomeDialog::slot_add_operation() {
 	int row=ptr_operationsModel->rowCount();
-	ptr_operationsModel->insertRow(row);	
+	ptr_operationsModel->insertRow(row);
+
 //	operationsView->setRowHidden(row,true);
 	QDate date_qdate=date->date();
 	ptr_operationsModel->setData(ptr_operationsModel->index(row,1),date_qdate,Qt::EditRole);
 	ptr_operationsModel->setData(ptr_operationsModel->index(row,2),op_number->text(),Qt::EditRole);
 	ptr_operationsModel->setData(ptr_operationsModel->index(row,3),"income operation",Qt::EditRole);
+
+	int col=4;
+	if(operationsView->currentIndex().isValid())
+		col=operationsView->currentIndex().column();
+	operationsView->setCurrentIndex(operations_proxymodel->index(operations_proxymodel->rowCount()-1,col));
+}
+
+void IncomeDialog::slot_copy_operation() {
+	if(operations_proxymodel->rowCount()==0) {
+    QMessageBox::information(nullptr,"Warning message","Empty table, nothing to copy!");
+		return;
+	}
+	if(!operationsView->currentIndex().isValid()) {
+    QMessageBox::information(nullptr,"Warning message","Select row before copying!");
+		return;
+	}
+	QModelIndex source_index=operationsView->currentIndex();
+	slot_add_operation();
+	QModelIndex dest_index;
+	for(int col=4;col!=operations_proxymodel->columnCount();++col) {
+		QModelIndex tmp_index=operations_proxymodel->index(source_index.row(),col);
+		dest_index=operations_proxymodel->index(operations_proxymodel->rowCount()-1,col);
+		QVariant var=operations_proxymodel->data(tmp_index,Qt::EditRole);
+		if(col!=operations_proxymodel->columnCount()-1)
+			operations_proxymodel->setData(dest_index,var.toString(),Qt::EditRole);
+		else
+			operations_proxymodel->setData(dest_index,var.toInt(),Qt::EditRole);
+	}
+	operationsView->setCurrentIndex(operations_proxymodel->index(dest_index.row(),source_index.column()));
+}
+
+void IncomeDialog::slot_remove_operation() {
+	QModelIndex op_index=operations_proxymodel->index(operationsView->currentIndex().row(),operationsView->currentIndex().column());
+	if(!op_index.isValid()) {
+    QMessageBox::information(nullptr,"Warning message","Select row before deletion!");
+		return;
+	}
+	int last_row_before_remove=operations_proxymodel->rowCount()-1;
+
+	QModelIndex correspond_index=operations_proxymodel->mapToSource(op_index);
+	ptr_operationsModel->removeRow(correspond_index.row());
+	ptr_operationsModel->submitAll();
+	ptr_incomesModel->select();
+
+	if(op_index.row()<last_row_before_remove)
+		operationsView->setCurrentIndex(operations_proxymodel->index(op_index.row(),op_index.column()));
+	else
+		operationsView->setCurrentIndex(operations_proxymodel->index(operations_proxymodel->rowCount()-1,op_index.column()));
+
+	emit signal_ready();
 }
