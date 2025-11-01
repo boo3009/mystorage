@@ -153,12 +153,48 @@ void IncomeDialog::slot_saveIncome() {
 	int sum=0;
 	for(int row=0;row!=operations_proxymodel->rowCount();++row) {
 		for(int column=1;column!=operations_proxymodel->columnCount();++column) {
-			if((operations_proxymodel->index(row,column)).data().isNull() || operations_proxymodel->index(row,6).data().toInt()==0) {
-				QMessageBox::information(nullptr,"Warning message","Empty fields in operations, or quantity is set to '0'!");
+//------------------------------------------------------------------------------------
+			if((operations_proxymodel->index(row,column)).data().isNull()) {
+				QMessageBox::information(nullptr,"Warning message","Some fields leaved empty!");
 				return;
 			}
-			if(column==6)
+//------------------------------------------------------------------------------------
+			if(column==6) {
+				if(operations_proxymodel->index(row,column).data().toInt()<=0) {
+					QMessageBox::information(nullptr,"Warning message",QString("%1 %2").arg("Quantity is less or equal '0': ").arg(operations_proxymodel->index(row,column).data().toInt()));
+					return;
+				}
 				sum=sum+operations_proxymodel->index(row,column).data().toInt();
+			}
+//------------------------------------------------------------------------------------
+			if(column==4) {
+				QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+				QSqlQuery query(retrieveDB);
+				QString str=QString("select exists(select 1 from balance where cell like '%1')").arg(operations_proxymodel->index(row,column).data().toString());
+				if(query.exec(str)) {
+					if(query.next()) {
+						if(operations_proxymodel->index(row,column).data().toString().isEmpty()) {
+							QMessageBox::information(nullptr,"Warning message","Some fields leaved empty!");
+							return;
+						}
+						if(0==query.value(0).toInt()) {
+							QMessageBox::information(nullptr,"Warning message",QString("%1 %2").arg("Wrong cell number: ").arg(operations_proxymodel->index(row,column).data().toString()));
+							return;
+						}
+					} else {
+						qDebug()<<"error in work of 'query.next'" ;
+						return;
+					}
+				} else {
+					qDebug()<<"error in work of 'query.exec'";
+					qDebug()<<"error type"<<query.lastError().type();
+					qDebug()<<"error text"<<query.lastError().text();
+					qDebug()<<"driver error"<<query.lastError().driverText();
+					qDebug()<<"database error"<<query.lastError().databaseText();
+					return;
+				}
+			}
+//------------------------------------------------------------------------------------
 		}
 	}
 	QModelIndex sum_index;
@@ -317,3 +353,8 @@ void IncomeDialog::slot_remove_operation() {
 
 	emit signal_ready();
 }
+
+//void IncomeDialog::slot_update_balance() {
+//	
+//
+//}
