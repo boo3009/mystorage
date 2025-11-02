@@ -150,10 +150,12 @@ void IncomeDialog::slot_saveIncome() {
 	}
 //---Check if we leave any field empty. Column is set to 1 to pass id field, which is empty until submitting.
 //---By the way, lets get the sum of quantities and set its value to income tables according field.
+	QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+	QSqlQuery query(retrieveDB);
 	int sum=0;
 	for(int row=0;row!=operations_proxymodel->rowCount();++row) {
-		for(int column=1;column!=operations_proxymodel->columnCount();++column) {
-//------------------------------------------------------------------------------------
+ 		for(int column=1;column!=operations_proxymodel->columnCount();++column) {
+//-----------------------CHECKING FOR CORRECTNESS-------------------------------------
 			if((operations_proxymodel->index(row,column)).data().isNull()) {
 				QMessageBox::information(nullptr,"Warning message","Some fields leaved empty!");
 				return;
@@ -168,10 +170,8 @@ void IncomeDialog::slot_saveIncome() {
 			}
 //------------------------------------------------------------------------------------
 			if(column==4) {
-				QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
-				QSqlQuery query(retrieveDB);
-				QString str=QString("select exists(select 1 from balance where cell like '%1')").arg(operations_proxymodel->index(row,column).data().toString());
-				if(query.exec(str)) {
+				QString check_existance=QString("select exists(select 1 from balance where cell like '%1')").arg(operations_proxymodel->index(row,column).data().toString());
+				if(query.exec(check_existance)) {
 					if(query.next()) {
 						if(operations_proxymodel->index(row,column).data().toString().isEmpty()) {
 							QMessageBox::information(nullptr,"Warning message","Some fields leaved empty!");
@@ -186,7 +186,7 @@ void IncomeDialog::slot_saveIncome() {
 						return;
 					}
 				} else {
-					qDebug()<<"error in work of 'query.exec'";
+					qDebug()<<"error in work of 'query.exec': check if cell from editline even exists in 'balance'.";
 					qDebug()<<"error type"<<query.lastError().type();
 					qDebug()<<"error text"<<query.lastError().text();
 					qDebug()<<"driver error"<<query.lastError().driverText();
@@ -194,9 +194,61 @@ void IncomeDialog::slot_saveIncome() {
 					return;
 				}
 			}
-//------------------------------------------------------------------------------------
 		}
+//-----------------------INSERTS AND UPDATES------------------------------------------
+			QSqlQuery check_que(retrieveDB);
+		  QString check_str=QString("select * from filled_cells where cell like '%1'").arg(operations_proxymodel->index(row,4).data().toString());
+		  if(!check_que.exec(check_str)) {
+				qDebug()<<"error in work of 'query.exec': check if current cell has records in 'filled_cells'.";
+				qDebug()<<"error type"<<check_que.lastError().type();
+				qDebug()<<"error text"<<check_que.lastError().text();
+				qDebug()<<"driver error"<<check_que.lastError().driverText();
+				qDebug()<<"database error"<<check_que.lastError().databaseText();
+				return;
+		  }
+//---If set is empty, then just insert new record in 'filled_cells'
+		  if(!check_que.next()) {
+				QSqlQuery insert_que(retrieveDB);
+				insert_que.prepare("insert into filled_cells(cell,item,quantity) values(:c,:i,:q)");
+			  insert_que.bindValue(":c",operations_proxymodel->index(row,4).data().toString());
+			  insert_que.bindValue(":i",operations_proxymodel->index(row,5).data().toString());
+			  insert_que.bindValue(":q",operations_proxymodel->index(row,6).data().toInt());
+				if(!insert_que.exec()) {
+					qDebug()<<"(line 218) error in work of 'query.exec': inserting distinct record in empty set in 'filled_cells'.";
+					return;
+				}
+		  } else {
+			  do {
+//---if we have a row with current item in result set, then update its quantity
+					QSqlRecord record=check_que.record();
+					if(operations_proxymodel->index(row,5).data().toString()==record.value("item").toString()) {
+						QSqlQuery update_que(retrieveDB);
+				//------------------------------------------------NEED TO GET INITIAL CELL_ID (NOT CURRENT)
+				//
+				//
+				//
+						QString update_str=QString("update filled_cells set quantity=quantity+'%1' where cell_id='%2'")
+																			 .arg(operations_proxymodel->index(row,6).data().toInt()).arg(record.value("cell_id").toInt());
+						if(!update_que.exec(update_str)) {
+							qDebug()<<"Error while 'query.exec' (income): update record in not empty set in 'filled_cells'.";
+							return;
+						}
+					} else {
+//---if dont, then just insert a new row 
+						QSqlQuery insert_que(retrieveDB);
+						insert_que.prepare("insert into filled_cells(cell,item,quantity) values(:c,:i,:q)");
+						insert_que.bindValue(":c",operations_proxymodel->index(row,4).data().toString());
+						insert_que.bindValue(":i",operations_proxymodel->index(row,5).data().toString());
+						insert_que.bindValue(":q",operations_proxymodel->index(row,6).data().toInt());
+						if(!insert_que.exec()) {
+							qDebug()<<"(line 244) error in work of 'query.exec': inserting record in not empty set in 'filled_cells'.";
+							return;
+						}
+				  }
+			  } while(check_que.next());
+		  }
 	}
+//------------------------------------------------------------------------------------
 	QModelIndex sum_index;
 	if(!ptr_incomesView->currentIndex().isValid())
 		sum_index=ptr_incomesModel->index(ptr_incomesModel->rowCount()-1,4);

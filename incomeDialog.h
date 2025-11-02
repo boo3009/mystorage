@@ -17,6 +17,7 @@
 #include <QPushButton>
 #include <QShortcut>
 #include <QSqlQuery>
+#include <QSqlRecord>
 #include <QDebug>
 
 #include "db.h"
