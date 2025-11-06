@@ -143,112 +143,101 @@ void IncomeDialog::func_editIncome(int row) {
 	operations_proxymodel->setFilterRegExp(op_number->text());
 }
 
-void IncomeDialog::slot_saveIncome() {
-  if(operations_proxymodel->rowCount()==0) {
-    QMessageBox::information(nullptr,"Warning message","No operations added!");
-  	return;
-	}
-//---Check if we leave any field empty. Column is set to 1 to pass id field, which is empty until submitting.
-//---By the way, lets get the sum of quantities and set its value to income tables according field.
-	QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+int IncomeDialog::func_check_correctness(const QSortFilterProxyModel *proxy) {
+  QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
 	QSqlQuery query(retrieveDB);
+  if(proxy->rowCount()==0) {
+    QMessageBox::information(nullptr,"Warning message","No operations added!");
+  	return -1;
+	}
 	int sum=0;
-	for(int row=0;row!=operations_proxymodel->rowCount();++row) {
- 		for(int column=1;column!=operations_proxymodel->columnCount();++column) {
-//-----------------------CHECKING FOR CORRECTNESS-------------------------------------
-			if((operations_proxymodel->index(row,column)).data().isNull()) {
+	for(int row=0;row!=proxy->rowCount();++row) {
+		for(int column=1;column!=proxy->columnCount();++column) {
+//------------------------------------------------------------------------------------
+			if((proxy->index(row,column)).data().isNull()) {
 				QMessageBox::information(nullptr,"Warning message","Some fields leaved empty!");
-				return;
+				return -1;
 			}
 //------------------------------------------------------------------------------------
 			if(column==6) {
-				if(operations_proxymodel->index(row,column).data().toInt()<=0) {
-					QMessageBox::information(nullptr,"Warning message",QString("%1 %2").arg("Quantity is less or equal '0': ").arg(operations_proxymodel->index(row,column).data().toInt()));
-					return;
+				int local_quantity=proxy->index(row,column).data().toInt();
+				if(local_quantity<=0) {
+					QMessageBox::information(nullptr,"Warning message",QString("%1 %2").arg("Quantity is less or equal '0': ").arg(local_quantity));
+					return -1;
 				}
-				sum=sum+operations_proxymodel->index(row,column).data().toInt();
+				sum=sum+local_quantity;
 			}
 //------------------------------------------------------------------------------------
 			if(column==4) {
-				QString check_existance=QString("select exists(select 1 from balance where cell like '%1')").arg(operations_proxymodel->index(row,column).data().toString());
-				if(query.exec(check_existance)) {
-					if(query.next()) {
-						if(operations_proxymodel->index(row,column).data().toString().isEmpty()) {
-							QMessageBox::information(nullptr,"Warning message","Some fields leaved empty!");
-							return;
-						}
-						if(0==query.value(0).toInt()) {
-							QMessageBox::information(nullptr,"Warning message",QString("%1 %2").arg("Wrong cell number: ").arg(operations_proxymodel->index(row,column).data().toString()));
-							return;
-						}
-					} else {
-						qDebug()<<"error in work of 'query.next'" ;
-						return;
-					}
-				} else {
-					qDebug()<<"error in work of 'query.exec': check if cell from editline even exists in 'balance'.";
+				QString local_cell=proxy->index(row,column).data().toString();
+				QString check_existance=QString("select exists(select 1 from cells where cell like '%1')").arg(local_cell);
+				if(!query.exec(check_existance)) {
+					qDebug()<<"error in work of 'query.exec': check if cell from editline even exists in 'cells'.";
 					qDebug()<<"error type"<<query.lastError().type();
 					qDebug()<<"error text"<<query.lastError().text();
 					qDebug()<<"driver error"<<query.lastError().driverText();
 					qDebug()<<"database error"<<query.lastError().databaseText();
-					return;
+					return -1;
+				}
+				if(query.next()) {
+					if(local_cell.isEmpty()) {
+						QMessageBox::information(nullptr,"Warning message","Some fields leaved empty!");
+						return -1;
+					}
+					if(0==query.value(0).toInt()) {
+						QMessageBox::information(nullptr,"Warning message",QString("%1 %2").arg("Wrong cell number: ").arg(local_cell));
+						return -1;
+					}
 				}
 			}
-		}
-//-----------------------INSERTS AND UPDATES------------------------------------------
-			QSqlQuery check_que(retrieveDB);
-		  QString check_str=QString("select * from filled_cells where cell like '%1'").arg(operations_proxymodel->index(row,4).data().toString());
-		  if(!check_que.exec(check_str)) {
-				qDebug()<<"error in work of 'query.exec': check if current cell has records in 'filled_cells'.";
-				qDebug()<<"error type"<<check_que.lastError().type();
-				qDebug()<<"error text"<<check_que.lastError().text();
-				qDebug()<<"driver error"<<check_que.lastError().driverText();
-				qDebug()<<"database error"<<check_que.lastError().databaseText();
-				return;
-		  }
-//---If set is empty, then just insert new record in 'filled_cells'
-		  if(!check_que.next()) {
-				QSqlQuery insert_que(retrieveDB);
-				insert_que.prepare("insert into filled_cells(cell,item,quantity) values(:c,:i,:q)");
-			  insert_que.bindValue(":c",operations_proxymodel->index(row,4).data().toString());
-			  insert_que.bindValue(":i",operations_proxymodel->index(row,5).data().toString());
-			  insert_que.bindValue(":q",operations_proxymodel->index(row,6).data().toInt());
-				if(!insert_que.exec()) {
-					qDebug()<<"(line 218) error in work of 'query.exec': inserting distinct record in empty set in 'filled_cells'.";
-					return;
-				}
-		  } else {
-			  do {
-//---if we have a row with current item in result set, then update its quantity
-					QSqlRecord record=check_que.record();
-					if(operations_proxymodel->index(row,5).data().toString()==record.value("item").toString()) {
-						QSqlQuery update_que(retrieveDB);
-				//------------------------------------------------NEED TO GET INITIAL CELL_ID (NOT CURRENT)
-				//
-				//
-				//
-						QString update_str=QString("update filled_cells set quantity=quantity+'%1' where cell_id='%2'")
-																			 .arg(operations_proxymodel->index(row,6).data().toInt()).arg(record.value("cell_id").toInt());
-						if(!update_que.exec(update_str)) {
-							qDebug()<<"Error while 'query.exec' (income): update record in not empty set in 'filled_cells'.";
-							return;
-						}
-					} else {
-//---if dont, then just insert a new row 
-						QSqlQuery insert_que(retrieveDB);
-						insert_que.prepare("insert into filled_cells(cell,item,quantity) values(:c,:i,:q)");
-						insert_que.bindValue(":c",operations_proxymodel->index(row,4).data().toString());
-						insert_que.bindValue(":i",operations_proxymodel->index(row,5).data().toString());
-						insert_que.bindValue(":q",operations_proxymodel->index(row,6).data().toInt());
-						if(!insert_que.exec()) {
-							qDebug()<<"(line 244) error in work of 'query.exec': inserting record in not empty set in 'filled_cells'.";
-							return;
-						}
-				  }
-			  } while(check_que.next());
-		  }
-	}
 //------------------------------------------------------------------------------------
+ 		}
+	}
+	return sum;
+}
+
+void IncomeDialog::func_insert_update(const QSqlTableModel *ptr_tmp_operations) {
+  QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+	QSqlQuery query(retrieveDB);
+
+	for(int row=0;row!=ptr_tmp_operations->rowCount();++row) {
+//------------------------------------------------------------------------------------
+		QString check_str=QString("select * from filled_cells where cell like '%1' and item like '%2'").arg(ptr_tmp_operations->index(row,4).data().toString())
+																																																	 .arg(ptr_tmp_operations->index(row,5).data().toString());
+		if(!query.exec(check_str)) {
+			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': local checking in 'while' loop.";
+			return;
+		}
+		if(query.next()) {
+			QString update_str=QString("update filled_cells set quantity=quantity+'%1' where cell_id like '%2'")
+																 .arg(ptr_tmp_operations->index(row,6).data().toInt()).arg(query.value(0).toInt());
+			if(!query.exec(update_str)) {
+				qDebug()<<"("<<__LINE__<<") "<<"Error while 'query.exec' (income): update record in not empty set in 'filled_cells'.";
+				return;
+			}
+		} else {
+//------------------------------------------------------------------------------------
+			query.prepare("insert into filled_cells(cell,item,quantity) values(:c,:i,:q)");
+			query.bindValue(":c",ptr_tmp_operations->index(row,4).data().toString());
+			query.bindValue(":i",ptr_tmp_operations->index(row,5).data().toString());
+			query.bindValue(":q",ptr_tmp_operations->index(row,6).data().toInt());
+			if(!query.exec()) {
+				qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': inserting record in not empty set in 'filled_cells'.";
+				return;
+			}
+		}
+//------------------------------------------------------------------------------------
+	}
+}
+
+void IncomeDialog::slot_saveIncome() {
+	QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+	QSqlQuery query(retrieveDB);
+
+	int sum=func_check_correctness(operations_proxymodel);
+	if(sum==-1)
+    qDebug()<<"Error: Sum is not calculated. '-1' will be returned!";
+//---------------------FINALIZING CODE FOR MAIN INCOME VIEW---------------------------
 	QModelIndex sum_index;
 	if(!ptr_incomesView->currentIndex().isValid())
 		sum_index=ptr_incomesModel->index(ptr_incomesModel->rowCount()-1,4);
@@ -261,6 +250,14 @@ void IncomeDialog::slot_saveIncome() {
   ptr_operationsModel->submitAll();
   emit signal_ready();
   this->close();
+//------------------------------------------------------------------------------------
+}
+
+void IncomeDialog::slot_update_filled_cells() {
+	func_insert_update(ptr_operationsModel);
+//	print somehow this result set
+//	truncate this table, cause its temporary!!!
+//	so we need to generate balance by clicking on some Generate button, print out result and after closing truncate filled_cells table!
 }
 
 void IncomeDialog::slot_cancelIncome() {
@@ -405,8 +402,3 @@ void IncomeDialog::slot_remove_operation() {
 
 	emit signal_ready();
 }
-
-//void IncomeDialog::slot_update_balance() {
-//	
-//
-//}

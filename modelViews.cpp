@@ -211,10 +211,10 @@ void MainWindow::setup_balanceModelView() {
 //------------------------------create "Model" for balance table
   QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
 	balanceModel=new QSqlTableModel(this,retrieveDB);
-	balanceModel->setTable("balance");
+	balanceModel->setTable("filled_cells");
   balanceModel->select();
   if(!balanceModel->select())
-    qDebug()<<"Selecting not working in balance";
+    qDebug()<<"Selecting not working in filled_cells";
   balanceModel->setHeaderData(0, Qt::Horizontal, "id");
   balanceModel->setHeaderData(1, Qt::Horizontal, "Cell");
   balanceModel->setHeaderData(2, Qt::Horizontal, "Item");
@@ -222,12 +222,9 @@ void MainWindow::setup_balanceModelView() {
   balanceModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
 	balanceModel->setSort(0,Qt::AscendingOrder);
 //------------------------------create "View" for balance table
-	balance_proxyModel_non_empty_rows=new Proxy_model_non_empty_rows(this);
-	balance_proxyModel_non_empty_rows->setSourceModel(balanceModel);
 
   balanceView=new QTableView();
-//balanceView->setModel(balanceModel);
-	balanceView->setModel(balance_proxyModel_non_empty_rows);
+	balanceView->setModel(balanceModel);
 	
   balanceView->sortByColumn(0,Qt::AscendingOrder); /*finded out that view needed sort too*/
 	balanceView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -254,6 +251,7 @@ void MainWindow::setup_balanceModelView() {
 	balanceModelView_widget->setFixedSize(900,800);
   balanceModelView_widget_mainLayout=new QHBoxLayout(balanceModelView_widget);
 	balanceModelView_widget_mainLayout->addWidget(balanceView);
+//	balanceModelView_widget->setVisible(false);
 }
 
 void MainWindow::setup_operationsModelView() {

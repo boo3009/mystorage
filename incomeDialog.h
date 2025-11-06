@@ -80,6 +80,8 @@ private:
 //---------helper functions-----	
 	void func_addIncome();
 	void func_editIncome(int);
+  int func_check_correctness(const QSortFilterProxyModel*);
+	void func_insert_update(const QSqlTableModel*);
 signals:
   void signal_ready();
 private slots:
@@ -90,6 +92,7 @@ private slots:
 	void slot_add_operation();
 	void slot_copy_operation();
 	void slot_remove_operation();
+	void slot_update_filled_cells();
 };
 
 #endif
