@@ -220,13 +220,13 @@ void MainWindow::setup_balanceModelView() {
   balanceModel->setHeaderData(2, Qt::Horizontal, "Item");
   balanceModel->setHeaderData(3, Qt::Horizontal, "Quantity");
   balanceModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
-	balanceModel->setSort(0,Qt::AscendingOrder);
+	balanceModel->setSort(1,Qt::AscendingOrder);
 //------------------------------create "View" for balance table
 
   balanceView=new QTableView();
 	balanceView->setModel(balanceModel);
 	
-  balanceView->sortByColumn(0,Qt::AscendingOrder); /*finded out that view needed sort too*/
+  balanceView->sortByColumn(1,Qt::AscendingOrder); /*finded out that view needed sort too*/
 	balanceView->setSelectionMode(QAbstractItemView::SingleSelection);
   balanceView->setSelectionBehavior(QAbstractItemView::SelectRows);
   balanceView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -250,8 +250,10 @@ void MainWindow::setup_balanceModelView() {
   balanceModelView_widget=new QWidget();
 	balanceModelView_widget->setFixedSize(900,800);
   balanceModelView_widget_mainLayout=new QHBoxLayout(balanceModelView_widget);
+
+	generate=new QPushButton("Generate");
+	balanceModelView_widget_mainLayout->addWidget(generate);
 	balanceModelView_widget_mainLayout->addWidget(balanceView);
-//	balanceModelView_widget->setVisible(false);
 }
 
 void MainWindow::setup_operationsModelView() {

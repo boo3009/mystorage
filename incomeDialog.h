@@ -27,7 +27,9 @@ class IncomeDialog : public QDialog {
 public:
   explicit IncomeDialog(QSqlTableModel *model, QTableView *view,QSqlTableModel *itemsModel,
  					 	 QSqlTableModel *opModel,int row=-1,QWidget *parent=0);
+	int get_summary() const;
 private:
+	int summary;
 //-------pointers to constructors parameters
   QSqlTableModel *ptr_incomesModel;
   QTableView *ptr_incomesView;
@@ -81,7 +83,6 @@ private:
 	void func_addIncome();
 	void func_editIncome(int);
   int func_check_correctness(const QSortFilterProxyModel*);
-	void func_insert_update(const QSqlTableModel*);
 signals:
   void signal_ready();
 private slots:
@@ -92,7 +93,6 @@ private slots:
 	void slot_add_operation();
 	void slot_copy_operation();
 	void slot_remove_operation();
-	void slot_update_filled_cells();
 };
 
 #endif

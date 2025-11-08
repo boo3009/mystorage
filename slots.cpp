@@ -92,15 +92,19 @@ void MainWindow::slot_itemsModelView_remove() {
 void MainWindow::slot_incomeDialog_add() {
   QModelIndex index=incomeView->currentIndex();
 	if(!index.isValid())
-		index=incomeModel->index(incomeModel->rowCount(),1);
+		index=incomeModel->index(incomeModel->rowCount()-1,1);
 	int before=incomeModel->rowCount();
 	IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,
 																									operationsModel);
-  obj_incomeDialog->exec();
+  if(obj_incomeDialog->exec()==QDialog::Accepted)
+		qDebug()<<"WHAT THE FUCK MAN!!!";
   int after=incomeModel->rowCount();
 	if(after!=before) {
-  	QModelIndex i=incomeModel->index(incomeModel->rowCount()-1,0); //get added income's qmodelindex
+  	QModelIndex i=incomeModel->index(incomeModel->rowCount()-1,1); //get added income's qmodelindex
 		incomeView->setCurrentIndex(i); //select added row (after adding)
+	  int sum=obj_incomeDialog->get_summary();
+		incomeModel->setData(incomeModel->index(incomeModel->rowCount()-1,4),sum,Qt::EditRole);
+		incomeModel->submitAll();
 	} else
 		incomeView->setCurrentIndex(index);
 	connect(obj_incomeDialog,&IncomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
@@ -155,3 +159,48 @@ void MainWindow::slot_incomeModelView_remove() {
 }
 
 //=================================INCOMES PART END=========================================
+
+//----...
+
+
+
+
+//=================================BALANCE PART START=========================================
+void MainWindow::slot_insert_update() {
+  QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+	QSqlQuery query(retrieveDB);
+	if(!query.exec("truncate table filled_cells")) {
+			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': Cant truncate filled_cells.";
+			return;
+	}
+
+	for(int row=0;row!=operationsModel->rowCount();++row) {
+//------------------------------------------------------------------------------------
+		QString check_str=QString("select * from filled_cells where cell like '%1' and item like '%2'").arg(operationsModel->index(row,4).data().toString())
+																																																	 .arg(operationsModel->index(row,5).data().toString());
+		if(!query.exec(check_str)) {
+			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': local checking in 'while' loop.";
+			return;
+		}
+		if(query.next()) {
+			QString update_str=QString("update filled_cells set quantity=quantity+'%1' where cell_id like '%2'")
+																 .arg(operationsModel->index(row,6).data().toInt()).arg(query.value(0).toInt());
+			if(!query.exec(update_str)) {
+				qDebug()<<"("<<__LINE__<<") "<<"Error while 'query.exec' (income): update record in not empty set in 'filled_cells'.";
+				return;
+			}
+		} else {
+//------------------------------------------------------------------------------------
+			query.prepare("insert into filled_cells(cell,item,quantity) values(:c,:i,:q)");
+			query.bindValue(":c",operationsModel->index(row,4).data().toString());
+			query.bindValue(":i",operationsModel->index(row,5).data().toString());
+			query.bindValue(":q",operationsModel->index(row,6).data().toInt());
+			if(!query.exec()) {
+				qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': inserting record in not empty set in 'filled_cells'.";
+				return;
+			}
+		}
+//------------------------------------------------------------------------------------
+	}
+	balanceModel->select();
+}

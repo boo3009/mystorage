@@ -113,6 +113,9 @@ void IncomeDialog::setup_Widget() {
 	connect(operations_addPB,&QPushButton::clicked,this,&IncomeDialog::slot_add_operation);
 	connect(operations_copyPB,&QPushButton::clicked,this,&IncomeDialog::slot_copy_operation);
 	connect(operations_removePB,&QPushButton::clicked,this,&IncomeDialog::slot_remove_operation);
+
+  connect(save_incomePB,&QPushButton::clicked,this,&QDialog::accept); 
+  connect(cancel_incomePB,&QPushButton::clicked,this,&QDialog::reject); 
 } 
 
 void IncomeDialog::setup_ModelandMapper() {
@@ -196,76 +199,26 @@ int IncomeDialog::func_check_correctness(const QSortFilterProxyModel *proxy) {
 	return sum;
 }
 
-void IncomeDialog::func_insert_update(const QSqlTableModel *ptr_tmp_operations) {
-  QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
-	QSqlQuery query(retrieveDB);
-
-	for(int row=0;row!=ptr_tmp_operations->rowCount();++row) {
-//------------------------------------------------------------------------------------
-		QString check_str=QString("select * from filled_cells where cell like '%1' and item like '%2'").arg(ptr_tmp_operations->index(row,4).data().toString())
-																																																	 .arg(ptr_tmp_operations->index(row,5).data().toString());
-		if(!query.exec(check_str)) {
-			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': local checking in 'while' loop.";
-			return;
-		}
-		if(query.next()) {
-			QString update_str=QString("update filled_cells set quantity=quantity+'%1' where cell_id like '%2'")
-																 .arg(ptr_tmp_operations->index(row,6).data().toInt()).arg(query.value(0).toInt());
-			if(!query.exec(update_str)) {
-				qDebug()<<"("<<__LINE__<<") "<<"Error while 'query.exec' (income): update record in not empty set in 'filled_cells'.";
-				return;
-			}
-		} else {
-//------------------------------------------------------------------------------------
-			query.prepare("insert into filled_cells(cell,item,quantity) values(:c,:i,:q)");
-			query.bindValue(":c",ptr_tmp_operations->index(row,4).data().toString());
-			query.bindValue(":i",ptr_tmp_operations->index(row,5).data().toString());
-			query.bindValue(":q",ptr_tmp_operations->index(row,6).data().toInt());
-			if(!query.exec()) {
-				qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': inserting record in not empty set in 'filled_cells'.";
-				return;
-			}
-		}
-//------------------------------------------------------------------------------------
-	}
-}
-
 void IncomeDialog::slot_saveIncome() {
 	QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
 	QSqlQuery query(retrieveDB);
 
-	int sum=func_check_correctness(operations_proxymodel);
-	if(sum==-1)
-    qDebug()<<"Error: Sum is not calculated. '-1' will be returned!";
-//---------------------FINALIZING CODE FOR MAIN INCOME VIEW---------------------------
-	QModelIndex sum_index;
-	if(!ptr_incomesView->currentIndex().isValid())
-		sum_index=ptr_incomesModel->index(ptr_incomesModel->rowCount()-1,4);
-	else 
-		sum_index=ptr_incomesModel->index(ptr_incomesView->currentIndex().row(),4);
-	ptr_incomesModel->setData(sum_index,sum,Qt::EditRole);
+	this->summary=func_check_correctness(operations_proxymodel);
+	if(this->summary==-1)
+    qDebug()<<"Error: Summary is not calculated. '-1' will be returned!";
   ptr_incomesView->setRowHidden(ptr_incomesModel->rowCount()-1,false);
   mapper->submit();      
   ptr_incomesModel->submitAll();
   ptr_operationsModel->submitAll();
   emit signal_ready();
-  this->close();
 //------------------------------------------------------------------------------------
 }
 
-void IncomeDialog::slot_update_filled_cells() {
-	func_insert_update(ptr_operationsModel);
-//	print somehow this result set
-//	truncate this table, cause its temporary!!!
-//	so we need to generate balance by clicking on some Generate button, print out result and after closing truncate filled_cells table!
-}
-
 void IncomeDialog::slot_cancelIncome() {
-  if(operations_proxymodel->rowCount()==0)
+//  if(operations_proxymodel->rowCount()==0)
 		//-----------------------NEED TO WRITE CODE FOR DATA RETRIEVING, FEX AFTER DELETION,SO DATA WRITE BACK AS IT WAS
 
-  emit signal_ready();
-  this->close();
+//  emit signal_ready();
 }
 
 void IncomeDialog::slot_open_itemsList(QModelIndex index) {
@@ -401,4 +354,8 @@ void IncomeDialog::slot_remove_operation() {
 		operationsView->setCurrentIndex(operations_proxymodel->index(operations_proxymodel->rowCount()-1,op_index.column()));
 
 	emit signal_ready();
+}
+
+int IncomeDialog::get_summary() const {
+	return this->summary;
 }

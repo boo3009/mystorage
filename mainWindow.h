@@ -82,6 +82,7 @@ private:
 	QTableView *balanceView;
 	QHeaderView *balanceView_header;
 	QWidget *balanceModelView_widget;
+	QPushButton *generate;
 	QHBoxLayout *balanceModelView_widget_mainLayout;
 	Proxy_model_non_empty_rows *balance_proxyModel_non_empty_rows;
 //--------------------------pointer to "Database" object	
@@ -113,6 +114,11 @@ private slots:
 	void slot_editIncomeByDoubleClick(QModelIndex);
 	void slot_incomeModelView_remove();
 //--------------------------slots for outcome
+
+
+//--------------------------slots for balance
+	void slot_insert_update();
+
 };
 
 #endif

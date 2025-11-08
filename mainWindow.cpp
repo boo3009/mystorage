@@ -95,5 +95,6 @@ void MainWindow::setup_SignalSlots() {
 	connect(incomeModelView_widget_removeIncomePB,&QPushButton::clicked,this,&MainWindow::slot_incomeModelView_remove);
 	
 
+	connect(generate,&QPushButton::clicked,this,&MainWindow::slot_insert_update);
 
 }
