@@ -26,6 +26,7 @@ SOURCES += db.cpp \
 					 incomeDialog.cpp\
 					 modelViews.cpp\
 					 slots.cpp\
+					 proxy_models.cpp\
            mainWindow.cpp\
            main.cpp 
 # RESOURCES += resources.qrc

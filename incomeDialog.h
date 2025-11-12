@@ -21,15 +21,14 @@
 #include <QDebug>
 
 #include "db.h"
+#include "proxy_models.h"
 
 class IncomeDialog : public QDialog {
   Q_OBJECT
 public:
   explicit IncomeDialog(QSqlTableModel *model, QTableView *view,QSqlTableModel *itemsModel,
  					 	 QSqlTableModel *opModel,int row=-1,QWidget *parent=0);
-	int get_summary() const;
 private:
-	int summary;
 //-------pointers to constructors parameters
   QSqlTableModel *ptr_incomesModel;
   QTableView *ptr_incomesView;
@@ -48,7 +47,7 @@ private:
 //-------operations view part-----------		
 	QTableView *operationsView;
 	QHeaderView *operationsView_header;
-	QSortFilterProxyModel *operations_proxymodel;
+	Proxy_op_number_income *operations_proxymodel;
 	QPushButton *operations_addPB;
 	QPushButton *operations_copyPB;
 	QPushButton *operations_removePB;
@@ -76,13 +75,15 @@ private:
 	QLineEdit *note;
   QPushButton *save_incomePB;
   QPushButton *cancel_incomePB;
+
+	bool row_added=false;
 //---------main setup-----------
   void setup_Widget();
   void setup_ModelandMapper();
 //---------helper functions-----	
 	void func_addIncome();
 	void func_editIncome(int);
-  int func_check_correctness(const QSortFilterProxyModel*);
+  int func_check_correctness(const QSortFilterProxyModel*,int*);
 signals:
   void signal_ready();
 private slots:

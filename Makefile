@@ -57,6 +57,7 @@ SOURCES       = db.cpp \
 		incomeDialog.cpp \
 		modelViews.cpp \
 		slots.cpp \
+		proxy_models.cpp \
 		mainWindow.cpp \
 		main.cpp moc_db.cpp \
 		moc_itemDialog.cpp \
@@ -68,6 +69,7 @@ OBJECTS       = db.o \
 		incomeDialog.o \
 		modelViews.o \
 		slots.o \
+		proxy_models.o \
 		mainWindow.o \
 		main.o \
 		moc_db.o \
@@ -161,6 +163,7 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		incomeDialog.cpp \
 		modelViews.cpp \
 		slots.cpp \
+		proxy_models.cpp \
 		mainWindow.cpp \
 		main.cpp
 QMAKE_TARGET  = mystorageProject
@@ -347,7 +350,7 @@ distdir: FORCE
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
 	$(COPY_FILE) --parents db.h itemDialog.h incomeDialog.h proxy_models.h mainWindow.h $(DISTDIR)/
-	$(COPY_FILE) --parents db.cpp itemDialog.cpp incomeDialog.cpp modelViews.cpp slots.cpp mainWindow.cpp main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents db.cpp itemDialog.cpp incomeDialog.cpp modelViews.cpp slots.cpp proxy_models.cpp mainWindow.cpp main.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -408,7 +411,6 @@ moc_mainWindow.cpp: mainWindow.h \
 		db.h \
 		itemDialog.h \
 		incomeDialog.h \
-		proxy_models.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include mainWindow.h -o moc_mainWindow.cpp
@@ -443,29 +445,28 @@ incomeDialog.o: incomeDialog.cpp incomeDialog.h \
 modelViews.o: modelViews.cpp mainWindow.h \
 		db.h \
 		itemDialog.h \
-		incomeDialog.h \
-		proxy_models.h
+		incomeDialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o modelViews.o modelViews.cpp
 
 slots.o: slots.cpp mainWindow.h \
 		db.h \
 		itemDialog.h \
-		incomeDialog.h \
-		proxy_models.h
+		incomeDialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o slots.o slots.cpp
+
+proxy_models.o: proxy_models.cpp proxy_models.h
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o proxy_models.o proxy_models.cpp
 
 mainWindow.o: mainWindow.cpp mainWindow.h \
 		db.h \
 		itemDialog.h \
-		incomeDialog.h \
-		proxy_models.h
+		incomeDialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainWindow.o mainWindow.cpp
 
 main.o: main.cpp mainWindow.h \
 		db.h \
 		itemDialog.h \
-		incomeDialog.h \
-		proxy_models.h
+		incomeDialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 moc_db.o: moc_db.cpp 

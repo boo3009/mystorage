@@ -34,6 +34,7 @@ void MainWindow::setup_itemsModelView() {
     "QHeaderView::section { background-color: #f95959;}");
   QFont itemsView_headerFont("Colibri",10,QFont::Bold);
   itemsView_header->setFont(itemsView_headerFont);
+	itemsView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
 //------------------------------setup "Widget" for "itemsView" 
   itemsModelView_widget=new QWidget();
   itemsModelView_widget_mainLayout=new QHBoxLayout(itemsModelView_widget);
@@ -77,8 +78,9 @@ void MainWindow::setup_incomeModelView() {
   incomeModel->setHeaderData(1, Qt::Horizontal, "N");
   incomeModel->setHeaderData(2, Qt::Horizontal, "Date");
   incomeModel->setHeaderData(3, Qt::Horizontal, "Operation type");
-  incomeModel->setHeaderData(4, Qt::Horizontal, "Sum");
-  incomeModel->setHeaderData(5, Qt::Horizontal, "Note");
+  incomeModel->setHeaderData(4, Qt::Horizontal, "Status");
+  incomeModel->setHeaderData(5, Qt::Horizontal, "Sum");
+  incomeModel->setHeaderData(6, Qt::Horizontal, "Note");
   incomeModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
 	incomeModel->setSort(0,Qt::AscendingOrder);
 //------------------------------create "View" for items table
@@ -90,10 +92,6 @@ void MainWindow::setup_incomeModelView() {
   incomeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
   incomeView->setColumnHidden(0,true);
   incomeView->verticalHeader()->setVisible(false);
-	incomeView->setColumnWidth(1,75);
-	incomeView->setColumnWidth(2,75);
-	incomeView->setColumnWidth(3,150);
-	incomeView->setColumnWidth(4,70);
 //------------------------------some design tweaks for "incomeView" 
   incomeView->setStyleSheet(
     "QTableView {"
@@ -107,6 +105,7 @@ void MainWindow::setup_incomeModelView() {
     "QHeaderView::section { background-color: #f95959;}");
   QFont incomeView_headerFont("Colibri",10,QFont::Bold);
   incomeView_header->setFont(incomeView_headerFont);
+	incomeView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
 //------------------------------setup "Widget" for "incomeView" 
   incomeModelView_widget=new QWidget();
   incomeModelView_widget_mainLayout=new QHBoxLayout(incomeModelView_widget);
@@ -114,6 +113,7 @@ void MainWindow::setup_incomeModelView() {
   incomeModelView_widget_addIncomePB=new QPushButton("Add income");
   incomeModelView_widget_editIncomePB=new QPushButton("Edit income");
   incomeModelView_widget_removeIncomePB=new QPushButton("Remove income");
+  incomeModelView_widget_cancel_removeIncomePB=new QPushButton("Cancel removing");
 
 	incomeModelView_widget->setFixedSize(900,800);
 	int x=130;
@@ -121,21 +121,24 @@ void MainWindow::setup_incomeModelView() {
   incomeModelView_widget_addIncomePB->setFixedSize(x,y);
   incomeModelView_widget_editIncomePB->setFixedSize(x,y);
   incomeModelView_widget_removeIncomePB->setFixedSize(x,y);
+  incomeModelView_widget_cancel_removeIncomePB->setFixedSize(x,y);
 	incomeModelView_widget_addIncomePB->setStyleSheet("text-align:left;");
 	incomeModelView_widget_editIncomePB->setStyleSheet("text-align:left;");
 	incomeModelView_widget_removeIncomePB->setStyleSheet("text-align:left;");
+	incomeModelView_widget_cancel_removeIncomePB->setStyleSheet("text-align:left;");
   
 	incomeModelView_widget_mainLayout->addWidget(incomeView);
   incomeModelView_widget_buttonsLayout->addSpacing(22);
   incomeModelView_widget_buttonsLayout->addWidget(incomeModelView_widget_addIncomePB);
   incomeModelView_widget_buttonsLayout->addWidget(incomeModelView_widget_editIncomePB);
   incomeModelView_widget_buttonsLayout->addWidget(incomeModelView_widget_removeIncomePB);
+  incomeModelView_widget_buttonsLayout->addWidget(incomeModelView_widget_cancel_removeIncomePB);
   incomeModelView_widget_buttonsLayout->addStretch();
   incomeModelView_widget_mainLayout->addLayout(incomeModelView_widget_buttonsLayout);
 }
 
 void MainWindow::setup_outcomeModelView() {
-//------------------------------create "Model" for income table
+//------------------------------create "Model" for outcome table
   QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
 	outcomeModel=new QSqlTableModel(this,retrieveDB);
 	outcomeModel->setTable("outcome");
@@ -146,8 +149,9 @@ void MainWindow::setup_outcomeModelView() {
   outcomeModel->setHeaderData(1, Qt::Horizontal, "N");
   outcomeModel->setHeaderData(2, Qt::Horizontal, "Date");
   outcomeModel->setHeaderData(3, Qt::Horizontal, "Operation type");
-  outcomeModel->setHeaderData(4, Qt::Horizontal, "Sum");
-  outcomeModel->setHeaderData(5, Qt::Horizontal, "Note");
+  outcomeModel->setHeaderData(4, Qt::Horizontal, "Status");
+  outcomeModel->setHeaderData(5, Qt::Horizontal, "Sum");
+  outcomeModel->setHeaderData(6, Qt::Horizontal, "Note");
   outcomeModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
 	outcomeModel->setSort(0,Qt::AscendingOrder);
 //------------------------------create "View" for items table
@@ -159,10 +163,6 @@ void MainWindow::setup_outcomeModelView() {
   outcomeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
   outcomeView->setColumnHidden(0,true);
   outcomeView->verticalHeader()->setVisible(false);
-	outcomeView->setColumnWidth(1,75);
-	outcomeView->setColumnWidth(2,75);
-	outcomeView->setColumnWidth(3,150);
-	outcomeView->setColumnWidth(4,70);
 //------------------------------some design tweaks for "outcomeView" 
   outcomeView->setStyleSheet(
     "QTableView {"
@@ -176,13 +176,13 @@ void MainWindow::setup_outcomeModelView() {
     "QHeaderView::section { background-color: #f95959;}");
   QFont outcomeView_headerFont("Colibri",10,QFont::Bold);
   outcomeView_header->setFont(outcomeView_headerFont);
+	outcomeView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
 //------------------------------setup "Widget" for "outcomeView" 
   outcomeModelView_widget=new QWidget();
   outcomeModelView_widget_mainLayout=new QHBoxLayout(outcomeModelView_widget);
   outcomeModelView_widget_buttonsLayout=new QVBoxLayout();
   outcomeModelView_widget_addOutcomePB=new QPushButton("Add outcome");
   outcomeModelView_widget_editOutcomePB=new QPushButton("Edit outcome");
-	outcomeModelView_widget_copyOutcomePB=new QPushButton("Copy outcome");
   outcomeModelView_widget_removeOutcomePB=new QPushButton("Remove outcome");
 
 	outcomeModelView_widget->setFixedSize(900,800);
@@ -190,18 +190,15 @@ void MainWindow::setup_outcomeModelView() {
 	int y=27;
   outcomeModelView_widget_addOutcomePB->setFixedSize(x,y);
   outcomeModelView_widget_editOutcomePB->setFixedSize(x,y);
-	outcomeModelView_widget_copyOutcomePB->setFixedSize(x,y);
   outcomeModelView_widget_removeOutcomePB->setFixedSize(x,y);
 	outcomeModelView_widget_addOutcomePB->setStyleSheet("text-align:left;");
 	outcomeModelView_widget_editOutcomePB->setStyleSheet("text-align:left;");
-	outcomeModelView_widget_copyOutcomePB->setStyleSheet("text-align:left;");
 	outcomeModelView_widget_removeOutcomePB->setStyleSheet("text-align:left;");
   
 	outcomeModelView_widget_mainLayout->addWidget(outcomeView);
   outcomeModelView_widget_buttonsLayout->addSpacing(22);
   outcomeModelView_widget_buttonsLayout->addWidget(outcomeModelView_widget_addOutcomePB);
   outcomeModelView_widget_buttonsLayout->addWidget(outcomeModelView_widget_editOutcomePB);
-  outcomeModelView_widget_buttonsLayout->addWidget(outcomeModelView_widget_copyOutcomePB);
   outcomeModelView_widget_buttonsLayout->addWidget(outcomeModelView_widget_removeOutcomePB);
   outcomeModelView_widget_buttonsLayout->addStretch();
   outcomeModelView_widget_mainLayout->addLayout(outcomeModelView_widget_buttonsLayout);
@@ -246,14 +243,22 @@ void MainWindow::setup_balanceModelView() {
     "QHeaderView::section { background-color: #f95959;}");
   QFont balanceView_headerFont("Colibri",10,QFont::Bold);
   balanceView_header->setFont(balanceView_headerFont);
+	balanceView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
 //------------------------------setup "Widget" for "balanceView" 
   balanceModelView_widget=new QWidget();
 	balanceModelView_widget->setFixedSize(900,800);
-  balanceModelView_widget_mainLayout=new QHBoxLayout(balanceModelView_widget);
+  balanceModelView_widget_mainLayout=new QVBoxLayout(balanceModelView_widget);
 
 	generate=new QPushButton("Generate");
+	generate->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	balanceModelView_widget_mainLayout->addWidget(generate);
 	balanceModelView_widget_mainLayout->addWidget(balanceView);
+
+	QSizePolicy sp(QSizePolicy::Expanding,QSizePolicy::Expanding);
+	sp.setRetainSizeWhenHidden(true);
+	balanceView->setSizePolicy(sp);
+	balanceView->setVisible(false);
+//	
 }
 
 void MainWindow::setup_operationsModelView() {
@@ -268,9 +273,10 @@ void MainWindow::setup_operationsModelView() {
   operationsModel->setHeaderData(1, Qt::Horizontal, "Date");
   operationsModel->setHeaderData(2, Qt::Horizontal, "Num");
   operationsModel->setHeaderData(3, Qt::Horizontal, "Operation");
-  operationsModel->setHeaderData(4, Qt::Horizontal, "Cell");
-  operationsModel->setHeaderData(5, Qt::Horizontal, "Item");
-  operationsModel->setHeaderData(6, Qt::Horizontal, "Quantity");
+  operationsModel->setHeaderData(4, Qt::Horizontal, "Status");
+  operationsModel->setHeaderData(5, Qt::Horizontal, "Cell");
+  operationsModel->setHeaderData(6, Qt::Horizontal, "Item");
+  operationsModel->setHeaderData(7, Qt::Horizontal, "Quantity");
   operationsModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
 	operationsModel->setSort(0,Qt::AscendingOrder);
 }

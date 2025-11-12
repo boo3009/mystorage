@@ -33,7 +33,7 @@ void IncomeDialog::setup_Widget() {
 	date_label=new QLabel("Date");
 	date=new QDateEdit();
 	date->setDate(QDate::currentDate());
-	date->setDisplayFormat("dd/MM/yyyy");
+	date->setDisplayFormat("dd.MM.yyyy");
 	date->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
 	note_label=new QLabel("Note");
@@ -46,16 +46,17 @@ void IncomeDialog::setup_Widget() {
 	operationsView->setSelectionMode(QAbstractItemView::SingleSelection);
   operationsView->setColumnHidden(0,true);
 //  operationsView->setColumnHidden(1,true);
-//  /*operationsView->setColumnHidden(2,true);*/
+//  operationsView->setColumnHidden(2,true);
 //  operationsView->setColumnHidden(3,true);
   operationsView->verticalHeader()->setVisible(false);
 	operationsView_header=operationsView->horizontalHeader();
 	operationsView_header->setStretchLastSection(true);
+	operationsView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-	operations_proxymodel=new QSortFilterProxyModel(this);
+	operations_proxymodel=new Proxy_op_number_income(this);
 	operations_proxymodel->setSourceModel(ptr_operationsModel);
+	operations_proxymodel->setFilterKeyColumn(ptr_operationsModel->fieldIndex("operation_number"));
 	operationsView->setModel(operations_proxymodel);
-	operations_proxymodel->setFilterKeyColumn(2);
 
 	operations_addPB=new QPushButton("Add");
 	operations_copyPB=new QPushButton("Copy");
@@ -113,9 +114,6 @@ void IncomeDialog::setup_Widget() {
 	connect(operations_addPB,&QPushButton::clicked,this,&IncomeDialog::slot_add_operation);
 	connect(operations_copyPB,&QPushButton::clicked,this,&IncomeDialog::slot_copy_operation);
 	connect(operations_removePB,&QPushButton::clicked,this,&IncomeDialog::slot_remove_operation);
-
-  connect(save_incomePB,&QPushButton::clicked,this,&QDialog::accept); 
-  connect(cancel_incomePB,&QPushButton::clicked,this,&QDialog::reject); 
 } 
 
 void IncomeDialog::setup_ModelandMapper() {
@@ -131,29 +129,30 @@ void IncomeDialog::func_addIncome() {
 //---Insert row and set mapper to it
   int row=ptr_incomesModel->rowCount();
 	ptr_incomesModel->insertRow(row);
+	row_added=true;
 	mapper->setCurrentModelIndex(ptr_incomesModel->index(row,1));
 //---Get the string for operation_number and set it to lineedit op_number
 	QString num="in-"+QString::number(row+1);
 	op_number->setText(num);
-//---Set filter for operations proxymodel, so it to show operations considered to new op_number
-	operations_proxymodel->setFilterRegExp(op_number->text());
+//---Set filter for operations proxymodel to show operations considered to new op_number
+	operations_proxymodel->setFilterPattern(op_number->text());
 //---Hide the newly inserted row, to unhide it only on pressing "Save" button 
 	ptr_incomesView->setRowHidden(ptr_incomesModel->rowCount()-1,true);
 }
 
 void IncomeDialog::func_editIncome(int row) {
+	row_added=false;
 	mapper->setCurrentModelIndex(ptr_incomesModel->index(row,1));
-	operations_proxymodel->setFilterRegExp(op_number->text());
+	operations_proxymodel->setFilterPattern(op_number->text());
 }
 
-int IncomeDialog::func_check_correctness(const QSortFilterProxyModel *proxy) {
+int IncomeDialog::func_check_correctness(const QSortFilterProxyModel *proxy,int *sum) {
   QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
 	QSqlQuery query(retrieveDB);
   if(proxy->rowCount()==0) {
     QMessageBox::information(nullptr,"Warning message","No operations added!");
   	return -1;
 	}
-	int sum=0;
 	for(int row=0;row!=proxy->rowCount();++row) {
 		for(int column=1;column!=proxy->columnCount();++column) {
 //------------------------------------------------------------------------------------
@@ -162,16 +161,16 @@ int IncomeDialog::func_check_correctness(const QSortFilterProxyModel *proxy) {
 				return -1;
 			}
 //------------------------------------------------------------------------------------
-			if(column==6) {
+			if(column==ptr_operationsModel->fieldIndex("quantity")) {
 				int local_quantity=proxy->index(row,column).data().toInt();
 				if(local_quantity<=0) {
 					QMessageBox::information(nullptr,"Warning message",QString("%1 %2").arg("Quantity is less or equal '0': ").arg(local_quantity));
 					return -1;
 				}
-				sum=sum+local_quantity;
+				*sum=*sum+local_quantity;
 			}
 //------------------------------------------------------------------------------------
-			if(column==4) {
+			if(column==ptr_operationsModel->fieldIndex("cell")) {
 				QString local_cell=proxy->index(row,column).data().toString();
 				QString check_existance=QString("select exists(select 1 from cells where cell like '%1')").arg(local_cell);
 				if(!query.exec(check_existance)) {
@@ -196,33 +195,41 @@ int IncomeDialog::func_check_correctness(const QSortFilterProxyModel *proxy) {
 //------------------------------------------------------------------------------------
  		}
 	}
-	return sum;
+	return 0;
 }
 
 void IncomeDialog::slot_saveIncome() {
-	QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
-	QSqlQuery query(retrieveDB);
+	int sum=0;
+	if(func_check_correctness(operations_proxymodel,&sum)==0) {
+		QModelIndex index=ptr_incomesModel->index(ptr_incomesView->currentIndex().row(),ptr_incomesModel->fieldIndex("sum"));
+		if(row_added)
+			index=ptr_incomesModel->index(ptr_incomesModel->rowCount()-1,ptr_incomesModel->fieldIndex("sum"));
+		if(!index.isValid()) {
+			qDebug()<<"Invalid index of row...Returning.";
+			return;
+		}
+		ptr_incomesModel->setData(index,sum,Qt::EditRole);
 
-	this->summary=func_check_correctness(operations_proxymodel);
-	if(this->summary==-1)
-    qDebug()<<"Error: Summary is not calculated. '-1' will be returned!";
-  ptr_incomesView->setRowHidden(ptr_incomesModel->rowCount()-1,false);
-  mapper->submit();      
-  ptr_incomesModel->submitAll();
-  ptr_operationsModel->submitAll();
-  emit signal_ready();
-//------------------------------------------------------------------------------------
+		mapper->submit();      
+		ptr_operationsModel->submitAll();
+		ptr_incomesModel->submitAll();
+		ptr_incomesView->setRowHidden(ptr_incomesModel->rowCount()-1,false);
+		emit signal_ready();
+		this->close();
+	}
 }
 
 void IncomeDialog::slot_cancelIncome() {
-//  if(operations_proxymodel->rowCount()==0)
+  if(row_added)
+		ptr_incomesModel->removeRow(ptr_incomesModel->rowCount()-1);
 		//-----------------------NEED TO WRITE CODE FOR DATA RETRIEVING, FEX AFTER DELETION,SO DATA WRITE BACK AS IT WAS
 
-//  emit signal_ready();
+  emit signal_ready();
+	this->close();
 }
 
 void IncomeDialog::slot_open_itemsList(QModelIndex index) {
-	if(!index.isValid() || index.column()!=5)
+	if(!index.isValid() || index.column()!=ptr_operationsModel->fieldIndex("item"))
 		return;
 	items_widget=new QWidget(this,Qt::Window);
 	items_widget->setFixedSize(500,300);
@@ -274,7 +281,7 @@ void IncomeDialog::slot_open_itemsList(QModelIndex index) {
 
 void IncomeDialog::slot_passSelectedItem() {
 //---Get the index of selected item from items_view
-	QModelIndex item_index=ptr_itemsModel->index(items_view->currentIndex().row(),1);
+	QModelIndex item_index=ptr_itemsModel->index(items_view->currentIndex().row(),ptr_itemsModel->fieldIndex("item_name"));
 	if(!item_index.isValid()) {
     QMessageBox::information(nullptr,"Warning message","Nothing selected, pick an item please!");
   	return;
@@ -283,7 +290,7 @@ void IncomeDialog::slot_passSelectedItem() {
 	QVariant data=ptr_itemsModel->data(item_index,Qt::DisplayRole);
 	QString str=data.toString();
 //---Get the index of row in operations view of our widget
-	QModelIndex op_index=operations_proxymodel->index(operationsView->currentIndex().row(),5);
+	QModelIndex op_index=operations_proxymodel->index(operationsView->currentIndex().row(),ptr_operationsModel->fieldIndex("item"));
 //---Get the correspond index in main operations model
 	QModelIndex correspond_index=operations_proxymodel->mapToSource(op_index);
 	if(!op_index.isValid()) {
@@ -299,13 +306,18 @@ void IncomeDialog::slot_add_operation() {
 	int row=ptr_operationsModel->rowCount();
 	ptr_operationsModel->insertRow(row);
 
-//	operationsView->setRowHidden(row,true);
 	QDate date_qdate=date->date();
-	ptr_operationsModel->setData(ptr_operationsModel->index(row,1),date_qdate,Qt::EditRole);
-	ptr_operationsModel->setData(ptr_operationsModel->index(row,2),op_number->text(),Qt::EditRole);
-	ptr_operationsModel->setData(ptr_operationsModel->index(row,3),"income operation",Qt::EditRole);
+	QModelIndex tmp_date_index=ptr_operationsModel->index(row,ptr_operationsModel->fieldIndex("date"));
+	QModelIndex tmp_operation_number_index=ptr_operationsModel->index(row,ptr_operationsModel->fieldIndex("operation_number"));
+	QModelIndex tmp_operation_type_index=ptr_operationsModel->index(row,ptr_operationsModel->fieldIndex("operation_type"));
+	QModelIndex tmp_status_index=ptr_operationsModel->index(row,ptr_operationsModel->fieldIndex("status"));
+	ptr_operationsModel->setData(tmp_date_index,date_qdate,Qt::EditRole);
+	ptr_operationsModel->setData(tmp_operation_number_index,op_number->text(),Qt::EditRole);
+	ptr_operationsModel->setData(tmp_operation_type_index,"income operation",Qt::EditRole);
+	ptr_operationsModel->setData(tmp_status_index,"SAVED",Qt::EditRole);
 
-	int col=4;
+//   select the same column before adding an operation row. if no column selected then select 'cell' column
+	int col=ptr_operationsModel->fieldIndex("cell");
 	if(operationsView->currentIndex().isValid())
 		col=operationsView->currentIndex().column();
 	operationsView->setCurrentIndex(operations_proxymodel->index(operations_proxymodel->rowCount()-1,col));
@@ -323,7 +335,8 @@ void IncomeDialog::slot_copy_operation() {
 	QModelIndex source_index=operationsView->currentIndex();
 	slot_add_operation();
 	QModelIndex dest_index;
-	for(int col=4;col!=operations_proxymodel->columnCount();++col) {
+	int col=ptr_operationsModel->fieldIndex("cell");
+	for( ;col!=operations_proxymodel->columnCount();++col) {
 		QModelIndex tmp_index=operations_proxymodel->index(source_index.row(),col);
 		dest_index=operations_proxymodel->index(operations_proxymodel->rowCount()-1,col);
 		QVariant var=operations_proxymodel->data(tmp_index,Qt::EditRole);
@@ -346,7 +359,7 @@ void IncomeDialog::slot_remove_operation() {
 	QModelIndex correspond_index=operations_proxymodel->mapToSource(op_index);
 	ptr_operationsModel->removeRow(correspond_index.row());
 	ptr_operationsModel->submitAll();
-	ptr_incomesModel->select();
+	ptr_operationsModel->select();
 
 	if(op_index.row()<last_row_before_remove)
 		operationsView->setCurrentIndex(operations_proxymodel->index(op_index.row(),op_index.column()));
@@ -354,8 +367,4 @@ void IncomeDialog::slot_remove_operation() {
 		operationsView->setCurrentIndex(operations_proxymodel->index(operations_proxymodel->rowCount()-1,op_index.column()));
 
 	emit signal_ready();
-}
-
-int IncomeDialog::get_summary() const {
-	return this->summary;
 }

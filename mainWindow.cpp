@@ -93,6 +93,7 @@ void MainWindow::setup_SignalSlots() {
 	/*----*/this,&MainWindow::slot_incomeDialog_edit);
 	connect(incomeView,&QTableView::doubleClicked,this,&MainWindow::slot_editIncomeByDoubleClick);
 	connect(incomeModelView_widget_removeIncomePB,&QPushButton::clicked,this,&MainWindow::slot_incomeModelView_remove);
+	connect(incomeModelView_widget_cancel_removeIncomePB,&QPushButton::clicked,this,&MainWindow::slot_incomeModelView_cancel_remove);
 	
 
 	connect(generate,&QPushButton::clicked,this,&MainWindow::slot_insert_update);
