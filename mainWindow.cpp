@@ -96,6 +96,8 @@ void MainWindow::setup_SignalSlots() {
 	connect(incomeModelView_widget_cancel_removeIncomePB,&QPushButton::clicked,this,&MainWindow::slot_incomeModelView_cancel_remove);
 	
 
+//-------------------------balanceModelView connects
 	connect(generate,&QPushButton::clicked,this,&MainWindow::slot_insert_update);
+	connect(write_into_file,&QPushButton::clicked,this,&MainWindow::slot_write_balance_into_file);
 
 }

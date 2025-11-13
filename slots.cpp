@@ -1,4 +1,6 @@
+#include <iostream>
 #include "mainWindow.h"
+
 
 void MainWindow::slot_updateModels() {
   itemsModel->select();
@@ -280,4 +282,74 @@ void MainWindow::slot_insert_update() {
 	}
 	balanceModel->select();
 	balanceView->setVisible(true);
+}
+
+void MainWindow::slot_write_balance_into_file() {
+	if(balanceModel->rowCount()==0 || !balanceView->isVisible()) {
+    QMessageBox::information(nullptr,"Informational message","Balance table is empty, nothing to print out.");
+		return;
+	}
+//   some enums
+	enum { QUANTITY_MAX_LENGTH=6, LINES_OFSET=9 };
+//   lets get width of column in pixels and convert it to length of chars that column can contain
+	QFontMetrics fm(balanceView->font());
+	int char_width=fm.averageCharWidth();
+	int item_width_pixels=balanceView->columnWidth(balanceModel->fieldIndex("item"));
+	if(!char_width)
+		return;
+	int item_width=item_width_pixels/char_width;
+	int cell_width=balanceView->columnWidth(balanceModel->fieldIndex("cell"))/char_width;
+//   now we can have '+------------+' line
+	int total_row_width=cell_width+item_width+QUANTITY_MAX_LENGTH+LINES_OFSET;
+	QString lines='+'+QString('-').repeated(total_row_width-2)+'+';
+//   some short names for fields indexes as an integers
+	int cell_column=balanceModel->fieldIndex("cell");
+	int quantity_column=balanceModel->fieldIndex("quantity");
+//   open file and filestream
+	QString filename="print.txt";
+	QFile file(filename);
+	if(!file.open(QIODevice::WriteOnly | QIODevice::Text)) {
+		qDebug()<<"Cant open or create file: 'print.txt'";
+		return;
+	}
+	QTextStream file_stream(&file);
+//   at this point lets define logic of writing information into file
+	file_stream<< lines <<Qt::endl;
+	for(int row=0;row!=balanceModel->rowCount();++row) {
+//---------------------------------------------------------------------------------------------------------------------------------------
+		for(int col=cell_column; col!=balanceModel->columnCount();++col) {
+			file_stream<<"| ";
+//   for quantity column
+			if(col==quantity_column) {
+				int num=balanceModel->index(row,col).data().toInt();
+				QString num_str=QString::number(num);
+				int num_len=num_str.length();
+				QString num_sp=QString(' ').repeated(QUANTITY_MAX_LENGTH-num_len);
+				file_stream<< num << num_sp <<" ";
+				continue;
+			}
+//   for cell column
+			QString str=balanceModel->index(row,col).data().toString();
+			if(col==cell_column) {
+				file_stream<< str <<" ";
+				continue;
+			}
+//   for item column
+			int len=str.length();
+			if(len>item_width) {
+				QString left_part=str.left(item_width);
+				file_stream<< left_part <<" ";
+				continue;
+			}
+			file_stream<< str;
+			str=QString(' ').repeated(item_width-len);
+			file_stream<< str <<" ";
+		}
+//---------------------------------------------------------------------------------------------------------------------------------------
+		file_stream<<"|"<<Qt::endl;
+		file_stream<< lines <<Qt::endl;
+	}
+//---------------------------------------------------------------------------------------------------------------------------------------
+	QMessageBox::information(nullptr,"Informational message",QString("%1 %2").arg("Done buddy. File created: ").arg(filename));
+	file.close();
 }

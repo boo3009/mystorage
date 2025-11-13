@@ -84,6 +84,7 @@ private:
 	QHeaderView *balanceView_header;
 	QWidget *balanceModelView_widget;
 	QPushButton *generate;
+	QPushButton *write_into_file;
 	QVBoxLayout *balanceModelView_widget_mainLayout;
 //--------------------------pointer to "Database" object	
 	Database *dbPointer;
@@ -119,7 +120,7 @@ private slots:
 
 //--------------------------slots for balance
 	void slot_insert_update();
-
+	void slot_write_balance_into_file();
 };
 
 #endif

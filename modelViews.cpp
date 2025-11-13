@@ -251,7 +251,10 @@ void MainWindow::setup_balanceModelView() {
 
 	generate=new QPushButton("Generate");
 	generate->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	write_into_file=new QPushButton("Write into file");
+	write_into_file->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	balanceModelView_widget_mainLayout->addWidget(generate);
+	balanceModelView_widget_mainLayout->addWidget(write_into_file);
 	balanceModelView_widget_mainLayout->addWidget(balanceView);
 
 	QSizePolicy sp(QSizePolicy::Expanding,QSizePolicy::Expanding);
