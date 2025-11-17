@@ -94,10 +94,15 @@ void MainWindow::setup_SignalSlots() {
 	connect(incomeView,&QTableView::doubleClicked,this,&MainWindow::slot_editIncomeByDoubleClick);
 	connect(incomeModelView_widget_removeIncomePB,&QPushButton::clicked,this,&MainWindow::slot_incomeModelView_remove);
 	connect(incomeModelView_widget_cancel_removeIncomePB,&QPushButton::clicked,this,&MainWindow::slot_incomeModelView_cancel_remove);
-	
-
+//-------------------------outcomesModelView connects
+	connect(outcomeModelView_widget_addOutcomePB,&QPushButton::clicked,
+  /*----*/this,&MainWindow::slot_outcomeDialog_add);
+	connect(outcomeModelView_widget_editOutcomePB,&QPushButton::clicked,
+	/*----*/this,&MainWindow::slot_outcomeDialog_edit);
+	connect(outcomeView,&QTableView::doubleClicked,this,&MainWindow::slot_editOutcomeByDoubleClick);
+	connect(outcomeModelView_widget_removeOutcomePB,&QPushButton::clicked,this,&MainWindow::slot_outcomeModelView_remove);
+	connect(outcomeModelView_widget_cancel_removeOutcomePB,&QPushButton::clicked,this,&MainWindow::slot_outcomeModelView_cancel_remove);
 //-------------------------balanceModelView connects
-	connect(generate,&QPushButton::clicked,this,&MainWindow::slot_insert_update);
+	connect(generate,&QPushButton::clicked,this,&MainWindow::slot_generate);
 	connect(write_into_file,&QPushButton::clicked,this,&MainWindow::slot_write_balance_into_file);
-
 }

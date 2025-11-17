@@ -92,12 +92,15 @@ void MainWindow::slot_itemsModelView_remove() {
 //=================================INCOMES PART START=========================================
 
 void MainWindow::slot_incomeDialog_add() {
+	int before=incomeModel->rowCount();
   QModelIndex index=incomeView->currentIndex();
 	if(!index.isValid())
-		index=incomeModel->index(incomeModel->rowCount()-1,1);
+		index=incomeModel->index(0,incomeModel->fieldIndex("operation_number"));
 	IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,
-																									operationsModel);
-  if(obj_incomeDialog->exec()==QDialog::Accepted) {
+																									operationsModel,balanceModel);
+	obj_incomeDialog->exec();
+	int after=incomeModel->rowCount();
+  if(after!=before) {
   	QModelIndex i=incomeModel->index(incomeModel->rowCount()-1,1); //get added income's qmodelindex
 		incomeView->setCurrentIndex(i); //select added row (after adding)
 	} else
@@ -112,7 +115,8 @@ void MainWindow::slot_editIncomeByDoubleClick(QModelIndex index) {
     QMessageBox::information(nullptr,"Warning message","Please, select an income before editing!");
 		return;
 	}
-  IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,operationsModel,index.row());
+  IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,
+		operationsModel,balanceModel,index.row());
   obj_incomeDialog->setWindowTitle("Editing an income");
   obj_incomeDialog->exec();
   incomeView->setCurrentIndex(index); //select edited row (after editing)
@@ -127,7 +131,8 @@ void MainWindow::slot_incomeDialog_edit() {
     QMessageBox::information(nullptr,"Warning message","Please, select an income before editing!");
 		return;
 	}
-  IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,operationsModel,index.row());
+  IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,
+		operationsModel,balanceModel,index.row());
   obj_incomeDialog->setWindowTitle("Editing an income");
   obj_incomeDialog->exec();
   incomeView->setCurrentIndex(index); //select edited row (after editing)
@@ -216,18 +221,161 @@ void MainWindow::slot_incomeModelView_cancel_remove() {
 
 //=================================INCOMES PART END=========================================
 
-//----...
+//=================================OUTCOMES PART START=========================================
+
+void MainWindow::slot_outcomeDialog_add() {
+	int before=outcomeModel->rowCount();
+  QModelIndex index=outcomeView->currentIndex();
+	if(!index.isValid())
+		index=outcomeModel->index(0,outcomeModel->fieldIndex("operation_number"));
+//---call a function, to recalculate operations from operations table, so we get actual balance BEFORE outcome. We dont need to do the same for incomes, since there is nothing to check.
+	if(slot_insert_update()==-1)
+		return;
+	OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,
+																									operationsModel,balanceModel);
+  obj_outcomeDialog->exec();
+	int after=outcomeModel->rowCount();
+  if(after!=before) {
+  	QModelIndex i=outcomeModel->index(outcomeModel->rowCount()-1,1); //get added outcome's qmodelindex
+		outcomeView->setCurrentIndex(i); //select added row (after adding)
+	} else
+		outcomeView->setCurrentIndex(index);
+	connect(obj_outcomeDialog,&OutcomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
+	delete obj_outcomeDialog;
+	obj_outcomeDialog=nullptr;
+}
+
+void MainWindow::slot_editOutcomeByDoubleClick(QModelIndex index) {
+  if(!index.isValid()) {
+    QMessageBox::information(nullptr,"Warning message","Please, select an outcome before editing!");
+		return;
+	}
+  OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,operationsModel,balanceModel,index.row());
+  obj_outcomeDialog->setWindowTitle("Editing an outcome");
+  obj_outcomeDialog->exec();
+  outcomeView->setCurrentIndex(index); //select edited row (after editing)
+	connect(obj_outcomeDialog,&OutcomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
+	delete obj_outcomeDialog;
+	obj_outcomeDialog=nullptr;
+}
+
+void MainWindow::slot_outcomeDialog_edit() {
+  QModelIndex index=outcomeView->currentIndex(); 
+  if(!index.isValid()) {
+    QMessageBox::information(nullptr,"Warning message","Please, select an outcome before editing!");
+		return;
+	}
+  OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,operationsModel,balanceModel,index.row());
+  obj_outcomeDialog->setWindowTitle("Editing an outcome");
+  obj_outcomeDialog->exec();
+  outcomeView->setCurrentIndex(index); //select edited row (after editing)
+	connect(obj_outcomeDialog,&OutcomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
+	delete obj_outcomeDialog;
+	obj_outcomeDialog=nullptr;
+}
+
+void MainWindow::slot_outcomeModelView_remove() {
+	QModelIndex index=outcomeView->currentIndex();
+  if(!index.isValid() || outcomeModel->index(index.row(),outcomeModel->fieldIndex("status")).data().toString()=="REMOVED") {
+    QMessageBox::information(nullptr,"Warning message","Outcome not selected or has status REMOVED!");
+		return;
+	}
+	index=outcomeModel->index(index.row(),outcomeModel->fieldIndex("status"));
+	outcomeModel->setData(index,"REMOVED",Qt::EditRole);
+	outcomeModel->submitAll();
+	outcomeModel->select();
+	
+	QString num=outcomeModel->index(index.row(),outcomeModel->fieldIndex("operation_number")).data().toString();
+	QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+	QSqlQuery query(retrieveDB);
+	QString str=QString("select * from operations where operation_number like '%1'").arg(num);
+	if(!query.exec(str)) {
+		qDebug()<<__LINE__<<"error in work of 'query.exec': cant set status to REMOVED to operation.";
+		qDebug()<<"error type"<<query.lastError().type();
+		qDebug()<<"error text"<<query.lastError().text();
+		qDebug()<<"driver error"<<query.lastError().driverText();
+		qDebug()<<"database error"<<query.lastError().databaseText();
+		return;
+	}
+	QSqlQuery upd(retrieveDB);
+	while(query.next())	{
+		QString upd_str=QString("update operations set status='%1' where operation_id like %2").arg("REMOVED").arg(query.value(0).toInt());
+		if(!upd.exec(upd_str)) {
+			qDebug()<<__LINE__<<"error in work of 'query.exec': cant set status to REMOVED to operation.";
+			qDebug()<<"error type"<<query.lastError().type();
+			qDebug()<<"error text"<<query.lastError().text();
+			qDebug()<<"driver error"<<query.lastError().driverText();
+			qDebug()<<"database error"<<query.lastError().databaseText();
+		}
+	}
+	operationsModel->submitAll();
+	operationsModel->select();
+	outcomeView->setCurrentIndex(index);
+}
+
+void MainWindow::slot_outcomeModelView_cancel_remove() {
+	QModelIndex index=outcomeView->currentIndex();
+  if(!index.isValid() || outcomeModel->index(index.row(),outcomeModel->fieldIndex("status")).data().toString()=="SAVED") {
+    QMessageBox::information(nullptr,"Warning message","Outcome not selected or has status SAVED!");
+		return;
+	}
+	index=outcomeModel->index(index.row(),outcomeModel->fieldIndex("status"));
+	outcomeModel->setData(index,"SAVED",Qt::EditRole);
+	outcomeModel->submitAll();
+	outcomeModel->select();
+	
+	QString num=outcomeModel->index(index.row(),outcomeModel->fieldIndex("operation_number")).data().toString();
+	QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+	QSqlQuery query(retrieveDB);
+	QString str=QString("select * from operations where operation_number like '%1'").arg(num);
+	if(!query.exec(str)) {
+		qDebug()<<__LINE__<<"error in work of 'query.exec': cant set status to REMOVED to operation.";
+		qDebug()<<"error type"<<query.lastError().type();
+		qDebug()<<"error text"<<query.lastError().text();
+		qDebug()<<"driver error"<<query.lastError().driverText();
+		qDebug()<<"database error"<<query.lastError().databaseText();
+		return;
+	}
+	QSqlQuery upd(retrieveDB);
+	while(query.next())	{
+		QString upd_str=QString("update operations set status='%1' where operation_id like %2").arg("SAVED").arg(query.value(0).toInt());
+		if(!upd.exec(upd_str)) {
+			qDebug()<<__LINE__<<"error in work of 'query.exec': cant set status to REMOVED to operation.";
+			qDebug()<<"error type"<<query.lastError().type();
+			qDebug()<<"error text"<<query.lastError().text();
+			qDebug()<<"driver error"<<query.lastError().driverText();
+			qDebug()<<"database error"<<query.lastError().databaseText();
+		}
+	}
+	operationsModel->submitAll();
+	operationsModel->select();
+	outcomeView->setCurrentIndex(index);
+}
+
+//=================================OUTCOMES PART END=========================================
 
 
 
 
 //=================================BALANCE PART START=========================================
-void MainWindow::slot_insert_update() {
+
+//-------need to write function, that tells us not to remove income, since we have an outcome with that cell and item.!!!!!!!!
+//
+//
+//
+
+void MainWindow::slot_generate() {
+	if(slot_insert_update()==-1)
+		qDebug()<<__LINE__<<"Error: Cant generate balance,soryan :)";
+	balanceView->setVisible(true);
+}
+
+int MainWindow::slot_insert_update() {
   QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
 	QSqlQuery query(retrieveDB);
 	if(!query.exec("truncate table filled_cells")) {
 			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': Cant truncate filled_cells.";
-			return;
+			return -1;
 	}
 //   operations columns
 	int cell_column=operationsModel->fieldIndex("cell");
@@ -237,51 +385,49 @@ void MainWindow::slot_insert_update() {
 	int status_column=operationsModel->fieldIndex("status");
 //   filled_cells columns
 	int balance_cell_id_column=balanceModel->fieldIndex("cell_id");
-	int balance_quantity_column=balanceModel->fieldIndex("quantity");
 	for(int row=0;row!=operationsModel->rowCount();++row) {
 		if(operationsModel->index(row,status_column).data().toString()=="REMOVED")
 			continue;
 //------------------------------------------------------------------------------------
 		QString check_str=QString("select * from filled_cells where cell like '%1' and item like '%2'")
-					 .arg(operationsModel->index(row,cell_column).data().toString()).arg(operationsModel->index(row,item_column).data().toString());
+		  .arg(operationsModel->index(row,cell_column).data().toString())
+			.arg(operationsModel->index(row,item_column).data().toString());
 		if(!query.exec(check_str)) {
 			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': local checking in 'while' loop.";
-			return;
+			return -1;
 		}
 		if(query.next()) {
+//---result set is NOT empty, so we can add an income or outcome.
 			QString update_str;
 			if(operationsModel->index(row,operation_type_column).data().toString()=="income operation")
 				update_str=QString("update filled_cells set quantity=quantity+'%1' where cell_id like '%2'")
-																	 .arg(operationsModel->index(row,quantity_column).data().toInt()).arg(query.value(balance_cell_id_column).toInt());
-			else {
-				if(query.value(balance_quantity_column).toInt()<operationsModel->index(row,quantity_column).data().toInt()) {
-					QMessageBox::information(nullptr,"Warning message",QString("%1 %2%, %3 %4 %5").arg("Balance of the cell: ")
-								.arg(operationsModel->index(row,cell_column).data().toString()).arg(operationsModel->index(row,item_column).data().toString())
-								.arg(query.value(balance_quantity_column).toInt()).arg("correct quantity please."));
-					return;
-				}
+				  .arg(operationsModel->index(row,quantity_column).data().toInt())
+					.arg(query.value(balance_cell_id_column).toInt());
+			else
 				update_str=QString("update filled_cells set quantity=quantity-'%1' where cell_id like '%2'")
-																	 .arg(operationsModel->index(row,quantity_column).data().toInt()).arg(query.value(balance_cell_id_column).toInt());
-			}
+				  .arg(operationsModel->index(row,quantity_column).data().toInt())
+					.arg(query.value(balance_cell_id_column).toInt());
 			if(!query.exec(update_str)) {
 				qDebug()<<"("<<__LINE__<<") "<<"Error while 'query.exec' (income): update record in not empty set in 'filled_cells'.";
-				return;
+				return -1;
 			}
-		} else {
-//------------------------------------------------------------------------------------
+			continue;
+		} 
+//---result set is empty, so we have nothing in that cell, lets ADD an income.
+		if(operationsModel->index(row,operation_type_column).data().toString()=="income operation") {
 			query.prepare("insert into filled_cells(cell,item,quantity) values(:c,:i,:q)");
 			query.bindValue(":c",operationsModel->index(row,cell_column).data().toString());
 			query.bindValue(":i",operationsModel->index(row,item_column).data().toString());
 			query.bindValue(":q",operationsModel->index(row,quantity_column).data().toInt());
 			if(!query.exec()) {
 				qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': inserting record in not empty set in 'filled_cells'.";
-				return;
+				return -1;
 			}
 		}
 //------------------------------------------------------------------------------------
 	}
 	balanceModel->select();
-	balanceView->setVisible(true);
+	return 0;
 }
 
 void MainWindow::slot_write_balance_into_file() {

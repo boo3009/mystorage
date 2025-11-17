@@ -5,11 +5,11 @@
 #include <QVariant>
 
 
-class Proxy_op_number_income: public QSortFilterProxyModel
+class Proxy_op_number: public QSortFilterProxyModel
 {
 	Q_OBJECT
 public:
-	explicit Proxy_op_number_income(QObject *parent=nullptr) : QSortFilterProxyModel(parent) {/*---*/}	
+	explicit Proxy_op_number(QObject *parent=nullptr) : QSortFilterProxyModel(parent) {/*---*/}	
 	void setFilterPattern(const QVariant &pattern);
 protected:
 	bool filterAcceptsRow(int sourceRow,const QModelIndex &sourceParent) const override;

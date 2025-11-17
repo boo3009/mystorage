@@ -19,11 +19,13 @@ CONFIG+=debug
 HEADERS += db.h \
 					 itemDialog.h\
 					 incomeDialog.h\
+					 outcomeDialog.h\
 					 proxy_models.h\
            mainWindow.h
 SOURCES += db.cpp \
 					 itemDialog.cpp\
 					 incomeDialog.cpp\
+					 outcomeDialog.cpp\
 					 modelViews.cpp\
 					 slots.cpp\
 					 proxy_models.cpp\

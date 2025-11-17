@@ -1,8 +1,8 @@
 #include "incomeDialog.h"
 
 IncomeDialog::IncomeDialog(QSqlTableModel *model,QTableView *view,QSqlTableModel *itemsModel,
-  QSqlTableModel *opModel,int row,QWidget *parent) : QDialog(parent), ptr_incomesModel(model),
-	ptr_incomesView(view), ptr_itemsModel(itemsModel), ptr_operationsModel(opModel) {
+  QSqlTableModel *opModel,QSqlTableModel *bal_model,int row,QWidget *parent) : QDialog(parent), ptr_incomesModel(model),
+	ptr_incomesView(view), ptr_itemsModel(itemsModel), ptr_operationsModel(opModel), ptr_balanceModel(bal_model) {
 //----------------------------------------------------------------------------------------
   setup_Widget();
   setup_ModelandMapper();
@@ -53,7 +53,7 @@ void IncomeDialog::setup_Widget() {
 	operationsView_header->setStretchLastSection(true);
 	operationsView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-	operations_proxymodel=new Proxy_op_number_income(this);
+	operations_proxymodel=new Proxy_op_number(this);
 	operations_proxymodel->setSourceModel(ptr_operationsModel);
 	operations_proxymodel->setFilterKeyColumn(ptr_operationsModel->fieldIndex("operation_number"));
 	operationsView->setModel(operations_proxymodel);

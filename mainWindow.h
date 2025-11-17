@@ -23,6 +23,7 @@
 #include "db.h"
 #include "itemDialog.h"
 #include "incomeDialog.h"
+#include "outcomeDialog.h"
 
 
 class MainWindow:public QMainWindow {
@@ -54,7 +55,6 @@ private:
 	QPushButton *itemsModelView_widget_editItemPB;
 	QPushButton *itemsModelView_widget_copyItemPB;
 	QPushButton *itemsModelView_widget_removeItemPB;
-	QPushButton *incomeModelView_widget_cancel_removeIncomePB;
 //--------------------------middle part: Income
 	QSqlTableModel *incomeModel;
 	QTableView *incomeView;
@@ -64,8 +64,9 @@ private:
 	QVBoxLayout *incomeModelView_widget_buttonsLayout;
 	QPushButton *incomeModelView_widget_addIncomePB;
 	QPushButton *incomeModelView_widget_editIncomePB;
-	QPushButton *incomeModelView_widget_copyIncomePB;
 	QPushButton *incomeModelView_widget_removeIncomePB;
+	QPushButton *incomeModelView_widget_cancel_removeIncomePB;
+//--------------------------hidden part: Operations
 	QSqlTableModel *operationsModel;
 //--------------------------middle part: Outcome
 	QSqlTableModel *outcomeModel;
@@ -76,8 +77,8 @@ private:
 	QVBoxLayout *outcomeModelView_widget_buttonsLayout;
 	QPushButton *outcomeModelView_widget_addOutcomePB;
 	QPushButton *outcomeModelView_widget_editOutcomePB;
-	QPushButton *outcomeModelView_widget_copyOutcomePB;
 	QPushButton *outcomeModelView_widget_removeOutcomePB;
+	QPushButton *outcomeModelView_widget_cancel_removeOutcomePB;
 //--------------------------middle part: Balance
 	QSqlTableModel *balanceModel;
 	QTableView *balanceView;
@@ -116,10 +117,14 @@ private slots:
 	void slot_incomeModelView_remove();
 	void slot_incomeModelView_cancel_remove();
 //--------------------------slots for outcome
-
-
+	void slot_outcomeDialog_add();
+	void slot_outcomeDialog_edit();
+	void slot_editOutcomeByDoubleClick(QModelIndex);
+	void slot_outcomeModelView_remove();
+	void slot_outcomeModelView_cancel_remove();
 //--------------------------slots for balance
-	void slot_insert_update();
+	int slot_insert_update();
+	void slot_generate();
 	void slot_write_balance_into_file();
 };
 

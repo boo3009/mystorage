@@ -184,6 +184,7 @@ void MainWindow::setup_outcomeModelView() {
   outcomeModelView_widget_addOutcomePB=new QPushButton("Add outcome");
   outcomeModelView_widget_editOutcomePB=new QPushButton("Edit outcome");
   outcomeModelView_widget_removeOutcomePB=new QPushButton("Remove outcome");
+  outcomeModelView_widget_cancel_removeOutcomePB=new QPushButton("Cancel removing");
 
 	outcomeModelView_widget->setFixedSize(900,800);
 	int x=130;
@@ -191,15 +192,18 @@ void MainWindow::setup_outcomeModelView() {
   outcomeModelView_widget_addOutcomePB->setFixedSize(x,y);
   outcomeModelView_widget_editOutcomePB->setFixedSize(x,y);
   outcomeModelView_widget_removeOutcomePB->setFixedSize(x,y);
+  outcomeModelView_widget_cancel_removeOutcomePB->setFixedSize(x,y);
 	outcomeModelView_widget_addOutcomePB->setStyleSheet("text-align:left;");
 	outcomeModelView_widget_editOutcomePB->setStyleSheet("text-align:left;");
 	outcomeModelView_widget_removeOutcomePB->setStyleSheet("text-align:left;");
+	outcomeModelView_widget_cancel_removeOutcomePB->setStyleSheet("text-align:left;");
   
 	outcomeModelView_widget_mainLayout->addWidget(outcomeView);
   outcomeModelView_widget_buttonsLayout->addSpacing(22);
   outcomeModelView_widget_buttonsLayout->addWidget(outcomeModelView_widget_addOutcomePB);
   outcomeModelView_widget_buttonsLayout->addWidget(outcomeModelView_widget_editOutcomePB);
   outcomeModelView_widget_buttonsLayout->addWidget(outcomeModelView_widget_removeOutcomePB);
+  outcomeModelView_widget_buttonsLayout->addWidget(outcomeModelView_widget_cancel_removeOutcomePB);
   outcomeModelView_widget_buttonsLayout->addStretch();
   outcomeModelView_widget_mainLayout->addLayout(outcomeModelView_widget_buttonsLayout);
 }

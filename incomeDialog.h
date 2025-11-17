@@ -27,13 +27,14 @@ class IncomeDialog : public QDialog {
   Q_OBJECT
 public:
   explicit IncomeDialog(QSqlTableModel *model, QTableView *view,QSqlTableModel *itemsModel,
- 					 	 QSqlTableModel *opModel,int row=-1,QWidget *parent=0);
+	  QSqlTableModel *opModel,QSqlTableModel *bal_model,int row=-1,QWidget *parent=0);
 private:
 //-------pointers to constructors parameters
   QSqlTableModel *ptr_incomesModel;
   QTableView *ptr_incomesView;
   QSqlTableModel *ptr_itemsModel;
 	QSqlTableModel *ptr_operationsModel;
+	QSqlTableModel *ptr_balanceModel;
 //-------pointer to mapper
   QDataWidgetMapper *mapper;
 //-------selecting items part-----------		
@@ -47,7 +48,7 @@ private:
 //-------operations view part-----------		
 	QTableView *operationsView;
 	QHeaderView *operationsView_header;
-	Proxy_op_number_income *operations_proxymodel;
+	Proxy_op_number *operations_proxymodel;
 	QPushButton *operations_addPB;
 	QPushButton *operations_copyPB;
 	QPushButton *operations_removePB;
@@ -84,6 +85,7 @@ private:
 	void func_addIncome();
 	void func_editIncome(int);
   int func_check_correctness(const QSortFilterProxyModel*,int*);
+	int func__insert_update();
 signals:
   void signal_ready();
 private slots:
