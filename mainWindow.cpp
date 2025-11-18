@@ -76,7 +76,8 @@ void MainWindow::setup_SignalSlots() {
 	connect(mainLayout_left_itemsPB,&QPushButton::clicked,
 	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(2); });
 	connect(mainLayout_left_balancePB,&QPushButton::clicked,
-	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(3); });
+	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(3);
+									balanceView->setVisible(false); });
 //-------------------------itemsModelView connects
 	connect(itemsModelView_widget_addItemPB,&QPushButton::clicked,
   /*----*/this,&MainWindow::slot_itemDialog_add);

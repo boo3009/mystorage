@@ -14,13 +14,24 @@ void MainWindow::setup_itemsModelView() {
 	itemsModel->setSort(0,Qt::AscendingOrder);
 //------------------------------create "View" for items table
   itemsView=new QTableView();
-	itemsView->setModel(itemsModel);
+//	itemsView->setModel(itemsModel);
   itemsView->sortByColumn(0,Qt::AscendingOrder); /*finded out that view needed sort too*/
 	itemsView->setSelectionMode(QAbstractItemView::SingleSelection);
   itemsView->setSelectionBehavior(QAbstractItemView::SelectRows);
   itemsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
   itemsView->setColumnHidden(0,true);
   itemsView->verticalHeader()->setVisible(false);
+//------------------------------create proxy model for "itemsModel"
+	items_proxymodel=new QSortFilterProxyModel(this); //----experimental
+	items_proxymodel->setSourceModel(itemsModel); //----experimental
+	items_proxymodel->setFilterKeyColumn(itemsModel->fieldIndex("item_name")); //----experimental
+	itemsView->setModel(items_proxymodel); //----experimental
+
+	items_filter_label=new QLabel("Search item");
+	items_filter_lineedit=new QLineEdit();
+	items_filter_label->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	items_filter_lineedit->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	connect(items_filter_lineedit,&QLineEdit::textEdited,this,&MainWindow::slot_set_items_filter); //----experimental
 //------------------------------some design tweaks for "itemsView" 
   itemsView->setStyleSheet(
     "QTableView {"
@@ -37,13 +48,18 @@ void MainWindow::setup_itemsModelView() {
 	itemsView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
 //------------------------------setup "Widget" for "itemsView" 
   itemsModelView_widget=new QWidget();
-  itemsModelView_widget_mainLayout=new QHBoxLayout(itemsModelView_widget);
+  itemsModelView_widget_mainLayout=new QVBoxLayout(itemsModelView_widget);
+	items_layout=new QHBoxLayout();
   itemsModelView_widget_buttonsLayout=new QVBoxLayout();
   itemsModelView_widget_addItemPB=new QPushButton("Add item");
   itemsModelView_widget_editItemPB=new QPushButton("Edit item");
 	itemsModelView_widget_copyItemPB=new QPushButton("Copy item");
   itemsModelView_widget_removeItemPB=new QPushButton("Remove item");
 	
+	items_filter_layout=new QHBoxLayout();
+	items_filter_layout->addWidget(items_filter_label);
+	items_filter_layout->addWidget(items_filter_lineedit);
+
 	itemsModelView_widget->setFixedSize(900,800);
 	int x=130;
 	int y=27;
@@ -56,14 +72,17 @@ void MainWindow::setup_itemsModelView() {
 	itemsModelView_widget_copyItemPB->setStyleSheet("text-align:left;");
 	itemsModelView_widget_removeItemPB->setStyleSheet("text-align:left;");
   
-	itemsModelView_widget_mainLayout->addWidget(itemsView);
+  itemsModelView_widget_mainLayout->addLayout(items_filter_layout);
+	items_filter_layout->addStretch();
+	items_layout->addWidget(itemsView);
   itemsModelView_widget_buttonsLayout->addSpacing(22);
   itemsModelView_widget_buttonsLayout->addWidget(itemsModelView_widget_addItemPB);
   itemsModelView_widget_buttonsLayout->addWidget(itemsModelView_widget_editItemPB);
   itemsModelView_widget_buttonsLayout->addWidget(itemsModelView_widget_copyItemPB);
   itemsModelView_widget_buttonsLayout->addWidget(itemsModelView_widget_removeItemPB);
   itemsModelView_widget_buttonsLayout->addStretch();
-  itemsModelView_widget_mainLayout->addLayout(itemsModelView_widget_buttonsLayout);
+  items_layout->addLayout(itemsModelView_widget_buttonsLayout);
+	itemsModelView_widget_mainLayout->addLayout(items_layout);
 }
 
 void MainWindow::setup_incomeModelView() {

@@ -48,6 +48,7 @@ void OutcomeDialog::setup_Widget() {
 //  operationsView->setColumnHidden(1,true);
 //  operationsView->setColumnHidden(2,true);
 //  operationsView->setColumnHidden(3,true);
+//  operationsView->setColumnHidden(4,true);
   operationsView->verticalHeader()->setVisible(false);
 	operationsView_header=operationsView->horizontalHeader();
 	operationsView_header->setStretchLastSection(true);
@@ -144,6 +145,10 @@ void OutcomeDialog::func_editOutcome(int row) {
 	row_added=false;
 	mapper->setCurrentModelIndex(ptr_outcomesModel->index(row,1));
 	operations_proxymodel->setFilterPattern(op_number->text());
+	if(func_revert_insert_update()==-1) {
+		qDebug()<<"Something went wrong while reverting inserts and updates of current outcome. Returning.";
+		return;
+	}
 }
 
 int OutcomeDialog::func_check_correctness(const QSortFilterProxyModel *proxy,int *sum) {
@@ -198,9 +203,25 @@ int OutcomeDialog::func_check_correctness(const QSortFilterProxyModel *proxy,int
 	return 0;
 }
 
-int OutcomeDialog::func__insert_update() {
+int OutcomeDialog::func_insert_update() {
   QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
 	QSqlQuery query(retrieveDB);
+	if(!query.exec("drop temporary table if exists tmp_filled_cells")) {
+		qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': Cant drop temporary table for filled_cells.";
+		qDebug()<<"error type"<<query.lastError().type();
+		qDebug()<<"error text"<<query.lastError().text();
+		qDebug()<<"driver error"<<query.lastError().driverText();
+		qDebug()<<"database error"<<query.lastError().databaseText();
+		return -1;
+	}
+	if(!query.exec("create temporary table tmp_filled_cells as select * from filled_cells")) {
+		qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': Cant create temporary table for filled_cells.";
+		qDebug()<<"error type"<<query.lastError().type();
+		qDebug()<<"error text"<<query.lastError().text();
+		qDebug()<<"driver error"<<query.lastError().driverText();
+		qDebug()<<"database error"<<query.lastError().databaseText();
+		return -1;
+	}
 //   operations columns
 	int cell_column=ptr_operationsModel->fieldIndex("cell");
 	int item_column=ptr_operationsModel->fieldIndex("item");
@@ -208,12 +229,14 @@ int OutcomeDialog::func__insert_update() {
 	int status_column=ptr_operationsModel->fieldIndex("status");
 //   filled_cells columns
 	int balance_quantity_column=ptr_balanceModel->fieldIndex("quantity");
+	int balance_cell_id_column=ptr_balanceModel->fieldIndex("cell_id");
 	for(int row=0;row!=operations_proxymodel->rowCount();++row) {
 		if(operations_proxymodel->index(row,status_column).data().toString()=="REMOVED")
 			continue;
 //------------------------------------------------------------------------------------
-		QString check_str=QString("select * from filled_cells where cell like '%1' and item like '%2'")
-		  .arg(operations_proxymodel->index(row,cell_column).data().toString()).arg(operations_proxymodel->index(row,item_column).data().toString());
+		QString check_str=QString("select * from tmp_filled_cells where cell like '%1' and item like '%2'")
+		  .arg(operations_proxymodel->index(row,cell_column).data().toString())
+			.arg(operations_proxymodel->index(row,item_column).data().toString());
 		if(!query.exec(check_str)) {
 			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': local checking in 'while' loop.";
 			return -1;
@@ -230,6 +253,13 @@ int OutcomeDialog::func__insert_update() {
 					.arg("so correct the quantity please."));
 				return -1;
 			}
+			QString update_str=QString("update tmp_filled_cells set quantity=quantity-'%1' where cell_id like '%2'")
+				.arg(operations_proxymodel->index(row,quantity_column).data().toInt())
+				.arg(query.value(balance_cell_id_column).toInt());
+			if(!query.exec(update_str)) {
+				qDebug()<<"("<<__LINE__<<") "<<"Error while 'query.exec' (income): update record in not empty set in 'filled_cells'.";
+				return -1;
+			}
 			continue;
 		} 
 		QMessageBox::information(nullptr,"Warning message",QString("%1 '%2' %3 '%4' %5")
@@ -244,9 +274,53 @@ int OutcomeDialog::func__insert_update() {
 	return 0;
 }
 
+int OutcomeDialog::func_revert_insert_update() {
+  QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+	QSqlQuery query(retrieveDB);
+//   operations columns
+	int cell_column=ptr_operationsModel->fieldIndex("cell");
+	int item_column=ptr_operationsModel->fieldIndex("item");
+	int quantity_column=ptr_operationsModel->fieldIndex("quantity");
+	int status_column=ptr_operationsModel->fieldIndex("status");
+//   balance columns
+	int balance_cell_id_column=ptr_balanceModel->fieldIndex("cell_id");
+//------------------------------------------------------------------------------------
+	for(int row=0;row!=operations_proxymodel->rowCount();++row) {
+		if(operations_proxymodel->index(row,status_column).data().toString()=="REMOVED")
+			continue;
+		QString check_str=QString("select * from filled_cells where cell like '%1' and item like '%2'")
+		  .arg(operations_proxymodel->index(row,cell_column).data().toString())
+			.arg(operations_proxymodel->index(row,item_column).data().toString());
+		if(!query.exec(check_str)) {
+			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': local checking in 'while' loop.";
+			return -1;
+		}
+		if(query.next()) {
+			QString update_str=QString("update filled_cells set quantity=quantity+'%1' where cell_id like '%2'")
+				.arg(operations_proxymodel->index(row,quantity_column).data().toInt())
+				.arg(query.value(balance_cell_id_column).toInt());
+			if(!query.exec(update_str)) {
+				qDebug()<<"("<<__LINE__<<") "<<"Error while 'query.exec' (income): update record in not empty set in 'filled_cells'.";
+				return -1;
+			}
+			continue;
+		}
+		query.prepare("insert into filled_cells(cell,item,quantity) values(:c,:i,:q)");
+		query.bindValue(":c",operations_proxymodel->index(row,cell_column).data().toString());
+		query.bindValue(":i",operations_proxymodel->index(row,item_column).data().toString());
+		query.bindValue(":q",-operations_proxymodel->index(row,quantity_column).data().toInt());
+		if(!query.exec()) {
+			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': inserting record in not empty set in 'filled_cells'.";
+			return -1;
+		}
+	}
+//------------------------------------------------------------------------------------
+	return 0;
+}
+
 void OutcomeDialog::slot_saveOutcome() {
 	int sum=0;
-	if(func_check_correctness(operations_proxymodel,&sum)==0 && func__insert_update()==0) {
+	if(func_check_correctness(operations_proxymodel,&sum)==0 && func_insert_update()==0) {
 		QModelIndex index=ptr_outcomesModel->index(ptr_outcomesView->currentIndex().row(),ptr_outcomesModel->fieldIndex("sum"));
 		if(row_added)
 			index=ptr_outcomesModel->index(ptr_outcomesModel->rowCount()-1,ptr_outcomesModel->fieldIndex("sum"));
@@ -401,6 +475,8 @@ void OutcomeDialog::slot_remove_operation() {
 		return;
 	}
 	int last_row_before_remove=operations_proxymodel->rowCount()-1;
+
+//   NEED TO WRITE SOME FUNCTION TO UPDATE FILLED_CELLS...
 
 	QModelIndex correspond_index=operations_proxymodel->mapToSource(op_index);
 	ptr_operationsModel->removeRow(correspond_index.row());

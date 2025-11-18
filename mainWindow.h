@@ -19,6 +19,7 @@
 #include <QMessageBox>
 #include <QDebug>
 #include <QSizePolicy>
+#include <QDateTime>
 
 #include "db.h"
 #include "itemDialog.h"
@@ -47,9 +48,14 @@ private:
 //--------------------------middle part: List of items
 	QSqlTableModel *itemsModel;
 	QTableView *itemsView;
+	QSortFilterProxyModel *items_proxymodel; //----experimental
+	QLabel *items_filter_label;
+	QLineEdit *items_filter_lineedit;
+	QHBoxLayout *items_filter_layout;
 	QHeaderView *itemsView_header;
 	QWidget *itemsModelView_widget;
-	QHBoxLayout *itemsModelView_widget_mainLayout;
+	QVBoxLayout *itemsModelView_widget_mainLayout;
+	QHBoxLayout *items_layout;
 	QVBoxLayout *itemsModelView_widget_buttonsLayout;
 	QPushButton *itemsModelView_widget_addItemPB;
 	QPushButton *itemsModelView_widget_editItemPB;
@@ -110,6 +116,7 @@ private slots:
 	void slot_editItemByDoubleClick(QModelIndex);
 	void slot_itemDialog_copy();
 	void slot_itemsModelView_remove();
+	void slot_set_items_filter(); //----experimental
 //--------------------------slots for income
 	void slot_incomeDialog_add();
 	void slot_incomeDialog_edit();

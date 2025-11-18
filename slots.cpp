@@ -5,7 +5,9 @@
 void MainWindow::slot_updateModels() {
   itemsModel->select();
   incomeModel->select();
+  outcomeModel->select();
 	operationsModel->select();
+	balanceModel->select();
 }
 
 //=================================ITEMS PART START=========================================
@@ -87,7 +89,9 @@ void MainWindow::slot_itemsModelView_remove() {
 	itemsView->setCurrentIndex(newindex);
 }
 
-//=================================ITEMS PART END=========================================
+void MainWindow::slot_set_items_filter() { //----experimental
+	items_proxymodel->setFilterWildcard(items_filter_lineedit->text());
+}
 
 //=================================INCOMES PART START=========================================
 
@@ -219,8 +223,6 @@ void MainWindow::slot_incomeModelView_cancel_remove() {
 	incomeView->setCurrentIndex(index);
 }
 
-//=================================INCOMES PART END=========================================
-
 //=================================OUTCOMES PART START=========================================
 
 void MainWindow::slot_outcomeDialog_add() {
@@ -250,6 +252,8 @@ void MainWindow::slot_editOutcomeByDoubleClick(QModelIndex index) {
     QMessageBox::information(nullptr,"Warning message","Please, select an outcome before editing!");
 		return;
 	}
+	if(slot_insert_update()==-1)
+		return;
   OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,operationsModel,balanceModel,index.row());
   obj_outcomeDialog->setWindowTitle("Editing an outcome");
   obj_outcomeDialog->exec();
@@ -265,6 +269,8 @@ void MainWindow::slot_outcomeDialog_edit() {
     QMessageBox::information(nullptr,"Warning message","Please, select an outcome before editing!");
 		return;
 	}
+	if(slot_insert_update()==-1)
+		return;
   OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,operationsModel,balanceModel,index.row());
   obj_outcomeDialog->setWindowTitle("Editing an outcome");
   obj_outcomeDialog->exec();
@@ -352,17 +358,7 @@ void MainWindow::slot_outcomeModelView_cancel_remove() {
 	outcomeView->setCurrentIndex(index);
 }
 
-//=================================OUTCOMES PART END=========================================
-
-
-
-
 //=================================BALANCE PART START=========================================
-
-//-------need to write function, that tells us not to remove income, since we have an outcome with that cell and item.!!!!!!!!
-//
-//
-//
 
 void MainWindow::slot_generate() {
 	if(slot_insert_update()==-1)
@@ -385,10 +381,10 @@ int MainWindow::slot_insert_update() {
 	int status_column=operationsModel->fieldIndex("status");
 //   filled_cells columns
 	int balance_cell_id_column=balanceModel->fieldIndex("cell_id");
+//------------------------------------------------------------------------------------
 	for(int row=0;row!=operationsModel->rowCount();++row) {
 		if(operationsModel->index(row,status_column).data().toString()=="REMOVED")
 			continue;
-//------------------------------------------------------------------------------------
 		QString check_str=QString("select * from filled_cells where cell like '%1' and item like '%2'")
 		  .arg(operationsModel->index(row,cell_column).data().toString())
 			.arg(operationsModel->index(row,item_column).data().toString());
@@ -413,19 +409,20 @@ int MainWindow::slot_insert_update() {
 			}
 			continue;
 		} 
-//---result set is empty, so we have nothing in that cell, lets ADD an income.
-		if(operationsModel->index(row,operation_type_column).data().toString()=="income operation") {
-			query.prepare("insert into filled_cells(cell,item,quantity) values(:c,:i,:q)");
-			query.bindValue(":c",operationsModel->index(row,cell_column).data().toString());
-			query.bindValue(":i",operationsModel->index(row,item_column).data().toString());
+//---result set is empty, so we have nothing in that cell, lets ADD an income or minus outcome.
+		query.prepare("insert into filled_cells(cell,item,quantity) values(:c,:i,:q)");
+		query.bindValue(":c",operationsModel->index(row,cell_column).data().toString());
+		query.bindValue(":i",operationsModel->index(row,item_column).data().toString());
+		if(operationsModel->index(row,operation_type_column).data().toString()=="income operation")
 			query.bindValue(":q",operationsModel->index(row,quantity_column).data().toInt());
-			if(!query.exec()) {
-				qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': inserting record in not empty set in 'filled_cells'.";
-				return -1;
-			}
+		else
+			query.bindValue(":q",-operationsModel->index(row,quantity_column).data().toInt());
+		if(!query.exec()) {
+			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': inserting record in not empty set in 'filled_cells'.";
+			return -1;
 		}
-//------------------------------------------------------------------------------------
 	}
+//------------------------------------------------------------------------------------
 	balanceModel->select();
 	return 0;
 }
@@ -443,7 +440,7 @@ void MainWindow::slot_write_balance_into_file() {
 	int item_width_pixels=balanceView->columnWidth(balanceModel->fieldIndex("item"));
 	if(!char_width)
 		return;
-	int item_width=item_width_pixels/char_width;
+	int item_width=item_width_pixels/char_width+2;
 	int cell_width=balanceView->columnWidth(balanceModel->fieldIndex("cell"))/char_width;
 //   now we can have '+------------+' line
 	int total_row_width=cell_width+item_width+QUANTITY_MAX_LENGTH+LINES_OFSET;
@@ -460,6 +457,9 @@ void MainWindow::slot_write_balance_into_file() {
 	}
 	QTextStream file_stream(&file);
 //   at this point lets define logic of writing information into file
+	QDateTime cur_date_time=QDateTime::currentDateTime();
+	QString cur_date_time_formated=cur_date_time.toString("dd.MM.yyyy, hh:mm:ss");
+	file_stream<<"| "<<cur_date_time_formated <<" |"<<Qt::endl; 
 	file_stream<< lines <<Qt::endl;
 	for(int row=0;row!=balanceModel->rowCount();++row) {
 //---------------------------------------------------------------------------------------------------------------------------------------

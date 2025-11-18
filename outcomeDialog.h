@@ -85,7 +85,8 @@ private:
 	void func_addOutcome();
 	void func_editOutcome(int);
   int func_check_correctness(const QSortFilterProxyModel*,int*);
-	int func__insert_update();
+	int func_insert_update();
+	int func_revert_insert_update();
 signals:
   void signal_ready();
 private slots:
