@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QSqlTableModel>
+#include <QSortFilterProxyModel>
 #include <QTableView>
 #include <QDataWidgetMapper>
 #include <QMessageBox>
@@ -19,11 +20,14 @@
 class ItemDialog : public QDialog {
   Q_OBJECT
 public:
-  explicit ItemDialog(QSqlTableModel *model, QTableView *view,int row=-1,bool copy=false,QWidget *parent=0);
+  explicit ItemDialog(QSqlTableModel *model,QTableView *view,QSortFilterProxyModel *proxy,
+		int row=-1,bool copy=false,QWidget *parent=0);
 private:
   QSqlTableModel *ptr_itemsModel;
   QTableView *ptr_itemsView;
+  QSortFilterProxyModel *ptr_proxymodel;
   QDataWidgetMapper *mapper;
+	bool row_added=false;
   
   QVBoxLayout *mainLayout;
   QHBoxLayout *buttonsLayout;

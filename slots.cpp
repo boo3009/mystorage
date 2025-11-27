@@ -1,4 +1,3 @@
-#include <iostream>
 #include "mainWindow.h"
 
 
@@ -13,16 +12,21 @@ void MainWindow::slot_updateModels() {
 //=================================ITEMS PART START=========================================
 
 void MainWindow::slot_itemDialog_add() {
+/*   get current index of row if one is selected. get row count before adding an item   */
   QModelIndex index=itemsView->currentIndex();
 	int before=itemsModel->rowCount();
-	ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView);
+
+/*   create dialog and execute it   */
+	ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel);
+  obj_itemDialog->setWindowTitle("Adding an item");
   obj_itemDialog->exec();
-  int after=itemsModel->rowCount();
-	if(after!=before) {
-  	QModelIndex i=itemsModel->index(itemsModel->rowCount()-1,0); //get added item's qmodelindex
-		itemsView->setCurrentIndex(i); //select added row (after adding)
-	} else
-			itemsView->setCurrentIndex(index);
+
+/*   check if row added, then select it if so. Otherwise select the old one   */
+	if(itemsModel->rowCount()>before)
+		index=items_proxymodel->index(items_proxymodel->rowCount()-1,1);
+	itemsView->setCurrentIndex(index);
+
+/*   connect signal and delete dialog from heap, also set pointer to it as nullptr   */
 	connect(obj_itemDialog,&ItemDialog::signal_ready,this,&MainWindow::slot_updateModels);
 	delete obj_itemDialog;
 	obj_itemDialog=nullptr;
@@ -33,10 +37,11 @@ void MainWindow::slot_editItemByDoubleClick(QModelIndex index) {
     QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
 		return;
 	}
-  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,index.row());
+  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,index.row());
   obj_itemDialog->setWindowTitle("Editing an item");
   obj_itemDialog->exec();
-  itemsView->setCurrentIndex(index); //select edited row (after editing)
+  itemsView->setCurrentIndex(items_proxymodel->index(index.row(),1)); //select edited row (after editing)
+
 	connect(obj_itemDialog,&ItemDialog::signal_ready,this,&MainWindow::slot_updateModels);
 	delete obj_itemDialog;
 	obj_itemDialog=nullptr;
@@ -48,10 +53,11 @@ void MainWindow::slot_itemDialog_edit() {
     QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
 		return;
 	}
-  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,index.row());
+  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,index.row());
   obj_itemDialog->setWindowTitle("Editing an item");
   obj_itemDialog->exec();
-  itemsView->setCurrentIndex(index); //select edited row (after editing)
+  itemsView->setCurrentIndex(items_proxymodel->index(index.row(),1)); //select edited row (after editing)
+
 	connect(obj_itemDialog,&ItemDialog::signal_ready,this,&MainWindow::slot_updateModels);
 	delete obj_itemDialog;
 	obj_itemDialog=nullptr;
@@ -63,7 +69,7 @@ void MainWindow::slot_itemDialog_copy() {
     QMessageBox::information(nullptr,"Warning message","Please, select an item before copying!");
 		return;
 	}
-  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,index.row(),true);
+  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,index.row(),true);
   obj_itemDialog->setWindowTitle("Copying an item");
   obj_itemDialog->exec();
   itemsView->setCurrentIndex(index); //select the same row, dont change the focus

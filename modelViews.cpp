@@ -25,6 +25,8 @@ void MainWindow::setup_itemsModelView() {
 	items_proxymodel=new QSortFilterProxyModel(this); //----experimental
 	items_proxymodel->setSourceModel(itemsModel); //----experimental
 	items_proxymodel->setFilterKeyColumn(itemsModel->fieldIndex("item_name")); //----experimental
+	items_proxymodel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+	items_proxymodel->setDynamicSortFilter(true); //----experimental
 	itemsView->setModel(items_proxymodel); //----experimental
 
 	items_filter_label=new QLabel("Search item");

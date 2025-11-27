@@ -426,6 +426,7 @@ moc_mainWindow.cpp: mainWindow.h \
 		itemDialog.h \
 		incomeDialog.h \
 		proxy_models.h \
+		outcomeDialog.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include mainWindow.h -o moc_mainWindow.cpp
@@ -467,14 +468,16 @@ modelViews.o: modelViews.cpp mainWindow.h \
 		db.h \
 		itemDialog.h \
 		incomeDialog.h \
-		proxy_models.h
+		proxy_models.h \
+		outcomeDialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o modelViews.o modelViews.cpp
 
 slots.o: slots.cpp mainWindow.h \
 		db.h \
 		itemDialog.h \
 		incomeDialog.h \
-		proxy_models.h
+		proxy_models.h \
+		outcomeDialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o slots.o slots.cpp
 
 proxy_models.o: proxy_models.cpp proxy_models.h
@@ -484,14 +487,16 @@ mainWindow.o: mainWindow.cpp mainWindow.h \
 		db.h \
 		itemDialog.h \
 		incomeDialog.h \
-		proxy_models.h
+		proxy_models.h \
+		outcomeDialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainWindow.o mainWindow.cpp
 
 main.o: main.cpp mainWindow.h \
 		db.h \
 		itemDialog.h \
 		incomeDialog.h \
-		proxy_models.h
+		proxy_models.h \
+		outcomeDialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
 
 moc_db.o: moc_db.cpp 

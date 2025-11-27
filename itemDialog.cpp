@@ -1,7 +1,9 @@
 #include "itemDialog.h"
 
-ItemDialog::ItemDialog(QSqlTableModel *model, QTableView *view,int row,bool copy,QWidget *parent) : 
-/*-------------------*/QDialog(parent), ptr_itemsModel(model), ptr_itemsView(view)  {
+ItemDialog::ItemDialog(QSqlTableModel *model, QTableView *view,QSortFilterProxyModel *proxy,
+	int row,bool copy,QWidget *parent) : QDialog(parent), ptr_itemsModel(model), 
+	ptr_itemsView(view), ptr_proxymodel(proxy)
+{
   setup_Widget();
   setup_ModelandMapper();
   if(row==-1)
@@ -13,7 +15,6 @@ ItemDialog::ItemDialog(QSqlTableModel *model, QTableView *view,int row,bool copy
 }
 
 void ItemDialog::setup_Widget() {
-  setWindowTitle("Creating new item");
   setFixedSize(500,100);
 
   mainLayout=new QVBoxLayout(this);
@@ -36,22 +37,27 @@ void ItemDialog::setup_Widget() {
 
 void ItemDialog::setup_ModelandMapper() {
   mapper=new QDataWidgetMapper();
-  mapper->setModel(ptr_itemsModel);
+  mapper->setModel(ptr_proxymodel);
   mapper->addMapping(lineEdit,ptr_itemsModel->fieldIndex("item_name"));
   mapper->setSubmitPolicy(QDataWidgetMapper::ManualSubmit);
 }
 
 void ItemDialog::func_addItem() {
-	ptr_itemsModel->insertRow(ptr_itemsModel->rowCount(QModelIndex()));
-	ptr_itemsView->setRowHidden(ptr_itemsModel->rowCount()-1,true);
-	mapper->toLast();
+	row_added=true;
+	ptr_proxymodel->setFilterRegularExpression("");
+	ptr_itemsModel->insertRow(ptr_itemsModel->rowCount());
+	QModelIndex index=ptr_proxymodel->index(ptr_proxymodel->rowCount()-1,1);
+	ptr_itemsView->setRowHidden(index.row(),true);
+	mapper->setCurrentModelIndex(index);
 }
 
 void ItemDialog::func_editItem(int row) {
-	mapper->setCurrentModelIndex(ptr_itemsModel->index(row,1));
+	row_added=false;
+	mapper->setCurrentModelIndex(ptr_proxymodel->index(row,1));
 }
 
 void ItemDialog::func_copyItem(int row) {
+	row_added=true;
 	ptr_itemsModel->insertRow(ptr_itemsModel->rowCount(QModelIndex()));
 	QString str=ptr_itemsModel->data(ptr_itemsModel->index(row,1),Qt::EditRole).toString();
 	QModelIndex index=ptr_itemsModel->index(ptr_itemsModel->rowCount()-1,1);
@@ -65,11 +71,15 @@ void ItemDialog::slot_saveItem() {
     QMessageBox::information(nullptr,"Warning message","Empty line, fill it out please!");
   	return;
 	}
-	if(func_isItemRepeated(lineEdit->text())) {
+	if(func_isItemRepeated(lineEdit->text()) && row_added) {
     QMessageBox::information(nullptr,"Warning message","Item with that name already exists,insert the new one!");
 		return;
 	}
-  ptr_itemsView->setRowHidden(ptr_itemsModel->rowCount()-1,false);
+	if(row_added) {
+		QModelIndex proxy_index=
+			ptr_proxymodel->mapFromSource(ptr_itemsModel->index(ptr_itemsModel->rowCount()-1,1));
+		ptr_itemsView->setRowHidden(proxy_index.row(),false);
+	}
   mapper->submit();      
   ptr_itemsModel->submitAll();
   emit signal_ready();
@@ -91,7 +101,7 @@ bool ItemDialog::func_isItemRepeated(QString name) {
 }
 
 void ItemDialog::slot_cancelItem() {
-  if(lineEdit->text().isEmpty())
+  if(row_added)
     ptr_itemsModel->removeRow(ptr_itemsModel->rowCount()-1);
   emit signal_ready();
   this->close();
