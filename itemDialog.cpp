@@ -57,13 +57,25 @@ void ItemDialog::func_editItem(int row) {
 }
 
 void ItemDialog::func_copyItem(int row) {
+//   add row
 	row_added=true;
-	ptr_itemsModel->insertRow(ptr_itemsModel->rowCount(QModelIndex()));
-	QString str=ptr_itemsModel->data(ptr_itemsModel->index(row,1),Qt::EditRole).toString();
+	ptr_itemsModel->insertRow(ptr_itemsModel->rowCount());
+
+//   convert index of the item that we want to copy from proxy space to source space. 
+//   then get string by that index
+	QModelIndex source_index=
+		ptr_proxymodel->mapToSource(ptr_proxymodel->index(row,1));
+	qDebug()<<"source index: "<<source_index;
+	QString str=ptr_itemsModel->data(source_index,Qt::EditRole).toString();
+
+//   get added rows index in source space and write string into
 	QModelIndex index=ptr_itemsModel->index(ptr_itemsModel->rowCount()-1,1);
 	ptr_itemsModel->setData(index,str,Qt::EditRole);
-	ptr_itemsView->setRowHidden(ptr_itemsModel->rowCount()-1,true);
-	mapper->toLast();
+
+//   convert index from source space to proxy space, unhide corresponding row and set mapper to it
+	QModelIndex proxy_index=ptr_proxymodel->mapFromSource(index);
+	ptr_itemsView->setRowHidden(proxy_index.row(),true);
+	mapper->setCurrentModelIndex(proxy_index);
 }
 
 void ItemDialog::slot_saveItem() {

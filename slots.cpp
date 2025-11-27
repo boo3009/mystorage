@@ -72,7 +72,8 @@ void MainWindow::slot_itemDialog_copy() {
   ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,index.row(),true);
   obj_itemDialog->setWindowTitle("Copying an item");
   obj_itemDialog->exec();
-  itemsView->setCurrentIndex(index); //select the same row, dont change the focus
+  itemsView->setCurrentIndex(items_proxymodel->index(index.row(),1)); //select the same row, dont change the focus
+
 	connect(obj_itemDialog,&ItemDialog::signal_ready,this,&MainWindow::slot_updateModels);
 	delete obj_itemDialog;
 	obj_itemDialog=nullptr;
