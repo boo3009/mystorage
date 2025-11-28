@@ -12,22 +12,21 @@ void MainWindow::setup_itemsModelView() {
   itemsModel->setHeaderData(1, Qt::Horizontal, "List of items");
   itemsModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
 	itemsModel->setSort(0,Qt::AscendingOrder);
-//------------------------------create "View" for items table
-  itemsView=new QTableView();
-//	itemsView->setModel(itemsModel);
-  itemsView->sortByColumn(0,Qt::AscendingOrder); /*finded out that view needed sort too*/
-	itemsView->setSelectionMode(QAbstractItemView::SingleSelection);
-  itemsView->setSelectionBehavior(QAbstractItemView::SelectRows);
-  itemsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
-  itemsView->setColumnHidden(0,true);
-  itemsView->verticalHeader()->setVisible(false);
 //------------------------------create proxy model for "itemsModel"
 	items_proxymodel=new QSortFilterProxyModel(this); //----experimental
 	items_proxymodel->setSourceModel(itemsModel); //----experimental
 	items_proxymodel->setFilterKeyColumn(itemsModel->fieldIndex("item_name")); //----experimental
 	items_proxymodel->setFilterCaseSensitivity(Qt::CaseInsensitive);
 	items_proxymodel->setDynamicSortFilter(true); //----experimental
+//------------------------------create "View" for proxy model
+  itemsView=new QTableView();
 	itemsView->setModel(items_proxymodel); //----experimental
+  itemsView->sortByColumn(0,Qt::AscendingOrder); /*finded out that view needed sort too*/
+	itemsView->setSelectionMode(QAbstractItemView::SingleSelection);
+  itemsView->setSelectionBehavior(QAbstractItemView::SelectRows);
+  itemsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
+  itemsView->setColumnHidden(0,true);
+  itemsView->verticalHeader()->setVisible(false);
 
 	items_filter_label=new QLabel("Search item");
 	items_filter_lineedit=new QLineEdit();

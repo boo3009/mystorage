@@ -45,14 +45,14 @@ void OutcomeDialog::setup_Widget() {
   operationsView->sortByColumn(0,Qt::AscendingOrder);
 	operationsView->setSelectionMode(QAbstractItemView::SingleSelection);
   operationsView->setColumnHidden(0,true);
-//  operationsView->setColumnHidden(1,true);
-//  operationsView->setColumnHidden(2,true);
-//  operationsView->setColumnHidden(3,true);
-//  operationsView->setColumnHidden(4,true);
+  operationsView->setColumnHidden(1,true);
+  operationsView->setColumnHidden(2,true);
+  operationsView->setColumnHidden(3,true);
+  operationsView->setColumnHidden(4,true);
   operationsView->verticalHeader()->setVisible(false);
 	operationsView_header=operationsView->horizontalHeader();
 	operationsView_header->setStretchLastSection(true);
-	operationsView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
+//	operationsView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
 
 	operations_proxymodel=new Proxy_op_number(this);
 	operations_proxymodel->setSourceModel(ptr_operationsModel);
