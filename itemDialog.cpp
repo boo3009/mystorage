@@ -44,7 +44,6 @@ void ItemDialog::setup_ModelandMapper() {
 
 void ItemDialog::func_addItem() {
 	row_added=true;
-	ptr_proxymodel->setFilterRegularExpression("");
 	ptr_itemsModel->insertRow(ptr_itemsModel->rowCount());
 	QModelIndex index=ptr_proxymodel->index(ptr_proxymodel->rowCount()-1,1);
 	ptr_itemsView->setRowHidden(index.row(),true);

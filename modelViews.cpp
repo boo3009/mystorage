@@ -31,9 +31,11 @@ void MainWindow::setup_itemsModelView() {
 
 	items_filter_label=new QLabel("Search item");
 	items_filter_lineedit=new QLineEdit();
+	clear_filterPB=new QPushButton("Clear filter");
 	items_filter_label->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	items_filter_lineedit->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	connect(items_filter_lineedit,&QLineEdit::textEdited,this,&MainWindow::slot_set_items_filter); //----experimental
+	connect(clear_filterPB,&QPushButton::clicked,this,&MainWindow::slot_clear_items_filter); //----experimental
 //------------------------------some design tweaks for "itemsView" 
   itemsView->setStyleSheet(
     "QTableView {"
@@ -61,6 +63,7 @@ void MainWindow::setup_itemsModelView() {
 	items_filter_layout=new QHBoxLayout();
 	items_filter_layout->addWidget(items_filter_label);
 	items_filter_layout->addWidget(items_filter_lineedit);
+	items_filter_layout->addWidget(clear_filterPB);
 
 	itemsModelView_widget->setFixedSize(900,800);
 	int x=130;

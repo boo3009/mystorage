@@ -16,6 +16,10 @@ void MainWindow::slot_itemDialog_add() {
   QModelIndex index=itemsView->currentIndex();
 	int before=itemsModel->rowCount();
 
+//   clear the filter by passing empty string and clear filter line
+	items_proxymodel->setFilterRegularExpression("");
+	items_filter_lineedit->clear();
+
 /*   create dialog and execute it   */
 	ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel);
   obj_itemDialog->setWindowTitle("Adding an item");
@@ -85,19 +89,31 @@ void MainWindow::slot_itemsModelView_remove() {
     QMessageBox::information(nullptr,"Warning message","Please, select an item before removing!");
 		return;
 	}
-	QModelIndex newindex;
-	if(index.row()==itemsModel->rowCount()-1)
-		newindex=itemsModel->index(index.row()-1,1);
-	else
-		newindex=index;
-	itemsModel->removeRow(index.row());
+
+	bool bottom_row= (index.row()==items_proxymodel->rowCount()-1) ? true : false;
+
+	QModelIndex source_index=items_proxymodel->mapToSource(index);
+	itemsModel->removeRow(source_index.row());
 	itemsModel->submitAll();
 	itemsModel->select();
-	itemsView->setCurrentIndex(newindex);
+
+	if(!items_proxymodel->rowCount()) {
+		items_proxymodel->setFilterRegExp("");	
+		items_filter_lineedit->clear();	
+		return;
+	}
+
+	index=items_proxymodel->index(index.row()-bottom_row,1);
+	itemsView->setCurrentIndex(index);
 }
 
 void MainWindow::slot_set_items_filter() { //----experimental
 	items_proxymodel->setFilterWildcard(items_filter_lineedit->text());
+}
+
+void MainWindow::slot_clear_items_filter() {
+	items_proxymodel->setFilterRegExp("");
+	items_filter_lineedit->clear();	
 }
 
 //=================================INCOMES PART START=========================================

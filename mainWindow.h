@@ -51,6 +51,7 @@ private:
 	QSortFilterProxyModel *items_proxymodel; //----experimental
 	QLabel *items_filter_label;
 	QLineEdit *items_filter_lineedit;
+	QPushButton *clear_filterPB;
 	QHBoxLayout *items_filter_layout;
 	QHeaderView *itemsView_header;
 	QWidget *itemsModelView_widget;
@@ -117,6 +118,7 @@ private slots:
 	void slot_itemDialog_copy();
 	void slot_itemsModelView_remove();
 	void slot_set_items_filter(); //----experimental
+	void slot_clear_items_filter(); //----experimental
 //--------------------------slots for income
 	void slot_incomeDialog_add();
 	void slot_incomeDialog_edit();
