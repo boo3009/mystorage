@@ -53,6 +53,8 @@ void IncomeDialog::setup_Widget() {
 	operationsView_header=operationsView->horizontalHeader();
 	operationsView_header->setStretchLastSection(true);
 //	operationsView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
+	operationsView->setColumnWidth(5,80);
+	operationsView->setColumnWidth(6,400);
 
 	operations_proxymodel=new Proxy_op_number(this);
 	operations_proxymodel->setSourceModel(ptr_operationsModel);
@@ -162,7 +164,7 @@ int IncomeDialog::func_check_correctness(const QSortFilterProxyModel *proxy,int 
 				return -1;
 			}
 //------------------------------------------------------------------------------------
-			if(column==ptr_operationsModel->fieldIndex("quantity")) {
+			if(column==ptr_operationsModel->fieldIndex("quantity") && !operationsView->isRowHidden(row)) {
 				int local_quantity=proxy->index(row,column).data().toInt();
 				if(local_quantity<=0) {
 					QMessageBox::information(nullptr,"Warning message",QString("%1 %2").arg("Quantity is less or equal '0': ").arg(local_quantity));
@@ -262,8 +264,19 @@ void IncomeDialog::slot_open_itemsList(QModelIndex index) {
     "QHeaderView::section { background-color: #f95959;}");
   QFont items_view_headerFont("Colibri",10,QFont::Bold);
   items_view_header->setFont(items_view_headerFont);
-
+//-----------------------------------------------------------------
 	items_widget_layout=new QVBoxLayout(items_widget);
+
+	items_filter_layout=new QHBoxLayout();
+	items_filter_label=new QLabel("Search item");
+	items_filter_lineedit=new QLineEdit();
+	items_filter_clearPB=new QPushButton("Clear filter");
+	items_filter_label->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	items_filter_lineedit->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	items_filter_clearPB->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	items_filter_layout->addWidget(items_filter_label);
+	items_filter_layout->addWidget(items_filter_lineedit);
+	items_filter_layout->addWidget(items_filter_clearPB);
 
 	items_buttons_layout=new QHBoxLayout();
 	select_itemPB=new QPushButton("Select");
@@ -271,13 +284,20 @@ void IncomeDialog::slot_open_itemsList(QModelIndex index) {
 	items_buttons_layout->addWidget(select_itemPB);
 	items_buttons_layout->addWidget(cancel_itemPB);
 	
+	items_widget_layout->addLayout(items_filter_layout);
+	items_filter_layout->addStretch();
 	items_widget_layout->addWidget(items_view);
 	items_widget_layout->addLayout(items_buttons_layout);
 	items_widget->show();
 
+	connect(items_filter_clearPB,&QPushButton::clicked,this,&IncomeDialog::slot_clear_items_filter);
 	connect(items_view,&QTableView::doubleClicked,this,&IncomeDialog::slot_passSelectedItem);
 	connect(select_itemPB,&QPushButton::clicked,this,&IncomeDialog::slot_passSelectedItem);
 	connect(cancel_itemPB,&QPushButton::clicked,[=]() { items_widget->close(); });
+}
+
+void IncomeDialog::slot_clear_items_filter() {
+	
 }
 
 void IncomeDialog::slot_passSelectedItem() {
@@ -350,22 +370,23 @@ void IncomeDialog::slot_copy_operation() {
 }
 
 void IncomeDialog::slot_remove_operation() {
+//   get the index of removing row. check validness
 	QModelIndex op_index=operations_proxymodel->index(operationsView->currentIndex().row(),operationsView->currentIndex().column());
 	if(!op_index.isValid()) {
     QMessageBox::information(nullptr,"Warning message","Select row before deletion!");
 		return;
 	}
-	int last_row_before_remove=operations_proxymodel->rowCount()-1;
+//   set that row hidden 
+	operationsView->setRowHidden(op_index.row(),true); //   experimental
+//   get the index of row that will be selected after deletion. if row is the last select previous, otherwise next
+	QModelIndex new_index=operations_proxymodel->index(op_index.row()+1,op_index.column());
+	if(op_index.row()==operations_proxymodel->rowCount()-1) //   experimental 
+		new_index=operations_proxymodel->index(op_index.row()-1,op_index.column());
+	operationsView->setCurrentIndex(new_index);
 
+//   convert proxy index of removing row to source and remove row by that index
 	QModelIndex correspond_index=operations_proxymodel->mapToSource(op_index);
 	ptr_operationsModel->removeRow(correspond_index.row());
-	ptr_operationsModel->submitAll();
-	ptr_operationsModel->select();
-
-	if(op_index.row()<last_row_before_remove)
-		operationsView->setCurrentIndex(operations_proxymodel->index(op_index.row(),op_index.column()));
-	else
-		operationsView->setCurrentIndex(operations_proxymodel->index(operations_proxymodel->rowCount()-1,op_index.column()));
 
 	emit signal_ready();
 }

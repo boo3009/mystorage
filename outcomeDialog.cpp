@@ -53,6 +53,8 @@ void OutcomeDialog::setup_Widget() {
 	operationsView_header=operationsView->horizontalHeader();
 	operationsView_header->setStretchLastSection(true);
 //	operationsView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
+	operationsView->setColumnWidth(5,80);
+	operationsView->setColumnWidth(6,400);
 
 	operations_proxymodel=new Proxy_op_number(this);
 	operations_proxymodel->setSourceModel(ptr_operationsModel);

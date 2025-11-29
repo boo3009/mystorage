@@ -42,6 +42,10 @@ private:
   QTableView *items_view;
 	QHeaderView *items_view_header;
 	QVBoxLayout *items_widget_layout;
+	QHBoxLayout *items_filter_layout;
+	QLabel *items_filter_label;
+	QLineEdit *items_filter_lineedit;
+	QPushButton *items_filter_clearPB;
 	QHBoxLayout *items_buttons_layout;
 	QPushButton *select_itemPB;
 	QPushButton *cancel_itemPB;
@@ -92,6 +96,7 @@ private slots:
   void slot_saveIncome();
   void slot_cancelIncome();
   void slot_open_itemsList(QModelIndex);
+ 	void slot_clear_items_filter();
   void slot_passSelectedItem();
 	void slot_add_operation();
 	void slot_copy_operation();

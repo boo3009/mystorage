@@ -33,6 +33,7 @@ void MainWindow::setup_itemsModelView() {
 	clear_filterPB=new QPushButton("Clear filter");
 	items_filter_label->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	items_filter_lineedit->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	clear_filterPB->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	connect(items_filter_lineedit,&QLineEdit::textEdited,this,&MainWindow::slot_set_items_filter); //----experimental
 	connect(clear_filterPB,&QPushButton::clicked,this,&MainWindow::slot_clear_items_filter); //----experimental
 //------------------------------some design tweaks for "itemsView" 
