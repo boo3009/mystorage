@@ -1,6 +1,6 @@
 #include "itemDialog.h"
 
-ItemDialog::ItemDialog(QSqlTableModel *model, QTableView *view,QSortFilterProxyModel *proxy,
+ItemDialog::ItemDialog(QSqlTableModel *model,QTableView *view,QSortFilterProxyModel *proxy,
 	int row,bool copy,QWidget *parent) : QDialog(parent), ptr_itemsModel(model), 
 	ptr_itemsView(view), ptr_proxymodel(proxy)
 {
@@ -45,7 +45,8 @@ void ItemDialog::setup_ModelandMapper() {
 void ItemDialog::func_addItem() {
 	row_added=true;
 	ptr_itemsModel->insertRow(ptr_itemsModel->rowCount());
-	QModelIndex index=ptr_proxymodel->index(ptr_proxymodel->rowCount()-1,1);
+	QModelIndex index=
+		ptr_proxymodel->mapFromSource(ptr_itemsModel->index(ptr_itemsModel->rowCount()-1,1));
 	ptr_itemsView->setRowHidden(index.row(),true);
 	mapper->setCurrentModelIndex(index);
 }
@@ -64,10 +65,9 @@ void ItemDialog::func_copyItem(int row) {
 //   then get string by that index
 	QModelIndex source_index=
 		ptr_proxymodel->mapToSource(ptr_proxymodel->index(row,1));
-	qDebug()<<"source index: "<<source_index;
 	QString str=ptr_itemsModel->data(source_index,Qt::EditRole).toString();
 
-//   get added rows index in source space and write string into
+//   get added rows index in source space and write string into it
 	QModelIndex index=ptr_itemsModel->index(ptr_itemsModel->rowCount()-1,1);
 	ptr_itemsModel->setData(index,str,Qt::EditRole);
 

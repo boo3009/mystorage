@@ -39,6 +39,7 @@ private:
   QDataWidgetMapper *mapper;
 //-------selecting items part-----------		
 	QWidget *items_widget;
+	QSortFilterProxyModel *items_proxymodel;
   QTableView *items_view;
 	QHeaderView *items_view_header;
 	QVBoxLayout *items_widget_layout;
@@ -96,11 +97,12 @@ private slots:
   void slot_saveIncome();
   void slot_cancelIncome();
   void slot_open_itemsList(QModelIndex);
- 	void slot_clear_items_filter();
   void slot_passSelectedItem();
 	void slot_add_operation();
 	void slot_copy_operation();
 	void slot_remove_operation();
+	void slot_clear_items_filter();
+	void slot_set_items_filter();
 };
 
 #endif

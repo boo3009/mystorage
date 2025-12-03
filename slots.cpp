@@ -12,13 +12,13 @@ void MainWindow::slot_updateModels() {
 //=================================ITEMS PART START=========================================
 
 void MainWindow::slot_itemDialog_add() {
-/*   get current index of row if one is selected. get row count before adding an item   */
+//   get current index of row if one is selected.
   QModelIndex index=itemsView->currentIndex();
-	int before=itemsModel->rowCount();
 
 //   clear the filter by passing empty string and clear filter line
 	items_proxymodel->setFilterRegularExpression("");
 	items_filter_lineedit->clear();
+	int before=itemsModel->rowCount();
 
 /*   create dialog and execute it   */
 	ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel);
@@ -112,7 +112,7 @@ void MainWindow::slot_set_items_filter() { //----experimental
 }
 
 void MainWindow::slot_clear_items_filter() {
-	items_proxymodel->setFilterRegExp("");
+	items_proxymodel->setFilterRegularExpression("");
 	items_filter_lineedit->clear();	
 }
 

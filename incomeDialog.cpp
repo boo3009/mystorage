@@ -2,7 +2,8 @@
 
 IncomeDialog::IncomeDialog(QSqlTableModel *model,QTableView *view,QSqlTableModel *itemsModel,
   QSqlTableModel *opModel,QSqlTableModel *bal_model,int row,QWidget *parent) : QDialog(parent), ptr_incomesModel(model),
-	ptr_incomesView(view), ptr_itemsModel(itemsModel), ptr_operationsModel(opModel), ptr_balanceModel(bal_model) {
+	ptr_incomesView(view), ptr_itemsModel(itemsModel), ptr_operationsModel(opModel), ptr_balanceModel(bal_model) 
+{
 //----------------------------------------------------------------------------------------
   setup_Widget();
   setup_ModelandMapper();
@@ -235,7 +236,7 @@ void IncomeDialog::slot_open_itemsList(QModelIndex index) {
 	if(!index.isValid() || index.column()!=ptr_operationsModel->fieldIndex("item"))
 		return;
 	items_widget=new QWidget(this,Qt::Window);
-	items_widget->setFixedSize(500,300);
+	items_widget->setFixedSize(500,400);
 //	items_widget->setWindowFlags(Qt::FramelessWindowHint);
 	
 	items_widget->setObjectName("borders_for_items_income");
@@ -243,9 +244,15 @@ void IncomeDialog::slot_open_itemsList(QModelIndex index) {
 												"background-color: #ABE7B2; color: black;"
 												"border: 1px solid #427A76; }");
 
+	items_proxymodel=new QSortFilterProxyModel(this); //----experimental
+	items_proxymodel->setSourceModel(ptr_itemsModel); //----experimental
+	items_proxymodel->setFilterKeyColumn(ptr_itemsModel->fieldIndex("item_name")); //----experimental
+	items_proxymodel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+	items_proxymodel->setDynamicSortFilter(true); //----experimental
+
 	items_view=new QTableView();
-	items_view->setModel(ptr_itemsModel);
-  items_view->sortByColumn(0,Qt::AscendingOrder); /*finded out that view needed sort too*/
+	items_view->setModel(items_proxymodel);
+//  items_view->sortByColumn(0,Qt::AscendingOrder); /*finded out that view needed sort too*/
 	items_view->setSelectionMode(QAbstractItemView::SingleSelection);
   items_view->setSelectionBehavior(QAbstractItemView::SelectRows);
   items_view->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -291,24 +298,32 @@ void IncomeDialog::slot_open_itemsList(QModelIndex index) {
 	items_widget->show();
 
 	connect(items_filter_clearPB,&QPushButton::clicked,this,&IncomeDialog::slot_clear_items_filter);
+	connect(items_filter_lineedit,&QLineEdit::textChanged,this,&IncomeDialog::slot_set_items_filter);
 	connect(items_view,&QTableView::doubleClicked,this,&IncomeDialog::slot_passSelectedItem);
 	connect(select_itemPB,&QPushButton::clicked,this,&IncomeDialog::slot_passSelectedItem);
 	connect(cancel_itemPB,&QPushButton::clicked,[=]() { items_widget->close(); });
 }
 
 void IncomeDialog::slot_clear_items_filter() {
-	
+	items_proxymodel->setFilterRegularExpression("");
+	items_filter_lineedit->clear();	
+}
+
+void IncomeDialog::slot_set_items_filter() {
+	items_proxymodel->setFilterWildcard(items_filter_lineedit->text());
 }
 
 void IncomeDialog::slot_passSelectedItem() {
 //---Get the index of selected item from items_view
-	QModelIndex item_index=ptr_itemsModel->index(items_view->currentIndex().row(),ptr_itemsModel->fieldIndex("item_name"));
-	if(!item_index.isValid()) {
+//	QModelIndex item_index=ptr_itemsModel->index(items_view->currentIndex().row(),ptr_itemsModel->fieldIndex("item_name"));
+	QModelIndex proxy_index=items_proxymodel->index(items_view->currentIndex().row(),ptr_itemsModel->fieldIndex("item_name"));
+	if(!proxy_index.isValid()) {
     QMessageBox::information(nullptr,"Warning message","Nothing selected, pick an item please!");
   	return;
 	}
 //---Get the text from selected item
-	QVariant data=ptr_itemsModel->data(item_index,Qt::DisplayRole);
+	QModelIndex source_index=items_proxymode->mapToSource(proxy_index);
+	QVariant data=ptr_itemsModel->data(source_index,Qt::DisplayRole);
 	QString str=data.toString();
 //---Get the index of row in operations view of our widget
 	QModelIndex op_index=operations_proxymodel->index(operationsView->currentIndex().row(),ptr_operationsModel->fieldIndex("item"));

@@ -20,6 +20,7 @@
 #include <QDebug>
 #include <QSizePolicy>
 #include <QDateTime>
+#include <QRegExp>
 
 #include "db.h"
 #include "itemDialog.h"

@@ -21,7 +21,6 @@ void MainWindow::setup_itemsModelView() {
 //------------------------------create "View" for proxy model
   itemsView=new QTableView();
 	itemsView->setModel(items_proxymodel); //----experimental
-  itemsView->sortByColumn(0,Qt::AscendingOrder); /*finded out that view needed sort too*/
 	itemsView->setSelectionMode(QAbstractItemView::SingleSelection);
   itemsView->setSelectionBehavior(QAbstractItemView::SelectRows);
   itemsView->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -34,7 +33,7 @@ void MainWindow::setup_itemsModelView() {
 	items_filter_label->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	items_filter_lineedit->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	clear_filterPB->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-	connect(items_filter_lineedit,&QLineEdit::textEdited,this,&MainWindow::slot_set_items_filter); //----experimental
+	connect(items_filter_lineedit,&QLineEdit::textChanged,this,&MainWindow::slot_set_items_filter); //----experimental
 	connect(clear_filterPB,&QPushButton::clicked,this,&MainWindow::slot_clear_items_filter); //----experimental
 //------------------------------some design tweaks for "itemsView" 
   itemsView->setStyleSheet(
