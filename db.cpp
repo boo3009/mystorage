@@ -49,6 +49,34 @@ void Database::closeDatabase() {
 bool Database::createTables() {
   QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
   QSqlQuery query(retrieveDB);
+//---Create table income
+	QString income_str={"create table if not exists income(\
+											   id int primary key autoincrement,\
+												 operation_number varchar(7) not null,\
+												 date date not null,\
+												 operation_type char(16) default 'income operation',\
+												 status varchar(7) default 'SAVED',\
+												 sum int not null,\
+	 										   note varchar(100))"};
+	if(!query.exec(income_str)) {
+		qDebug()<<"Error when creating table: income";
+		qDebug()<<query.lastError().text();
+		return false;
+	}
+//---Create table outcome
+	QString outcome_str={"create table if not exists outcome(\
+											   id int primary key autoincrement,\
+												 operation_number varchar(7) not null,\
+												 date date not null,\
+												 operation_type char(16) default 'outcome operation',\
+												 status varchar(7) default 'SAVED',\
+												 sum int not null,\
+	 										   note varchar(100))"};
+	if(!query.exec(outcome_str)) {
+		qDebug()<<"Error when creating table: outcome";
+		qDebug()<<query.lastError().text();
+		return false;
+	}
 //---Create table: items
 	QString items_str={"create table if not exists items(\
 											   item_id smallint primary key autoincrement,\
@@ -62,10 +90,25 @@ bool Database::createTables() {
 	QString filled_cells_str={"create table if not exists filled_cells(\
 															 cell_id int primary key auto_increment,\
 															 cell char(7) not null,\
-															 item varchar(50) not null,\
-															 quantity int not null)"};
+															 item varchar(50),\
+															 quantity int)"};
 	if(!query.exec(filled_cells_str)) {
 		qDebug()<<"Error when creating table: filled_cells";
+		qDebug()<<query.lastError().text();
+		return false;
+	}
+//---Create operations 
+	QString operations_str={"create table if not exists operations(\
+											   operation_id int unsigned primary key autoincrement,\
+												 date date not null,\
+												 operation_number varchar(7) not null,\
+												 operation_type char(17) not null,\
+												 status varchar(7) not null,\
+												 cell char(8) not null,\
+												 item varchar(50) not null,\
+	 										   quantity int not null)"};
+	if(!query.exec(operations_str)) {
+		qDebug()<<"Error when creating table: operations";
 		qDebug()<<query.lastError().text();
 		return false;
 	}
@@ -78,21 +121,19 @@ bool Database::createTables() {
 		qDebug()<<query.lastError().text();
 		return false;
 	}
-////---Check if filled_cells table is empty and if its so-fill cells column
-//	QString check_if_cells_column_is_empty={"select count(*) from filled_cells"};
+////---Check if cells table is empty and if its so-fill cells column
+//	QString check_if_cells_column_is_empty={"select count(*) cells"};
 //	if(!query.exec(check_if_cells_column_is_empty)) {
-//		qDebug()<<"Error when checking if table is empty: filled_cells";
+//		qDebug()<<"Error when checking if table is empty: cells";
 //		qDebug()<<query.lastError().text();
 //		return false;
 //	}
 //	if(query.next()) {
 //		int rows=query.value(0).toInt();
 //		if(rows==0)
-//			fill_cells_column(2,7,18);
+//			fill_cells_column(2,7,24);
 //	} else
 //		qDebug()<<"Error: Could not retrieve count of rows in table: filled_cells";
-
-
 	return true;
 }
 

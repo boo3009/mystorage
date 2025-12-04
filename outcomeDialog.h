@@ -27,7 +27,7 @@ class OutcomeDialog : public QDialog {
   Q_OBJECT
 public:
   explicit OutcomeDialog(QSqlTableModel *model, QTableView *view,QSqlTableModel *itemsModel,
- 					 	 QSqlTableModel *opModel,QSqlTableModel *bal_model,int row=-1,QWidget *parent=0);
+	 	 QSqlTableModel *opModel,QSqlTableModel *bal_model,int row=-1,QWidget *parent=0);
 private:
 //-------pointers to constructors parameters
   QSqlTableModel *ptr_outcomesModel;
@@ -39,9 +39,14 @@ private:
   QDataWidgetMapper *mapper;
 //-------selecting items part-----------		
 	QWidget *items_widget;
+	QSortFilterProxyModel *items_proxymodel;
   QTableView *items_view;
 	QHeaderView *items_view_header;
 	QVBoxLayout *items_widget_layout;
+	QHBoxLayout *items_filter_layout;
+	QLabel *items_filter_label;
+	QLineEdit *items_filter_lineedit;
+	QPushButton *items_filter_clearPB;
 	QHBoxLayout *items_buttons_layout;
 	QPushButton *select_itemPB;
 	QPushButton *cancel_itemPB;
@@ -97,6 +102,8 @@ private slots:
 	void slot_add_operation();
 	void slot_copy_operation();
 	void slot_remove_operation();
+	void slot_clear_items_filter();
+	void slot_set_items_filter();
 };
 
 #endif

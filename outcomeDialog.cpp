@@ -2,7 +2,8 @@
 
 OutcomeDialog::OutcomeDialog(QSqlTableModel *model,QTableView *view,QSqlTableModel *itemsModel,
   QSqlTableModel *opModel,QSqlTableModel *bal_model,int row,QWidget *parent) : QDialog(parent), ptr_outcomesModel(model),
-	ptr_outcomesView(view), ptr_itemsModel(itemsModel), ptr_operationsModel(opModel), ptr_balanceModel(bal_model) {
+	ptr_outcomesView(view), ptr_itemsModel(itemsModel), ptr_operationsModel(opModel), ptr_balanceModel(bal_model)
+{
 //----------------------------------------------------------------------------------------
   setup_Widget();
   setup_ModelandMapper();
@@ -168,7 +169,7 @@ int OutcomeDialog::func_check_correctness(const QSortFilterProxyModel *proxy,int
 				return -1;
 			}
 //------------------------------------------------------------------------------------
-			if(column==ptr_operationsModel->fieldIndex("quantity")) {
+			if(column==ptr_operationsModel->fieldIndex("quantity") && !operationsView->isRowHidden(row)) {
 				int local_quantity=proxy->index(row,column).data().toInt();
 				if(local_quantity<=0) {
 					QMessageBox::information(nullptr,"Warning message",QString("%1 %2").arg("Quantity is less or equal '0': ").arg(local_quantity));
@@ -344,8 +345,6 @@ void OutcomeDialog::slot_saveOutcome() {
 void OutcomeDialog::slot_cancelOutcome() {
   if(row_added)
 		ptr_outcomesModel->removeRow(ptr_outcomesModel->rowCount()-1);
-		//-----------------------NEED TO WRITE CODE FOR DATA RETRIEVING, FEX AFTER DELETION,SO DATA WRITE BACK AS IT WAS
-
   emit signal_ready();
 	this->close();
 }
@@ -354,7 +353,7 @@ void OutcomeDialog::slot_open_itemsList(QModelIndex index) {
 	if(!index.isValid() || index.column()!=ptr_operationsModel->fieldIndex("item"))
 		return;
 	items_widget=new QWidget(this,Qt::Window);
-	items_widget->setFixedSize(500,300);
+	items_widget->setFixedSize(500,400);
 //	items_widget->setWindowFlags(Qt::FramelessWindowHint);
 	
 	items_widget->setObjectName("borders_for_items_outcome");
@@ -362,9 +361,15 @@ void OutcomeDialog::slot_open_itemsList(QModelIndex index) {
 												"background-color: #ABE7B2; color: black;"
 												"border: 1px solid #427A76; }");
 
+	items_proxymodel=new QSortFilterProxyModel(this); //----experimental
+	items_proxymodel->setSourceModel(ptr_itemsModel); //----experimental
+	items_proxymodel->setFilterKeyColumn(ptr_itemsModel->fieldIndex("item_name")); //----experimental
+	items_proxymodel->setFilterCaseSensitivity(Qt::CaseInsensitive);
+	items_proxymodel->setDynamicSortFilter(true); //----experimental
+
 	items_view=new QTableView();
-	items_view->setModel(ptr_itemsModel);
-  items_view->sortByColumn(0,Qt::AscendingOrder); /*finded out that view needed sort too*/
+	items_view->setModel(items_proxymodel);
+//  items_view->sortByColumn(0,Qt::AscendingOrder); /*finded out that view needed sort too*/
 	items_view->setSelectionMode(QAbstractItemView::SingleSelection);
   items_view->setSelectionBehavior(QAbstractItemView::SelectRows);
   items_view->setEditTriggers(QAbstractItemView::NoEditTriggers);
@@ -383,8 +388,19 @@ void OutcomeDialog::slot_open_itemsList(QModelIndex index) {
     "QHeaderView::section { background-color: #f95959;}");
   QFont items_view_headerFont("Colibri",10,QFont::Bold);
   items_view_header->setFont(items_view_headerFont);
-
+//-----------------------------------------------------------------
 	items_widget_layout=new QVBoxLayout(items_widget);
+
+	items_filter_layout=new QHBoxLayout();
+	items_filter_label=new QLabel("Search item");
+	items_filter_lineedit=new QLineEdit();
+	items_filter_clearPB=new QPushButton("Clear filter");
+	items_filter_label->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	items_filter_lineedit->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	items_filter_clearPB->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	items_filter_layout->addWidget(items_filter_label);
+	items_filter_layout->addWidget(items_filter_lineedit);
+	items_filter_layout->addWidget(items_filter_clearPB);
 
 	items_buttons_layout=new QHBoxLayout();
 	select_itemPB=new QPushButton("Select");
@@ -392,24 +408,39 @@ void OutcomeDialog::slot_open_itemsList(QModelIndex index) {
 	items_buttons_layout->addWidget(select_itemPB);
 	items_buttons_layout->addWidget(cancel_itemPB);
 	
+	items_widget_layout->addLayout(items_filter_layout);
+	items_filter_layout->addStretch();
 	items_widget_layout->addWidget(items_view);
 	items_widget_layout->addLayout(items_buttons_layout);
 	items_widget->show();
 
+	connect(items_filter_clearPB,&QPushButton::clicked,this,&OutcomeDialog::slot_clear_items_filter);
+	connect(items_filter_lineedit,&QLineEdit::textChanged,this,&OutcomeDialog::slot_set_items_filter);
 	connect(items_view,&QTableView::doubleClicked,this,&OutcomeDialog::slot_passSelectedItem);
 	connect(select_itemPB,&QPushButton::clicked,this,&OutcomeDialog::slot_passSelectedItem);
 	connect(cancel_itemPB,&QPushButton::clicked,[=]() { items_widget->close(); });
 }
 
+void OutcomeDialog::slot_clear_items_filter() {
+	items_proxymodel->setFilterRegularExpression("");
+	items_filter_lineedit->clear();	
+}
+
+void OutcomeDialog::slot_set_items_filter() {
+	items_proxymodel->setFilterWildcard(items_filter_lineedit->text());
+}
+
 void OutcomeDialog::slot_passSelectedItem() {
 //---Get the index of selected item from items_view
-	QModelIndex item_index=ptr_itemsModel->index(items_view->currentIndex().row(),ptr_itemsModel->fieldIndex("item_name"));
-	if(!item_index.isValid()) {
+//	QModelIndex item_index=ptr_itemsModel->index(items_view->currentIndex().row(),ptr_itemsModel->fieldIndex("item_name"));
+	QModelIndex proxy_index=items_proxymodel->index(items_view->currentIndex().row(),ptr_itemsModel->fieldIndex("item_name"));
+	if(!proxy_index.isValid()) {
     QMessageBox::information(nullptr,"Warning message","Nothing selected, pick an item please!");
   	return;
 	}
 //---Get the text from selected item
-	QVariant data=ptr_itemsModel->data(item_index,Qt::DisplayRole);
+	QModelIndex source_index=items_proxymodel->mapToSource(proxy_index);
+	QVariant data=ptr_itemsModel->data(source_index,Qt::DisplayRole);
 	QString str=data.toString();
 //---Get the index of row in operations view of our widget
 	QModelIndex op_index=operations_proxymodel->index(operationsView->currentIndex().row(),ptr_operationsModel->fieldIndex("item"));
@@ -471,24 +502,23 @@ void OutcomeDialog::slot_copy_operation() {
 }
 
 void OutcomeDialog::slot_remove_operation() {
+//   get the index of removing row. check validness
 	QModelIndex op_index=operations_proxymodel->index(operationsView->currentIndex().row(),operationsView->currentIndex().column());
 	if(!op_index.isValid()) {
     QMessageBox::information(nullptr,"Warning message","Select row before deletion!");
 		return;
 	}
-	int last_row_before_remove=operations_proxymodel->rowCount()-1;
+//   set that row hidden 
+	operationsView->setRowHidden(op_index.row(),true); //   experimental
+//   get the index of row that will be selected after deletion. if row is the last select previous, otherwise next
+	QModelIndex new_index=operations_proxymodel->index(op_index.row()+1,op_index.column());
+	if(op_index.row()==operations_proxymodel->rowCount()-1) //   experimental 
+		new_index=operations_proxymodel->index(op_index.row()-1,op_index.column());
+	operationsView->setCurrentIndex(new_index);
 
-//   NEED TO WRITE SOME FUNCTION TO UPDATE FILLED_CELLS...
-
+//   convert proxy index of removing row to source and remove row by that index
 	QModelIndex correspond_index=operations_proxymodel->mapToSource(op_index);
 	ptr_operationsModel->removeRow(correspond_index.row());
-	ptr_operationsModel->submitAll();
-	ptr_operationsModel->select();
-
-	if(op_index.row()<last_row_before_remove)
-		operationsView->setCurrentIndex(operations_proxymodel->index(op_index.row(),op_index.column()));
-	else
-		operationsView->setCurrentIndex(operations_proxymodel->index(operations_proxymodel->rowCount()-1,op_index.column()));
 
 	emit signal_ready();
 }

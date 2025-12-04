@@ -226,8 +226,6 @@ void IncomeDialog::slot_saveIncome() {
 void IncomeDialog::slot_cancelIncome() {
   if(row_added)
 		ptr_incomesModel->removeRow(ptr_incomesModel->rowCount()-1);
-		//-----------------------NEED TO WRITE CODE FOR DATA RETRIEVING, FEX AFTER DELETION,SO DATA WRITE BACK AS IT WAS
-
   emit signal_ready();
 	this->close();
 }
@@ -322,7 +320,7 @@ void IncomeDialog::slot_passSelectedItem() {
   	return;
 	}
 //---Get the text from selected item
-	QModelIndex source_index=items_proxymode->mapToSource(proxy_index);
+	QModelIndex source_index=items_proxymodel->mapToSource(proxy_index);
 	QVariant data=ptr_itemsModel->data(source_index,Qt::DisplayRole);
 	QString str=data.toString();
 //---Get the index of row in operations view of our widget
