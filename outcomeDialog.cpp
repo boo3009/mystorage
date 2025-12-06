@@ -19,7 +19,7 @@ void OutcomeDialog::setup_Widget() {
 	this->setWindowFlags(Qt::FramelessWindowHint);
 	this->setObjectName("borders_for_outcome_dialog");
 	this->setStyleSheet("QWidget#borders_for_outcome_dialog {" 
-												"background-color: #ABE7B2; color: black;"
+												"background-color: #FFB6C1; color: black;"
 												"border: 1px solid #427A76; }");
 
   mainLayout=new QVBoxLayout(this);

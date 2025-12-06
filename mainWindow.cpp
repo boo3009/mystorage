@@ -63,7 +63,6 @@ void MainWindow::setup_CoreWidgets() {
 	mainLayout->addSpacing(50);
 	mainLayout->addLayout(mainLayout_middle);
 	mainLayout->addStretch();
-
 }
 
 void MainWindow::setup_SignalSlots() {
