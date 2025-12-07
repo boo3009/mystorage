@@ -484,6 +484,8 @@ void MainWindow::slot_write_balance_into_file() {
 	QString cur_date_time_formated=cur_date_time.toString("dd.MM.yyyy, hh:mm:ss");
 	file_stream<<"| "<<cur_date_time_formated <<" |"<<Qt::endl; 
 	file_stream<< lines <<Qt::endl;
+	int pieces=0;
+	int non_empty_cells=0;
 	for(int row=0;row!=balanceModel->rowCount();++row) {
 //---------------------------------------------------------------------------------------------------------------------------------------
 		for(int col=cell_column; col!=balanceModel->columnCount();++col) {
@@ -491,6 +493,7 @@ void MainWindow::slot_write_balance_into_file() {
 //   for quantity column
 			if(col==quantity_column) {
 				int num=balanceModel->index(row,col).data().toInt();
+				pieces+=num;
 				QString num_str=QString::number(num);
 				int num_len=num_str.length();
 				QString num_sp=QString(' ').repeated(QUANTITY_MAX_LENGTH-num_len);
@@ -514,10 +517,20 @@ void MainWindow::slot_write_balance_into_file() {
 			str=QString(' ').repeated(item_width-len);
 			file_stream<< str <<" ";
 		}
-//---------------------------------------------------------------------------------------------------------------------------------------
+//---------------------------------------------------------------------------------------------------------------------------------------	
 		file_stream<<"|"<<Qt::endl;
 		file_stream<< lines <<Qt::endl;
 	}
+//---------------------------------------------------------------------------------------------------------------------------------------
+  QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+	QSqlQuery query(retrieveDB);
+	if(!query.exec("select count(distinct cell) from filled_cells"))
+		qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': Cant count distinct cells from filled_cells.";
+	if(query.next())
+		non_empty_cells=query.value(0).toInt();
+	file_stream<<""<<Qt::endl;
+	file_stream<<"Pieces:  "<<pieces<<Qt::endl;
+	file_stream<<"Non-empty cells:  "<<non_empty_cells<<Qt::endl;
 //---------------------------------------------------------------------------------------------------------------------------------------
 	QMessageBox::information(nullptr,"Informational message",QString("%1 %2").arg("Done buddy. File created: ").arg(filename));
 	file.close();
