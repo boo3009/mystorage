@@ -133,8 +133,8 @@ private slots:
 	void slot_outcomeModelView_remove();
 	void slot_outcomeModelView_cancel_remove();
 //--------------------------slots for balance
-	int slot_insert_update();
-	void slot_generate();
+	int slot_generate_balance();
+	void slot_call_generate_balance();
 	void slot_write_balance_into_file();
 };
 

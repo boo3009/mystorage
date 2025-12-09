@@ -103,6 +103,6 @@ void MainWindow::setup_SignalSlots() {
 	connect(outcomeModelView_widget_removeOutcomePB,&QPushButton::clicked,this,&MainWindow::slot_outcomeModelView_remove);
 	connect(outcomeModelView_widget_cancel_removeOutcomePB,&QPushButton::clicked,this,&MainWindow::slot_outcomeModelView_cancel_remove);
 //-------------------------balanceModelView connects
-	connect(generate,&QPushButton::clicked,this,&MainWindow::slot_generate);
+	connect(generate,&QPushButton::clicked,this,&MainWindow::slot_call_generate_balance);
 	connect(write_into_file,&QPushButton::clicked,this,&MainWindow::slot_write_balance_into_file);
 }

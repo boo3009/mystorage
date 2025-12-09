@@ -233,10 +233,10 @@ int OutcomeDialog::func_insert_update() {
 //   filled_cells columns
 	int balance_quantity_column=ptr_balanceModel->fieldIndex("quantity");
 	int balance_cell_id_column=ptr_balanceModel->fieldIndex("cell_id");
+//------------------------------------------------------------------------------------
 	for(int row=0;row!=operations_proxymodel->rowCount();++row) {
 		if(operations_proxymodel->index(row,status_column).data().toString()=="REMOVED")
 			continue;
-//------------------------------------------------------------------------------------
 		QString check_str=QString("select * from tmp_filled_cells where cell like '%1' and item like '%2'")
 		  .arg(operations_proxymodel->index(row,cell_column).data().toString())
 			.arg(operations_proxymodel->index(row,item_column).data().toString());

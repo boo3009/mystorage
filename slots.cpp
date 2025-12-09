@@ -254,7 +254,7 @@ void MainWindow::slot_outcomeDialog_add() {
 	if(!index.isValid())
 		index=outcomeModel->index(0,outcomeModel->fieldIndex("operation_number"));
 //---call a function, to recalculate operations from operations table, so we get actual balance BEFORE outcome. We dont need to do the same for incomes, since there is nothing to check.
-	if(slot_insert_update()==-1)
+	if(slot_generate_balance()==-1)
 		return;
 	OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,
 																									operationsModel,balanceModel);
@@ -275,7 +275,7 @@ void MainWindow::slot_editOutcomeByDoubleClick(QModelIndex index) {
     QMessageBox::information(nullptr,"Warning message","Please, select an outcome before editing!");
 		return;
 	}
-	if(slot_insert_update()==-1)
+	if(slot_generate_balance()==-1)
 		return;
   OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,operationsModel,balanceModel,index.row());
   obj_outcomeDialog->setWindowTitle("Editing an outcome");
@@ -292,7 +292,7 @@ void MainWindow::slot_outcomeDialog_edit() {
     QMessageBox::information(nullptr,"Warning message","Please, select an outcome before editing!");
 		return;
 	}
-	if(slot_insert_update()==-1)
+	if(slot_generate_balance()==-1)
 		return;
   OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,operationsModel,balanceModel,index.row());
   obj_outcomeDialog->setWindowTitle("Editing an outcome");
@@ -383,13 +383,13 @@ void MainWindow::slot_outcomeModelView_cancel_remove() {
 
 //=================================BALANCE PART START=========================================
 
-void MainWindow::slot_generate() {
-	if(slot_insert_update()==-1)
+void MainWindow::slot_call_generate_balance() {
+	if(slot_generate_balance()==-1)
 		qDebug()<<__LINE__<<"Error: Cant generate balance,soryan :)";
 	balanceView->setVisible(true);
 }
 
-int MainWindow::slot_insert_update() {
+int MainWindow::slot_generate_balance() {
   QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
 	QSqlQuery query(retrieveDB);
 	if(!query.exec("truncate table filled_cells")) {
@@ -401,47 +401,49 @@ int MainWindow::slot_insert_update() {
 	int item_column=operationsModel->fieldIndex("item");
 	int quantity_column=operationsModel->fieldIndex("quantity");
 	int operation_type_column=operationsModel->fieldIndex("operation_type");
-	int status_column=operationsModel->fieldIndex("status");
 //   filled_cells columns
 	int balance_cell_id_column=balanceModel->fieldIndex("cell_id");
 //------------------------------------------------------------------------------------
-	for(int row=0;row!=operationsModel->rowCount();++row) {
-		if(operationsModel->index(row,status_column).data().toString()=="REMOVED")
-			continue;
+	if(!query.exec("select * from operations where status like 'SAVED'")) {
+		qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': selecting from operations.";
+		return -1;
+	}
+	while(query.next()) {
+		QSqlQuery subquery(retrieveDB);
 		QString check_str=QString("select * from filled_cells where cell like '%1' and item like '%2'")
-		  .arg(operationsModel->index(row,cell_column).data().toString())
-			.arg(operationsModel->index(row,item_column).data().toString());
-		if(!query.exec(check_str)) {
-			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': local checking in 'while' loop.";
+		  .arg(query.value(cell_column).toString())
+			.arg(query.value(item_column).toString());
+		if(!subquery.exec(check_str)) {
+			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'subquery.exec': local checking in 'while' loop.";
 			return -1;
 		}
-		if(query.next()) {
-//---result set is NOT empty, so we can add an income or outcome.
-			QString update_str;
-			if(operationsModel->index(row,operation_type_column).data().toString()=="income operation")
-				update_str=QString("update filled_cells set quantity=quantity+'%1' where cell_id like '%2'")
-				  .arg(operationsModel->index(row,quantity_column).data().toInt())
-					.arg(query.value(balance_cell_id_column).toInt());
-			else
-				update_str=QString("update filled_cells set quantity=quantity-'%1' where cell_id like '%2'")
-				  .arg(operationsModel->index(row,quantity_column).data().toInt())
-					.arg(query.value(balance_cell_id_column).toInt());
-			if(!query.exec(update_str)) {
-				qDebug()<<"("<<__LINE__<<") "<<"Error while 'query.exec' (income): update record in not empty set in 'filled_cells'.";
-				return -1;
-			}
-			continue;
-		} 
-//---result set is empty, so we have nothing in that cell, lets ADD an income or minus outcome.
-		query.prepare("insert into filled_cells(cell,item,quantity) values(:c,:i,:q)");
-		query.bindValue(":c",operationsModel->index(row,cell_column).data().toString());
-		query.bindValue(":i",operationsModel->index(row,item_column).data().toString());
-		if(operationsModel->index(row,operation_type_column).data().toString()=="income operation")
-			query.bindValue(":q",operationsModel->index(row,quantity_column).data().toInt());
+//---result set is NOT empty, so we can change quantity in income or outcome.
+		if(subquery.next()) {
+		QString update_str;
+		if(query.value(operation_type_column).toString()=="income operation")
+			update_str=QString("update filled_cells set quantity=quantity+'%1' where cell_id like '%2'")
+				.arg(query.value(quantity_column).toInt())
+				.arg(subquery.value(balance_cell_id_column).toInt());
 		else
-			query.bindValue(":q",-operationsModel->index(row,quantity_column).data().toInt());
-		if(!query.exec()) {
-			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': inserting record in not empty set in 'filled_cells'.";
+			update_str=QString("update filled_cells set quantity=quantity-'%1' where cell_id like '%2'")
+				.arg(query.value(quantity_column).toInt())
+				.arg(subquery.value(balance_cell_id_column).toInt());
+		if(!subquery.exec(update_str)) {
+			qDebug()<<"("<<__LINE__<<") "<<"Error while 'subquery.exec' (income): update record in not empty set in 'filled_cells'.";
+			return -1;
+		}
+		continue;
+		}
+//---result set is empty, so we have nothing in that cell, lets ADD an income or minus outcome.
+		subquery.prepare("insert into filled_cells(cell,item,quantity) values(:c,:i,:q)");
+		subquery.bindValue(":c",query.value(cell_column).toString());
+		subquery.bindValue(":i",query.value(item_column).toString());
+		if(query.value(operation_type_column).toString()=="income operation")
+			subquery.bindValue(":q",query.value(quantity_column).toInt());
+		else
+			subquery.bindValue(":q",-query.value(quantity_column).toInt());
+		if(!subquery.exec()) {
+			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'subquery.exec': inserting record in not empty set in 'filled_cells'.";
 			return -1;
 		}
 	}
