@@ -34,11 +34,11 @@ void MainWindow::setup_CoreWidgets() {
   mainLayout_left_itemsPB=new QPushButton("List of Items");
   mainLayout_left_balancePB=new QPushButton("Balance");
   mainLayout_left_quitPB=new QPushButton("Quit My Storage");
-	mainLayout_left_incomePB->setStyleSheet("text-align:left;");
-	mainLayout_left_outcomePB->setStyleSheet("text-align:left;");
-	mainLayout_left_itemsPB->setStyleSheet("text-align:left;");
-	mainLayout_left_balancePB->setStyleSheet("text-align:left;");
-	mainLayout_left_quitPB->setStyleSheet("text-align:left;");
+	mainLayout_left_incomePB->setStyleSheet("background-color: #9ECFD4; text-align:left;");
+	mainLayout_left_outcomePB->setStyleSheet("background-color: #9ECFD4; text-align:left;");
+	mainLayout_left_itemsPB->setStyleSheet("background-color: #9ECFD4; text-align:left;");
+	mainLayout_left_balancePB->setStyleSheet("background-color: #9ECFD4; text-align:left;");
+	mainLayout_left_quitPB->setStyleSheet("background-color: #948979; text-align:left;");
   mainLayout_left=new QVBoxLayout();
 	mainLayout_left->addSpacing(50);
   mainLayout_left->addWidget(mainLayout_left_incomePB);
@@ -65,18 +65,36 @@ void MainWindow::setup_CoreWidgets() {
 	mainLayout->addStretch();
 }
 
+void MainWindow::set_selected_button_dark(QPushButton *pb1,QPushButton *pb2, QPushButton *pb3,QPushButton *button_selected) {
+	pb1->setStyleSheet("background-color: #9ECFD4; text-align:left;");
+	pb2->setStyleSheet("background-color: #9ECFD4; text-align:left;");
+	pb3->setStyleSheet("background-color: #9ECFD4; text-align:left;");
+	button_selected->setStyleSheet("background-color: #336D82; text-align:left;");
+}
+
 void MainWindow::setup_SignalSlots() {
 //-------------------------mainLayouts left side PB's connects
 	connect(mainLayout_left_quitPB,&QPushButton::clicked,this,&QApplication::quit);
 	connect(mainLayout_left_incomePB,&QPushButton::clicked,
-	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(0); });
+	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(0);
+									set_selected_button_dark(mainLayout_left_outcomePB,mainLayout_left_itemsPB,
+																					 mainLayout_left_balancePB,mainLayout_left_incomePB); });
 	connect(mainLayout_left_outcomePB,&QPushButton::clicked,
-	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(1); });
+	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(1);
+									set_selected_button_dark(mainLayout_left_incomePB,mainLayout_left_itemsPB,
+																					 mainLayout_left_balancePB,mainLayout_left_outcomePB); });
 	connect(mainLayout_left_itemsPB,&QPushButton::clicked,
-	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(2); });
+	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(2);
+ 									items_filter_lineedit->clear();
+									set_selected_button_dark(mainLayout_left_incomePB,mainLayout_left_outcomePB,
+																					 mainLayout_left_balancePB,mainLayout_left_itemsPB); });
 	connect(mainLayout_left_balancePB,&QPushButton::clicked,
 	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(3);
-									balanceView->setVisible(false); });
+									balanceView->setVisible(false);
+								  pieces_lineedit->clear();	
+									non_empty_cells_lineedit->clear();
+									set_selected_button_dark(mainLayout_left_incomePB,mainLayout_left_outcomePB,
+																					 mainLayout_left_itemsPB,mainLayout_left_balancePB); });
 //-------------------------itemsModelView connects
 	connect(itemsModelView_widget_addItemPB,&QPushButton::clicked,
   /*----*/this,&MainWindow::slot_itemDialog_add);

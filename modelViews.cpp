@@ -38,14 +38,14 @@ void MainWindow::setup_itemsModelView() {
 //------------------------------some design tweaks for "itemsView" 
   itemsView->setStyleSheet(
     "QTableView {"
-			"gridline-color: #ffcab0;  border: 2px solid #ffcab0;"
-    	"background: #fdffcd;  selection-background-color: #f76b8a;}"
+			"gridline-color: #7F8CAA;  border: 2px solid #7F8CAA;"
+    	"background: #E8F9FF;  selection-background-color: #6D94C5;}"
     "QTableView::item { padding: 5px;}"); 
 	itemsView_header=itemsView->horizontalHeader();
   itemsView_header->setStretchLastSection(true);
   itemsView_header->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
   itemsView_header->setStyleSheet(
-    "QHeaderView::section { background-color: #f95959;}");
+    "QHeaderView::section { background-color: #0F828C;}");
   QFont itemsView_headerFont("Colibri",10,QFont::Bold);
   itemsView_header->setFont(itemsView_headerFont);
 	itemsView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -115,20 +115,24 @@ void MainWindow::setup_incomeModelView() {
   incomeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
   incomeView->setColumnHidden(0,true);
   incomeView->verticalHeader()->setVisible(false);
+	incomeView->setColumnWidth(1,70);
+	incomeView->setColumnWidth(2,70);
+	incomeView->setColumnWidth(3,140);
+	incomeView->setColumnWidth(4,90);
+	incomeView->setColumnWidth(5,60);
 //------------------------------some design tweaks for "incomeView" 
   incomeView->setStyleSheet(
     "QTableView {"
-			"gridline-color: #ffcab0;  border: 2px solid #ffcab0;"
-    	"background: #fdffcd;  selection-background-color: #f76b8a;}"
+			"gridline-color: #A1BC98;  border: 2px solid #A1BC98;"
+    	"background: #CBF3BB;  selection-background-color: #41A67E;}"
     "QTableView::item { padding: 5px;}"); 
 	incomeView_header=incomeView->horizontalHeader();
   incomeView_header->setStretchLastSection(true);
   incomeView_header->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
   incomeView_header->setStyleSheet(
-    "QHeaderView::section { background-color: #f95959;}");
+    "QHeaderView::section { background-color: #5D866C;}");
   QFont incomeView_headerFont("Colibri",10,QFont::Bold);
   incomeView_header->setFont(incomeView_headerFont);
-	incomeView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
 //------------------------------setup "Widget" for "incomeView" 
   incomeModelView_widget=new QWidget();
   incomeModelView_widget_mainLayout=new QHBoxLayout(incomeModelView_widget);
@@ -186,20 +190,24 @@ void MainWindow::setup_outcomeModelView() {
   outcomeView->setEditTriggers(QAbstractItemView::NoEditTriggers);
   outcomeView->setColumnHidden(0,true);
   outcomeView->verticalHeader()->setVisible(false);
+	outcomeView->setColumnWidth(1,70);
+	outcomeView->setColumnWidth(2,70);
+	outcomeView->setColumnWidth(3,140);
+	outcomeView->setColumnWidth(4,90);
+	outcomeView->setColumnWidth(5,60);
 //------------------------------some design tweaks for "outcomeView" 
   outcomeView->setStyleSheet(
     "QTableView {"
-			"gridline-color: #ffcab0;  border: 2px solid #ffcab0;"
-    	"background: #fdffcd;  selection-background-color: #f76b8a;}"
+			"gridline-color: #F5BABB;  border: 2px solid #F5BABB;"
+    	"background: #FFEAEA;  selection-background-color: #FD7979;}"
     "QTableView::item { padding: 5px;}"); 
 	outcomeView_header=outcomeView->horizontalHeader();
   outcomeView_header->setStretchLastSection(true);
   outcomeView_header->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
   outcomeView_header->setStyleSheet(
-    "QHeaderView::section { background-color: #f95959;}");
+    "QHeaderView::section { background-color: #D34E4E;}");
   QFont outcomeView_headerFont("Colibri",10,QFont::Bold);
   outcomeView_header->setFont(outcomeView_headerFont);
-	outcomeView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
 //------------------------------setup "Widget" for "outcomeView" 
   outcomeModelView_widget=new QWidget();
   outcomeModelView_widget_mainLayout=new QHBoxLayout(outcomeModelView_widget);
@@ -260,14 +268,14 @@ void MainWindow::setup_balanceModelView() {
 //------------------------------some design tweaks for "balanceView" 
   balanceView->setStyleSheet(
     "QTableView {"
-			"gridline-color: #ffcab0;  border: 2px solid #ffcab0;"
-    	"background: #fdffcd;  selection-background-color: #f76b8a;}"
+			"gridline-color: #7F8CAA;  border: 2px solid #7F8CAA;"
+    	"background: #E8F9FF;  selection-background-color: #6D94C5;}"
     "QTableView::item { padding: 5px;}"); 
 	balanceView_header=balanceView->horizontalHeader();
   balanceView_header->setStretchLastSection(true);
   balanceView_header->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
   balanceView_header->setStyleSheet(
-    "QHeaderView::section { background-color: #f95959;}");
+    "QHeaderView::section { background-color: #0F828C;}");
   QFont balanceView_headerFont("Colibri",10,QFont::Bold);
   balanceView_header->setFont(balanceView_headerFont);
 	balanceView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
@@ -276,19 +284,38 @@ void MainWindow::setup_balanceModelView() {
 	balanceModelView_widget->setFixedSize(900,800);
   balanceModelView_widget_mainLayout=new QVBoxLayout(balanceModelView_widget);
 
+	balanceModelView_widget_buttons_layout=new QHBoxLayout();
 	generate=new QPushButton("Generate");
 	generate->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	write_into_file=new QPushButton("Write into file");
 	write_into_file->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-	balanceModelView_widget_mainLayout->addWidget(generate);
-	balanceModelView_widget_mainLayout->addWidget(write_into_file);
+	pieces_label=new QLabel("Pieces: ");
+	pieces_lineedit=new QLineEdit();
+	pieces_lineedit->setReadOnly(true);
+	pieces_label->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	pieces_lineedit->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	non_empty_cells_label=new QLabel("Non-empty cells: ");
+	non_empty_cells_lineedit=new QLineEdit();
+	non_empty_cells_lineedit->setReadOnly(true);
+	non_empty_cells_label->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	non_empty_cells_lineedit->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+
+	balanceModelView_widget_buttons_layout->addWidget(generate);
+	balanceModelView_widget_buttons_layout->addWidget(write_into_file);
+	balanceModelView_widget_buttons_layout->addStretch(2);
+	balanceModelView_widget_buttons_layout->addWidget(pieces_label);
+	balanceModelView_widget_buttons_layout->addWidget(pieces_lineedit);
+	balanceModelView_widget_buttons_layout->addWidget(non_empty_cells_label);
+	balanceModelView_widget_buttons_layout->addWidget(non_empty_cells_lineedit);
+	balanceModelView_widget_buttons_layout->addStretch();
+
+	balanceModelView_widget_mainLayout->addLayout(balanceModelView_widget_buttons_layout);
 	balanceModelView_widget_mainLayout->addWidget(balanceView);
 
 	QSizePolicy sp(QSizePolicy::Expanding,QSizePolicy::Expanding);
 	sp.setRetainSizeWhenHidden(true);
 	balanceView->setSizePolicy(sp);
 	balanceView->setVisible(false);
-//	
 }
 
 void MainWindow::setup_operationsModelView() {

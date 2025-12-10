@@ -94,7 +94,12 @@ private:
 	QWidget *balanceModelView_widget;
 	QPushButton *generate;
 	QPushButton *write_into_file;
+	QLabel *pieces_label;
+	QLineEdit *pieces_lineedit;
+	QLabel *non_empty_cells_label;
+	QLineEdit *non_empty_cells_lineedit;
 	QVBoxLayout *balanceModelView_widget_mainLayout;
+	QHBoxLayout *balanceModelView_widget_buttons_layout;
 //--------------------------pointer to "Database" object	
 	Database *dbPointer;
 //--------------------------member functions Level 0
@@ -112,6 +117,8 @@ signals:
 
 private slots:
 	void slot_updateModels();
+	void set_selected_button_dark(QPushButton*,QPushButton*,
+																QPushButton*,QPushButton*);
 //--------------------------slots for items
 	void slot_itemDialog_add();
 	void slot_itemDialog_edit();
