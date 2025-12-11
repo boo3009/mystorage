@@ -3,7 +3,8 @@
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
   setWindowTitle("My Storage");
   setFixedSize(1400,900);
-//  this->showFullScreen();
+//  showFullScreen();
+	setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
 	
 	connect_Database();
   setup_ModelViews();

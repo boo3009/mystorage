@@ -16,7 +16,8 @@ OutcomeDialog::OutcomeDialog(QSqlTableModel *model,QTableView *view,QSqlTableMod
 void OutcomeDialog::setup_Widget() {
   setWindowTitle("Creating new outcome");
   setFixedSize(600,800);
-	this->setWindowFlags(Qt::FramelessWindowHint);
+//	this->setWindowFlags(Qt::FramelessWindowHint);
+//	this->setWindowModality(Qt::ApplicationModal);
 	this->setObjectName("borders_for_outcome_dialog");
 	this->setStyleSheet("QWidget#borders_for_outcome_dialog {" 
 												"background-color: #FFB6C1; color: black;"

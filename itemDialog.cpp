@@ -16,7 +16,8 @@ ItemDialog::ItemDialog(QSqlTableModel *model,QTableView *view,QSortFilterProxyMo
 
 void ItemDialog::setup_Widget() {
   setFixedSize(500,100);
-	this->setWindowFlags(Qt::FramelessWindowHint);
+//	this->setWindowFlags(Qt::FramelessWindowHint);
+//	this->setWindowModality(Qt::ApplicationModal);
 	this->setObjectName("bordered_item_widget");
 	this->setStyleSheet("QWidget#bordered_item_widget {"
 											"border: 1px solid #4A70A9; background-color: #8FABD4; }");

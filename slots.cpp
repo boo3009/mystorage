@@ -28,7 +28,7 @@ void MainWindow::slot_itemDialog_add() {
 	int before=itemsModel->rowCount();
 
 /*   create dialog and execute it   */
-	ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel);
+	ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,-1,false,this);
   obj_itemDialog->setWindowTitle("Adding an item");
   obj_itemDialog->exec();
 
@@ -48,7 +48,7 @@ void MainWindow::slot_editItemByDoubleClick(QModelIndex index) {
     QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
 		return;
 	}
-  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,index.row());
+  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,index.row(),false,this);
   obj_itemDialog->setWindowTitle("Editing an item");
   obj_itemDialog->exec();
   itemsView->setCurrentIndex(items_proxymodel->index(index.row(),1)); //select edited row (after editing)
@@ -64,7 +64,7 @@ void MainWindow::slot_itemDialog_edit() {
     QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
 		return;
 	}
-  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,index.row());
+  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,index.row(),false,this);
   obj_itemDialog->setWindowTitle("Editing an item");
   obj_itemDialog->exec();
   itemsView->setCurrentIndex(items_proxymodel->index(index.row(),1)); //select edited row (after editing)
@@ -80,7 +80,7 @@ void MainWindow::slot_itemDialog_copy() {
     QMessageBox::information(nullptr,"Warning message","Please, select an item before copying!");
 		return;
 	}
-  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,index.row(),true);
+  ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,index.row(),true,this);
   obj_itemDialog->setWindowTitle("Copying an item");
   obj_itemDialog->exec();
   itemsView->setCurrentIndex(items_proxymodel->index(index.row(),1)); //select the same row, dont change the focus
@@ -131,7 +131,7 @@ void MainWindow::slot_incomeDialog_add() {
 	if(!index.isValid())
 		index=incomeModel->index(0,incomeModel->fieldIndex("operation_number"));
 	IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,
-																									operationsModel,balanceModel);
+																									operationsModel,balanceModel,-1,this);
 	obj_incomeDialog->exec();
 	int after=incomeModel->rowCount();
   if(after!=before) {
@@ -150,7 +150,7 @@ void MainWindow::slot_editIncomeByDoubleClick(QModelIndex index) {
 		return;
 	}
   IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,
-		operationsModel,balanceModel,index.row());
+		operationsModel,balanceModel,index.row(),this);
   obj_incomeDialog->setWindowTitle("Editing an income");
   obj_incomeDialog->exec();
   incomeView->setCurrentIndex(index); //select edited row (after editing)
@@ -166,7 +166,7 @@ void MainWindow::slot_incomeDialog_edit() {
 		return;
 	}
   IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,
-		operationsModel,balanceModel,index.row());
+		operationsModel,balanceModel,index.row(),this);
   obj_incomeDialog->setWindowTitle("Editing an income");
   obj_incomeDialog->exec();
   incomeView->setCurrentIndex(index); //select edited row (after editing)
@@ -264,7 +264,7 @@ void MainWindow::slot_outcomeDialog_add() {
 	if(slot_generate_balance()==-1)
 		return;
 	OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,
-																									operationsModel,balanceModel);
+																									operationsModel,balanceModel,-1,this);
   obj_outcomeDialog->exec();
 	int after=outcomeModel->rowCount();
   if(after!=before) {
@@ -284,7 +284,7 @@ void MainWindow::slot_editOutcomeByDoubleClick(QModelIndex index) {
 	}
 	if(slot_generate_balance()==-1)
 		return;
-  OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,operationsModel,balanceModel,index.row());
+  OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,operationsModel,balanceModel,index.row(),this);
   obj_outcomeDialog->setWindowTitle("Editing an outcome");
   obj_outcomeDialog->exec();
   outcomeView->setCurrentIndex(index); //select edited row (after editing)
@@ -301,7 +301,7 @@ void MainWindow::slot_outcomeDialog_edit() {
 	}
 	if(slot_generate_balance()==-1)
 		return;
-  OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,operationsModel,balanceModel,index.row());
+  OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,operationsModel,balanceModel,index.row(),this);
   obj_outcomeDialog->setWindowTitle("Editing an outcome");
   obj_outcomeDialog->exec();
   outcomeView->setCurrentIndex(index); //select edited row (after editing)

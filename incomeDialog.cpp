@@ -16,7 +16,8 @@ IncomeDialog::IncomeDialog(QSqlTableModel *model,QTableView *view,QSqlTableModel
 void IncomeDialog::setup_Widget() {
   setWindowTitle("Creating new income");
   setFixedSize(600,800);
-	this->setWindowFlags(Qt::FramelessWindowHint);
+//	this->setWindowFlags(Qt::FramelessWindowHint); //title bar disabling, but focus messed up
+//	this->setWindowModality(Qt::ApplicationModal);
 	this->setObjectName("borders_for_income_dialog");
 	this->setStyleSheet("QWidget#borders_for_income_dialog {" 
 												"background-color: #ABE7B2; color: black;"
