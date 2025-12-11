@@ -27,7 +27,7 @@ void MainWindow::setup_ModelViews() {
 }
 
 void MainWindow::setup_CoreWidgets() {
-  mainWidget=new QWidget();
+  mainWidget=new QWidget(this);
   setCentralWidget(mainWidget);
 //------------------------------setting "left" side of mainLayout
   mainLayout_left_incomePB=new QPushButton("List of incomes");

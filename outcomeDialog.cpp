@@ -122,7 +122,7 @@ void OutcomeDialog::setup_Widget() {
 } 
 
 void OutcomeDialog::setup_ModelandMapper() {
-  mapper=new QDataWidgetMapper();
+  mapper=new QDataWidgetMapper(this);
   mapper->setModel(ptr_outcomesModel);
   mapper->addMapping(op_number,ptr_outcomesModel->fieldIndex("operation_number"));
   mapper->addMapping(date,ptr_outcomesModel->fieldIndex("date"));

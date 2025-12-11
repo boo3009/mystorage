@@ -43,7 +43,7 @@ void ItemDialog::setup_Widget() {
 } 
 
 void ItemDialog::setup_ModelandMapper() {
-  mapper=new QDataWidgetMapper();
+  mapper=new QDataWidgetMapper(this);
   mapper->setModel(ptr_proxymodel);
   mapper->addMapping(lineEdit,ptr_itemsModel->fieldIndex("item_name"));
   mapper->setSubmitPolicy(QDataWidgetMapper::ManualSubmit);

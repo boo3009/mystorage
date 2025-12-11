@@ -5,6 +5,8 @@ Database::~Database() {
 	if(db.isOpen())
 		db.close();
 	QSqlDatabase::removeDatabase(DB_NAME);
+	if(input_widget)
+		delete input_widget;
 }
 
 void Database::connectDatabase() {

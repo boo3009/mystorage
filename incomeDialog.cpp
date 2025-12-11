@@ -122,7 +122,7 @@ void IncomeDialog::setup_Widget() {
 } 
 
 void IncomeDialog::setup_ModelandMapper() {
-  mapper=new QDataWidgetMapper();
+  mapper=new QDataWidgetMapper(this);
   mapper->setModel(ptr_incomesModel);
   mapper->addMapping(op_number,ptr_incomesModel->fieldIndex("operation_number"));
   mapper->addMapping(date,ptr_incomesModel->fieldIndex("date"));
