@@ -65,13 +65,6 @@ void MainWindow::setup_CoreWidgets() {
 	mainLayout->addStretch();
 }
 
-void MainWindow::set_selected_button_dark(QPushButton *pb1,QPushButton *pb2, QPushButton *pb3,QPushButton *button_selected) {
-	pb1->setStyleSheet("background-color: #9ECFD4; text-align:left;");
-	pb2->setStyleSheet("background-color: #9ECFD4; text-align:left;");
-	pb3->setStyleSheet("background-color: #9ECFD4; text-align:left;");
-	button_selected->setStyleSheet("background-color: #336D82; text-align:left;");
-}
-
 void MainWindow::setup_SignalSlots() {
 //-------------------------mainLayouts left side PB's connects
 	connect(mainLayout_left_quitPB,&QPushButton::clicked,this,&QApplication::quit);

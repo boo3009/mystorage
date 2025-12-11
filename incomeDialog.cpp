@@ -259,14 +259,14 @@ void IncomeDialog::slot_open_itemsList(QModelIndex index) {
 //------------------------------some design tweaks for "items_view" 
   items_view->setStyleSheet(
     "QTableView {"
-			"gridline-color: #ffcab0;  border: 2px solid #ffcab0;"
-    	"background: #fdffcd;  selection-background-color: #f76b8a;}"
+			"gridline-color: #7F8CAA;  border: 2px solid #7F8CAA;"
+    	"background: #E8F9FF;  selection-background-color: #6D94C5;}"
     "QTableView::item { padding: 5px;}"); 
 	items_view_header=items_view->horizontalHeader();
   items_view_header->setStretchLastSection(true);
   items_view_header->setDefaultAlignment(Qt::AlignLeft | Qt::AlignVCenter);
   items_view_header->setStyleSheet(
-    "QHeaderView::section { background-color: #f95959;}");
+    "QHeaderView::section { background-color: #0F828C;}");
   QFont items_view_headerFont("Colibri",10,QFont::Bold);
   items_view_header->setFont(items_view_headerFont);
 //-----------------------------------------------------------------

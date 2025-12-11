@@ -9,6 +9,13 @@ void MainWindow::slot_updateModels() {
 	balanceModel->select();
 }
 
+void MainWindow::set_selected_button_dark(QPushButton *pb1,QPushButton *pb2, QPushButton *pb3,QPushButton *button_selected) {
+	pb1->setStyleSheet("background-color: #9ECFD4; text-align:left;");
+	pb2->setStyleSheet("background-color: #9ECFD4; text-align:left;");
+	pb3->setStyleSheet("background-color: #9ECFD4; text-align:left;");
+	button_selected->setStyleSheet("background-color: #336D82; text-align:left;");
+}
+
 //=================================ITEMS PART START=========================================
 
 void MainWindow::slot_itemDialog_add() {

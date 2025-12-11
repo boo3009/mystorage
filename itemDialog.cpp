@@ -16,11 +16,17 @@ ItemDialog::ItemDialog(QSqlTableModel *model,QTableView *view,QSortFilterProxyMo
 
 void ItemDialog::setup_Widget() {
   setFixedSize(500,100);
+	this->setWindowFlags(Qt::FramelessWindowHint);
+	this->setObjectName("bordered_item_widget");
+	this->setStyleSheet("QWidget#bordered_item_widget {"
+											"border: 1px solid #4A70A9; background-color: #8FABD4; }");
+	this->setAutoFillBackground(true);
 
   mainLayout=new QVBoxLayout(this);
   buttonsLayout=new QHBoxLayout();
   label=new QLabel("Item name");
   lineEdit=new QLineEdit();
+	lineEdit->setStyleSheet("background-color: white;");
   savePB=new QPushButton("Save");
   cancelPB=new QPushButton("Cancel");
   
