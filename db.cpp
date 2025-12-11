@@ -28,7 +28,7 @@ bool Database::openDatabase() {
 	db.setDatabaseName(DB_NAME);
 	db.setHostName(HOST);
 	db.setUserName(USER);
-	db.setPassword(PW);
+//	db.setPassword(PW); //created user with no password, so dont need this anymore
 	db.setPort(PORT);
   if(!db.open()) {
 		QMessageBox::information(nullptr,"Error message",
