@@ -92,6 +92,7 @@ private:
 	QTableView *balanceView;
 	QHeaderView *balanceView_header;
 	QWidget *balanceModelView_widget;
+	QDateEdit *date_filter;
 	QPushButton *generate;
 	QPushButton *write_into_file;
 	QLabel *pieces_label;
@@ -114,7 +115,7 @@ private:
 	void setup_balanceModelView();	
 	void setup_operationsModelView();	
 signals:
-
+/*----------------------------------------*/
 private slots:
 	void slot_updateModels();
 	void set_selected_button_dark(QPushButton*,QPushButton*,

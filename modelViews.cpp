@@ -287,6 +287,10 @@ void MainWindow::setup_balanceModelView() {
 	balanceModelView_widget_buttons_layout=new QHBoxLayout();
 	generate=new QPushButton("Generate");
 	generate->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	date_filter=new QDateEdit();
+	date_filter->setDate(QDate::currentDate());
+	date_filter->setDisplayFormat("dd.MM.yyyy");
+	date_filter->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	write_into_file=new QPushButton("Write into file");
 	write_into_file->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	pieces_label=new QLabel("Pieces: ");
@@ -300,6 +304,7 @@ void MainWindow::setup_balanceModelView() {
 	non_empty_cells_label->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	non_empty_cells_lineedit->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
+	balanceModelView_widget_buttons_layout->addWidget(date_filter);
 	balanceModelView_widget_buttons_layout->addWidget(generate);
 	balanceModelView_widget_buttons_layout->addWidget(write_into_file);
 	balanceModelView_widget_buttons_layout->addStretch(2);

@@ -393,6 +393,7 @@ void MainWindow::slot_outcomeModelView_cancel_remove() {
 void MainWindow::slot_call_generate_balance() {
 	if(slot_generate_balance()==-1)
 		qDebug()<<__LINE__<<"Error: Cant generate balance,soryan :)";
+	QMessageBox::information(nullptr,"Info message","Balance generated!");
 	balanceView->setVisible(true);
 }
 
@@ -410,8 +411,11 @@ int MainWindow::slot_generate_balance() {
 	int operation_type_column=operationsModel->fieldIndex("operation_type");
 //   filled_cells columns
 	int balance_cell_id_column=balanceModel->fieldIndex("cell_id");
+	int balance_quantity_column=balanceModel->fieldIndex("quantity");
 //------------------------------------------------------------------------------------
-	if(!query.exec("select * from operations where status like 'SAVED'")) {
+	QString select_str=QString("select * from operations where status like 'SAVED' and date<='%1'")
+		.arg(date_filter->date().toString("yyyy-MM-dd"));
+	if(!query.exec(select_str)) {
 		qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': selecting from operations.";
 		return -1;
 	}
@@ -426,19 +430,30 @@ int MainWindow::slot_generate_balance() {
 		}
 //---result set is NOT empty, so we can change quantity in income or outcome.
 		if(subquery.next()) {
-		QString update_str;
-		if(query.value(operation_type_column).toString()=="income operation")
-			update_str=QString("update filled_cells set quantity=quantity+'%1' where cell_id like '%2'")
-				.arg(query.value(quantity_column).toInt())
-				.arg(subquery.value(balance_cell_id_column).toInt());
-		else
-			update_str=QString("update filled_cells set quantity=quantity-'%1' where cell_id like '%2'")
-				.arg(query.value(quantity_column).toInt())
-				.arg(subquery.value(balance_cell_id_column).toInt());
-		if(!subquery.exec(update_str)) {
-			qDebug()<<"("<<__LINE__<<") "<<"Error while 'subquery.exec' (income): update record in not empty set in 'filled_cells'.";
-			return -1;
-		}
+//   if quantity is going to be equal to zero, then just delete that row, we dont need it to appear in view.
+			if(query.value(quantity_column).toInt()==subquery.value(balance_quantity_column).toInt()) {
+				QString delete_str=QString("delete from filled_cells where cell_id='%1'")
+					.arg(subquery.value(balance_cell_id_column).toInt());
+				if(!subquery.exec(delete_str)) {
+					qDebug()<<"("<<__LINE__<<") "<<"Error while 'subquery.exec' (income): cant delete row in 'filled_cells'.";
+					return -1;
+				}
+				continue;
+			}
+//------------------------------------------------------------------------------------
+			QString update_str;
+			if(query.value(operation_type_column).toString()=="income operation")
+				update_str=QString("update filled_cells set quantity=quantity+'%1' where cell_id like '%2'")
+					.arg(query.value(quantity_column).toInt())
+					.arg(subquery.value(balance_cell_id_column).toInt());
+			else 
+				update_str=QString("update filled_cells set quantity=quantity-'%1' where cell_id like '%2'")
+					.arg(query.value(quantity_column).toInt())
+					.arg(subquery.value(balance_cell_id_column).toInt());
+			if(!subquery.exec(update_str)) {
+				qDebug()<<"("<<__LINE__<<") "<<"Error while 'subquery.exec' (income): update record in not empty set in 'filled_cells'.";
+				return -1;
+			}
 		continue;
 		}
 //---result set is empty, so we have nothing in that cell, lets ADD an income or minus outcome.

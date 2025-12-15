@@ -32,14 +32,14 @@ bool Database::openDatabase() {
 	db.setUserName(USER);
 //	db.setPassword(PW); //created user with no password, so dont need this anymore
 	db.setPort(PORT);
-  if(!db.open()) {
+	if(!db.open()) {
 		QMessageBox::information(nullptr,"Error message",
-					"Connection to database is NOT established!");
+			"Connection to database is NOT established!");
 		return false;
 	}
 	if(!createTables())
 		QMessageBox::information(nullptr,"Error message",
-					"Can't create tables for database!");
+			"Can't create tables for database!");
 	return true;	
 }
 
