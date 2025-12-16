@@ -7,6 +7,8 @@ Database::~Database() {
 	QSqlDatabase::removeDatabase(DB_NAME);
 	if(input_widget)
 		delete input_widget;
+//	if(login_widget)
+//		delete login_widget;
 }
 
 void Database::connectDatabase() {
@@ -25,6 +27,42 @@ bool Database::restoreDatabase() {
 	return false;
 }
 
+//void Database::createDatabase() {
+//	login_widget=new QWidget("Log in as a root");
+//	login_widget->setFixedSize(200,100);
+//	login_layout=new QVBoxLayout(login_widget);
+//	login_label=new QLabel("Password for 'root': ");
+//	login_password=new QLineEdit();
+//
+//	login_buttons_layout=new QHBoxLayout();
+//	login_okPB=new QPushButton("Ok");
+//	login_cancelPB=new QPushButton("Cancel");
+//	login_buttons_layout->addWidget(login_okPB);
+//	login_buttons_layout->addWidget(login_cancelPB);
+//
+//	login_layout->addWidget(login_label);
+//	login_layout->addWidget(login_password);
+//	login_layout->addLayout(login_buttons_layout);
+//	login_widget->show();
+//
+//	connect(login_okPB,&QPushButton::clicked,this,&Database::slot_login_root);
+//}
+
+//bool Database::slot_login_root() { 
+//	db=QSqlDatabase::addDatabase("QMYSQL");
+//	db.setHostName("localhost");
+//	db.setUserName("root");
+//	db.setPassword(login_password->text());
+//	db.setPort(PORT);
+//	if(!db.open()) {
+//		QMessageBox::information(nullptr,"Error message",
+//			"Connection to database as a 'root' is NOT established!");
+//		return false;
+//	}
+//	QSqlQuery query(db);
+////!!!!!!!	check if base exists, if not create.
+//}
+
 bool Database::openDatabase() {
 	db=QSqlDatabase::addDatabase("QMYSQL",DB_NAME);
 	db.setDatabaseName(DB_NAME);
@@ -34,7 +72,7 @@ bool Database::openDatabase() {
 	db.setPort(PORT);
 	if(!db.open()) {
 		QMessageBox::information(nullptr,"Error message",
-			"Connection to database is NOT established!");
+			"Connection to database as a 'user' is NOT established!");
 		return false;
 	}
 	if(!createTables())

@@ -92,6 +92,7 @@ private:
   int func_check_correctness(const QSortFilterProxyModel*,int*);
 	int func_insert_update();
 	int func_revert_insert_update();
+	void set_operation_dates();
 signals:
   void signal_ready();
 private slots:

@@ -162,8 +162,9 @@ int OutcomeDialog::func_check_correctness(const QSortFilterProxyModel *proxy,int
     QMessageBox::information(nullptr,"Warning message","No operations added!");
   	return -1;
 	}
+	int cell_column=ptr_operationsModel->fieldIndex("cell");
 	for(int row=0;row!=proxy->rowCount();++row) {
-		for(int column=1;column!=proxy->columnCount();++column) {
+		for(int column=cell_column;column!=proxy->columnCount();++column) {
 //------------------------------------------------------------------------------------
 			if((proxy->index(row,column)).data().isNull()) {
 				QMessageBox::information(nullptr,"Warning message","Some fields leaved empty!");
@@ -210,6 +211,8 @@ int OutcomeDialog::func_check_correctness(const QSortFilterProxyModel *proxy,int
 int OutcomeDialog::func_insert_update() {
   QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
 	QSqlQuery query(retrieveDB);
+//   need to create temp table like 'filled_cells'. Itself 'filled_cells' generated from slots.cpp, before dialog 
+//   object creating, so its not empty and would be better not to modify it.
 	if(!query.exec("drop temporary table if exists tmp_filled_cells")) {
 		qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': Cant drop temporary table for filled_cells.";
 		qDebug()<<"error type"<<query.lastError().type();
@@ -312,7 +315,7 @@ int OutcomeDialog::func_revert_insert_update() {
 		query.prepare("insert into filled_cells(cell,item,quantity) values(:c,:i,:q)");
 		query.bindValue(":c",operations_proxymodel->index(row,cell_column).data().toString());
 		query.bindValue(":i",operations_proxymodel->index(row,item_column).data().toString());
-		query.bindValue(":q",-operations_proxymodel->index(row,quantity_column).data().toInt());
+		query.bindValue(":q",operations_proxymodel->index(row,quantity_column).data().toInt());
 		if(!query.exec()) {
 			qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': inserting record in not empty set in 'filled_cells'.";
 			return -1;
@@ -325,6 +328,7 @@ int OutcomeDialog::func_revert_insert_update() {
 void OutcomeDialog::slot_saveOutcome() {
 	int sum=0;
 	if(func_check_correctness(operations_proxymodel,&sum)==0 && func_insert_update()==0) {
+		set_operation_dates();
 		QModelIndex index=ptr_outcomesModel->index(ptr_outcomesView->currentIndex().row(),ptr_outcomesModel->fieldIndex("sum"));
 		if(row_added)
 			index=ptr_outcomesModel->index(ptr_outcomesModel->rowCount()-1,ptr_outcomesModel->fieldIndex("sum"));
@@ -340,6 +344,15 @@ void OutcomeDialog::slot_saveOutcome() {
 		ptr_outcomesView->setRowHidden(ptr_outcomesModel->rowCount()-1,false);
 		emit signal_ready();
 		this->close();
+	}
+}
+
+void OutcomeDialog::set_operation_dates() {
+	QModelIndex source_index;
+	for(int row=0;row!=operations_proxymodel->rowCount();++row) {
+		source_index=operations_proxymodel->mapToSource(operations_proxymodel->index(row,ptr_operationsModel->fieldIndex("date")));	
+		if(source_index.isValid())
+			ptr_operationsModel->setData(source_index,date->date(),Qt::EditRole);	
 	}
 }
 
@@ -460,12 +473,9 @@ void OutcomeDialog::slot_add_operation() {
 	int row=ptr_operationsModel->rowCount();
 	ptr_operationsModel->insertRow(row);
 
-	QDate date_qdate=date->date();
-	QModelIndex tmp_date_index=ptr_operationsModel->index(row,ptr_operationsModel->fieldIndex("date"));
 	QModelIndex tmp_operation_number_index=ptr_operationsModel->index(row,ptr_operationsModel->fieldIndex("operation_number"));
 	QModelIndex tmp_operation_type_index=ptr_operationsModel->index(row,ptr_operationsModel->fieldIndex("operation_type"));
 	QModelIndex tmp_status_index=ptr_operationsModel->index(row,ptr_operationsModel->fieldIndex("status"));
-	ptr_operationsModel->setData(tmp_date_index,date_qdate,Qt::EditRole);
 	ptr_operationsModel->setData(tmp_operation_number_index,op_number->text(),Qt::EditRole);
 	ptr_operationsModel->setData(tmp_operation_type_index,"outcome operation",Qt::EditRole);
 	ptr_operationsModel->setData(tmp_status_index,"SAVED",Qt::EditRole);

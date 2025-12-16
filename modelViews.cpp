@@ -172,9 +172,9 @@ void MainWindow::setup_outcomeModelView() {
   outcomeModel->select();
   if(!outcomeModel->select())
     qDebug()<<"Selecting not working in outcome";
-  outcomeModel->setHeaderData(0, Qt::Horizontal, "id");
-  outcomeModel->setHeaderData(1, Qt::Horizontal, "N");
-  outcomeModel->setHeaderData(2, Qt::Horizontal, "Date");
+//  outcomeModel->setHeaderData(0, Qt::Horizontal, "id");
+//  outcomeModel->setHeaderData(1, Qt::Horizontal, "N");
+//  outcomeModel->setHeaderData(2, Qt::Horizontal, "Date");
   outcomeModel->setHeaderData(3, Qt::Horizontal, "Operation type");
   outcomeModel->setHeaderData(4, Qt::Horizontal, "Status");
   outcomeModel->setHeaderData(5, Qt::Horizontal, "Sum");
@@ -286,12 +286,14 @@ void MainWindow::setup_balanceModelView() {
 
 	balanceModelView_widget_buttons_layout=new QHBoxLayout();
 	generate=new QPushButton("Generate");
+	generate->setStyleSheet("background-color: #8BAE66");
 	generate->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	date_filter=new QDateEdit();
 	date_filter->setDate(QDate::currentDate());
 	date_filter->setDisplayFormat("dd.MM.yyyy");
 	date_filter->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	write_into_file=new QPushButton("Write into file");
+	write_into_file->setStyleSheet("background-color: #ED985F");
 	write_into_file->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	pieces_label=new QLabel("Pieces: ");
 	pieces_lineedit=new QLineEdit();

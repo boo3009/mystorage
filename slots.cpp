@@ -33,7 +33,7 @@ void MainWindow::slot_itemDialog_add() {
   obj_itemDialog->exec();
 
 /*   check if row added, then select it if so. Otherwise select the old one   */
-	if(itemsModel->rowCount()>before)
+	if(itemsModel->rowCount() > before)
 		index=items_proxymodel->index(items_proxymodel->rowCount()-1,1);
 	itemsView->setCurrentIndex(index);
 
@@ -133,12 +133,9 @@ void MainWindow::slot_incomeDialog_add() {
 	IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,
 																									operationsModel,balanceModel,-1,this);
 	obj_incomeDialog->exec();
-	int after=incomeModel->rowCount();
-  if(after!=before) {
-  	QModelIndex i=incomeModel->index(incomeModel->rowCount()-1,1); //get added income's qmodelindex
-		incomeView->setCurrentIndex(i); //select added row (after adding)
-	} else
-		incomeView->setCurrentIndex(index);
+  if(incomeModel->rowCount() > before)
+		index=incomeModel->index(incomeModel->rowCount()-1,1); //get added income's qmodelindex
+	incomeView->setCurrentIndex(index);
 	connect(obj_incomeDialog,&IncomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
 	delete obj_incomeDialog;
 	obj_incomeDialog=nullptr;
@@ -266,12 +263,9 @@ void MainWindow::slot_outcomeDialog_add() {
 	OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,
 																									operationsModel,balanceModel,-1,this);
   obj_outcomeDialog->exec();
-	int after=outcomeModel->rowCount();
-  if(after!=before) {
-  	QModelIndex i=outcomeModel->index(outcomeModel->rowCount()-1,1); //get added outcome's qmodelindex
-		outcomeView->setCurrentIndex(i); //select added row (after adding)
-	} else
-		outcomeView->setCurrentIndex(index);
+  if(outcomeModel->rowCount() > before)
+		index=outcomeModel->index(outcomeModel->rowCount()-1,1); //get added outcome's qmodelindex
+	outcomeView->setCurrentIndex(index);
 	connect(obj_outcomeDialog,&OutcomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
 	delete obj_outcomeDialog;
 	obj_outcomeDialog=nullptr;

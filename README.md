@@ -12,4 +12,4 @@ printing.
 
 As simple as it can be. Thats all for now, enjoy :)<br>
 <br>
-![anim](https://github.com/user-attachments/assets/fb221b39-7c09-4422-89ec-203f5d8baa9c)
+![anim](https://github.com/user-attachments/assets/873dee56-9906-4519-83f4-c806026a7ccb)
