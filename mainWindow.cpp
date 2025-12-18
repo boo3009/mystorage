@@ -15,7 +15,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
 
 void MainWindow::connect_Database() {
 	dbPointer=new Database();
-	dbPointer->connectDatabase();
+	dbPointer->connect_database();
 }
 
 void MainWindow::setup_ModelViews() {

@@ -2,86 +2,48 @@
 
 Database::Database(QObject *parent) : QObject(parent) {  }
 Database::~Database() { 
-	if(db.isOpen())
-		db.close();
-	QSqlDatabase::removeDatabase(DB_NAME);
+	if(database_object.isOpen())
+		database_object.close();
+//	QSqlDatabase::removeDatabase(DB_NAME);
 	if(input_widget)
 		delete input_widget;
-//	if(login_widget)
-//		delete login_widget;
 }
 
-void Database::connectDatabase() {
+void Database::connect_database() {
 	if(!QFile(DB_FILE_PATH).exists())
-		this->restoreDatabase();
-	else 
-		this->openDatabase();
+		this->restore_database();
+	else  
+		this->open_database();
 }
 
-bool Database::restoreDatabase() {
-	if(this->openDatabase()) {
-		if(this->createTables())
+bool Database::restore_database() {
+	if(this->open_database()) {
+		if(this->create_tables())
 			return true;
 	}
-	qDebug()<<"Database restoring is NOT succeded"<<"\t"<<DB_FILE_PATH;
+	qDebug()<<"Error: Database can't be restored.";
 	return false;
 }
 
-//void Database::createDatabase() {
-//	login_widget=new QWidget("Log in as a root");
-//	login_widget->setFixedSize(200,100);
-//	login_layout=new QVBoxLayout(login_widget);
-//	login_label=new QLabel("Password for 'root': ");
-//	login_password=new QLineEdit();
-//
-//	login_buttons_layout=new QHBoxLayout();
-//	login_okPB=new QPushButton("Ok");
-//	login_cancelPB=new QPushButton("Cancel");
-//	login_buttons_layout->addWidget(login_okPB);
-//	login_buttons_layout->addWidget(login_cancelPB);
-//
-//	login_layout->addWidget(login_label);
-//	login_layout->addWidget(login_password);
-//	login_layout->addLayout(login_buttons_layout);
-//	login_widget->show();
-//
-//	connect(login_okPB,&QPushButton::clicked,this,&Database::slot_login_root);
-//}
-
-//bool Database::slot_login_root() { 
-//	db=QSqlDatabase::addDatabase("QMYSQL");
-//	db.setHostName("localhost");
-//	db.setUserName("root");
-//	db.setPassword(login_password->text());
-//	db.setPort(PORT);
-//	if(!db.open()) {
-//		QMessageBox::information(nullptr,"Error message",
-//			"Connection to database as a 'root' is NOT established!");
-//		return false;
-//	}
-//	QSqlQuery query(db);
-////!!!!!!!	check if base exists, if not create.
-//}
-
-bool Database::openDatabase() {
-	db=QSqlDatabase::addDatabase("QMYSQL",DB_NAME);
-	db.setDatabaseName(DB_NAME);
-	db.setHostName(HOST);
-	db.setUserName(USER);
-//	db.setPassword(PW); //created user with no password, so dont need this anymore
-	db.setPort(PORT);
-	if(!db.open()) {
+bool Database::open_database() {
+	database_object=QSqlDatabase::addDatabase("QMYSQL",DB_NAME);
+	database_object.setDatabaseName(DB_NAME);
+	database_object.setHostName(HOST);
+	database_object.setUserName(USER);
+//	database_object.setPassword(PW); //created user with no password, so dont need this anymore
+	database_object.setPort(PORT);
+	if(!database_object.open()) {
 		QMessageBox::information(nullptr,"Error message",
 			"Connection to database as a 'user' is NOT established!");
 		return false;
 	}
-	if(!createTables())
+	if(!create_tables())
 		QMessageBox::information(nullptr,"Error message",
 			"Can't create tables for database!");
 	return true;	
 }
 
-bool Database::createTables() {
+bool Database::create_tables() {
   QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
   QSqlQuery query(retrieveDB);
 //---Create table income
@@ -166,14 +128,14 @@ bool Database::createTables() {
 	if(query.next()) {
 		if(query.value(0).toInt()==0) {
 			QMessageBox::information(nullptr,"Warning message","Cells table is empty,fill it out please.");
-			input_for_filling_cells();
+			get_inputs_for_filling_cells();
 		}
 	} else
 		qDebug()<<"Error: Could not retrieve count of rows in table: cells";
 	return true;
 }
 
-void Database::input_for_filling_cells() {
+void Database::get_inputs_for_filling_cells() {
 	input_widget=new QWidget();	
 	input_widget->setFixedSize(250,115);
 
@@ -193,18 +155,18 @@ void Database::input_for_filling_cells() {
 	input_widget_layout->addWidget(input_widget_cells_lable,0,2);
 	input_widget_layout->addWidget(input_widget_cells_lineedit,1,2);
 
-	input_widget_generatePG=new QPushButton("Generate");
-	input_widget_cancelPG=new QPushButton("Cancel");
+	input_widget_generate_button=new QPushButton("Generate");
+	input_widget_cancel_button=new QPushButton("Cancel");
 
-	input_widget_layout->addWidget(input_widget_generatePG,2,0);
-	input_widget_layout->addWidget(input_widget_cancelPG,2,1);
+	input_widget_layout->addWidget(input_widget_generate_button,2,0);
+	input_widget_layout->addWidget(input_widget_cancel_button,2,1);
 	input_widget->show();
 
-	connect(input_widget_generatePG,&QPushButton::clicked,this,&Database::cells_filling);
-	connect(input_widget_cancelPG,&QPushButton::clicked,[=](){ input_widget->close(); });
+	connect(input_widget_generate_button,&QPushButton::clicked,this,&Database::filling_cells);
+	connect(input_widget_cancel_button,&QPushButton::clicked,[=](){ input_widget->close(); });
 }
 
-void Database::cells_filling() {
+void Database::filling_cells() {
 	uint8_t sections=input_widget_sections_lineedit->text().toInt();
 	uint8_t height=input_widget_levels_lineedit->text().toInt();
 	uint8_t cells=input_widget_cells_lineedit->text().toInt();
@@ -234,7 +196,7 @@ void Database::cells_filling() {
 		exit(1);
 	}
 //   Starting transaction for inserting cells.
-	if(!db.transaction()) {
+	if(!database_object.transaction()) {
 		qDebug()<<"Failed to start transaction!";
 		qDebug()<<query.lastError().text();
 		return;
@@ -284,7 +246,7 @@ void Database::cells_filling() {
 		}
 	}
 //   Commiting transaction for inserted cells.
-	if(!db.commit()) {
+	if(!database_object.commit()) {
 		qDebug()<<"Failed to commit transaction!";
 		qDebug()<<query.lastError().text();
 		return;

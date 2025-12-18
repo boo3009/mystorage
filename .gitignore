@@ -1,5 +1,6 @@
 unnecessary/
 mystorageProject
+*_corrected*
 *.o
 *.a
 *.exe

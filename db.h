@@ -28,25 +28,27 @@ class Database : public QObject
 public:
 	explicit Database(QObject *parent=0);
 	~Database();
-	void connectDatabase();
+	void connect_database();
 private:
-	QSqlDatabase db;
-	QWidget *input_widget;
-	QGridLayout *input_widget_layout;
-	QLabel *input_widget_sections_lable;
-	QLineEdit *input_widget_sections_lineedit;
-	QLabel *input_widget_levels_lable;
-	QLineEdit *input_widget_levels_lineedit;
-	QLabel *input_widget_cells_lable;
-	QLineEdit *input_widget_cells_lineedit;
-	QPushButton *input_widget_generatePG;
-	QPushButton	*input_widget_cancelPG;
-	void input_for_filling_cells();
-	void cells_filling();
-		
-	bool openDatabase();
-	bool restoreDatabase();
-	bool createTables();
+	QSqlDatabase	database_object;
+//----------input part for filling cells
+	QWidget 		 *input_widget;
+	QGridLayout  *input_widget_layout;
+	QLabel 			 *input_widget_sections_lable;
+	QLineEdit 	 *input_widget_sections_lineedit;
+	QLabel 			 *input_widget_levels_lable;
+	QLineEdit 	 *input_widget_levels_lineedit;
+	QLabel 			 *input_widget_cells_lable;
+	QLineEdit 	 *input_widget_cells_lineedit;
+	QPushButton  *input_widget_generate_button;
+	QPushButton	 *input_widget_cancel_button;
+//----------main part functions	
+	bool open_database();
+	bool restore_database();
+	bool create_tables();
+//----------getting inputs and filling cells
+	void get_inputs_for_filling_cells();
+	void filling_cells();
 };
 
 #endif

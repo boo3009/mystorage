@@ -387,7 +387,11 @@ void MainWindow::slot_outcomeModelView_cancel_remove() {
 void MainWindow::slot_call_generate_balance() {
 	if(slot_generate_balance()==-1)
 		qDebug()<<__LINE__<<"Error: Cant generate balance,soryan :)";
-	QMessageBox::information(nullptr,"Info message","Balance generated!");
+	QMessageBox msg(this);
+	msg.setText("Balance generated :)");
+	msg.setStyleSheet("QMessageBox{background-color: #4B9DA9; border: 2px solid #778873}" 
+		"QLabel{min-width: 160px;}");
+	msg.exec();
 	balanceView->setVisible(true);
 }
 
