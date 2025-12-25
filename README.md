@@ -27,4 +27,4 @@ Further builds will not require runnig the script, so go ahead just with second 
 /--------------------------------------------------------------------------------------------/
 
 <br>
-![gif\_animation](unnecessary/anim.gif)
+![gif\_animation](anim.gif)
