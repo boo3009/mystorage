@@ -25,6 +25,5 @@ Installing steps.<br>
 Further builds will not require runnig the script, so go ahead just with second step.
 
 /--------------------------------------------------------------------------------------------/
-
 <br>
 ![anim](https://github.com/user-attachments/assets/74fd794e-dea0-4dd3-a1b2-f0528756b2b9)
