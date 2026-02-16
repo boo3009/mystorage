@@ -512,9 +512,10 @@ void MainWindow::slot_write_balance_into_file() {
 	}
 	QTextStream file_stream(&file);
 //   at this point lets define logic of writing information into file
-	QDateTime cur_date_time=QDateTime::currentDateTime();
-	QString cur_date_time_formated=cur_date_time.toString("dd.MM.yyyy, hh:mm:ss");
-	file_stream<<"| "<<cur_date_time_formated <<" |"<<Qt::endl; 
+	QString date_in_file=date_filter->date().toString("dd.MM.yyyy");
+	QString time_in_file=QTime::currentTime().toString("hh:mm:ss");
+	
+	file_stream<<"| "<<date_in_file<<", "<<time_in_file<<" |"<<Qt::endl; 
 	file_stream<< lines <<Qt::endl;
 	for(int row=0;row!=balanceModel->rowCount();++row) {
 //---------------------------------------------------------------------------------------------------------------------------------------

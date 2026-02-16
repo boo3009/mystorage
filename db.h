@@ -18,7 +18,7 @@
 #define DB_NAME "mystorage"
 #define DB_FILE_PATH "/var/lib/mysql/mystorage"
 #define HOST "localhost"
-#define USER "WHOAMI"
+#define USER "william"
 #define PORT 3306
 
 
