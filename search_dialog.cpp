@@ -54,6 +54,17 @@ void search_dialog::setup_dialog(QSqlQueryModel *ptr_search_model) {
 	cell_LE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	cell_L=new QLabel("Cell");
 	cell_L->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	balance_button_layout=new QHBoxLayout();
+	balance_L=new QLabel("Current balance: ");
+	balance_L->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	balance_LE=new QLineEdit();
+	balance_LE->setReadOnly(true);
+	balance_LE->clear();
+	balance_LE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	balance_button_layout->addWidget(balance_L);
+	balance_button_layout->addWidget(balance_LE);
+	balance_button_layout->addStretch();
+	balance_button_layout->setAlignment(Qt::AlignBottom);
 	search_dialog_button_layout->addWidget(cell_L);
 	search_dialog_button_layout->addWidget(cell_LE);
 	search_dialog_button_layout->addWidget(date_from_L);
@@ -65,6 +76,7 @@ void search_dialog::setup_dialog(QSqlQueryModel *ptr_search_model) {
 	search_dialog_button_layout->setAlignment(Qt::AlignTop);
 	search_dialog_layout->addLayout(search_dialog_button_layout);
 	search_dialog_layout->addWidget(search_view);
+	search_dialog_layout->addLayout(balance_button_layout);
 
 	this->setAutoFillBackground(true);
 	QPalette palette=this->palette();
@@ -88,15 +100,18 @@ void search_dialog::slot_search_filtered() {
 	if(query.exec()) {
 		if(!query.next()) {
 			search_view->setVisible(false);
+			balance_LE->setText(get_search_balance(1));
 			QMessageBox::information(nullptr,"Info","There is no movement related with specified cell");
 			return;
 		}
-	}	else
+	}	else {
 		qDebug()<<"FAILED to exec query in slot_search_filtered!";
+	}
+	balance_LE->setText(get_search_balance(0));
 	ptr_search_model->setQuery(query);
 	if(ptr_search_model->lastError().isValid())
 		qDebug()<<"select from operations FAILED"<<ptr_search_model->lastError().text();
-  search_view->setColumnHidden(0,true);
+	search_view->setColumnHidden(0,true);
   search_view->setColumnHidden(4,true);
   search_view->setColumnWidth(1,70);	//date
   search_view->setColumnWidth(2,70);	//op_num
@@ -105,5 +120,42 @@ void search_dialog::slot_search_filtered() {
   search_view->setColumnWidth(6,320);	//item
   search_view->setColumnWidth(7,30);	//quantity
 	search_view->setVisible(true);
-//	USE DELEGATES TO PAINT INCOMES AND OUTCOMES NI COLORS
+}
+
+QString search_dialog::get_search_balance(int mode) {
+	QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+	QSqlQuery sum_query(retrieveDB);
+	QString str;
+	if(mode==1)
+		str=R"(select
+		sum(case when operation_type like 'income operation' and cell like ? then quantity else 0 end) -
+		sum(case when operation_type like 'outcome operation' and cell like ? then quantity else 0 end)
+		from operations)";
+	if(mode==0)
+		str=R"(select
+		sum(case when operation_type like 'income operation' and cell like ? 
+				and date>= ? and date<= ? then quantity else 0 end) -
+		sum(case when operation_type like 'outcome operation' and cell like ? 
+				and date>= ? and date<= ? then quantity else 0 end)
+		from operations)";
+	sum_query.prepare(str);
+	sum_query.addBindValue(cell_LE->text());
+	if(mode==0) {
+		sum_query.addBindValue(date_from_DE->date().toString("yyyy-MM-dd"));
+		sum_query.addBindValue(date_to_DE->date().toString("yyyy-MM-dd"));
+	}
+	sum_query.addBindValue(cell_LE->text());
+	if(mode==0) {
+		sum_query.addBindValue(date_from_DE->date().toString("yyyy-MM-dd"));
+		sum_query.addBindValue(date_to_DE->date().toString("yyyy-MM-dd"));
+	}
+  if(sum_query.exec()) {
+		if(!sum_query.next()) {
+			QMessageBox::information(nullptr,"Info","There is no balance");
+			return "0";
+		}
+	} else {
+		qDebug()<<"FAILED to balance for searched cell";
+	}
+	return sum_query.value(0).toString();
 }

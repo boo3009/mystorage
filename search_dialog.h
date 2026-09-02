@@ -12,6 +12,7 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QDateEdit>
+#include <QSpacerItem>
 #include <QMessageBox>
 #include <QDebug>
 
@@ -34,10 +35,14 @@ private:
 	QDateEdit 						*date_to_DE;
 	QLabel 								*cell_L;
 	QLineEdit 						*cell_LE;
+	QHBoxLayout 					*balance_button_layout;
+	QLabel 								*balance_L;
+	QLineEdit 						*balance_LE;
 //--------	
 	void setup_dialog(QSqlQueryModel *ptr_search_model);
 private slots:
 	void slot_search_filtered();
+	QString get_search_balance(int mode);
 };
 
 #endif

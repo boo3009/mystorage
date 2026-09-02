@@ -254,8 +254,9 @@ void MainWindow::setup_balanceModelView() {
   balanceModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
 	balanceModel->setSort(1,Qt::AscendingOrder);
 //------------------------------create "Model" for search	
-	search_model=new QSqlQueryModel(this);
-  search_model->setHeaderData(0, Qt::Horizontal, "Op_id");
+//	search_model=new QSqlQueryModel(this);
+  search_model=new query_model_class(this);
+	search_model->setHeaderData(0, Qt::Horizontal, "Op_id");
   search_model->setHeaderData(1, Qt::Horizontal, "Date");
   search_model->setHeaderData(2, Qt::Horizontal, "Op_number");
   search_model->setHeaderData(3, Qt::Horizontal, "Op_type");

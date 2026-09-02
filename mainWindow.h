@@ -29,6 +29,7 @@
 #include "outcomeDialog.h"
 #include "search_dialog.h"
 #include "search_item_dialog.h"
+#include "search_model.h"
 
 
 class MainWindow:public QMainWindow {
@@ -104,7 +105,7 @@ private:
 	QLineEdit 						*non_empty_cells_lineedit;
 	QVBoxLayout 					*balanceModelView_widget_mainLayout;
 	QHBoxLayout 					*balanceModelView_widget_buttons_layout;
-	QSqlQueryModel				*search_model;
+	query_model_class			*search_model;
 	QPushButton 					*search_by_cell_PB;
 	QPushButton						*search_by_item_PB;
 //--------------------------pointer to "Database" object	

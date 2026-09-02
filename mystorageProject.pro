@@ -23,6 +23,7 @@ HEADERS += db.h \
 					 proxy_models.h\
            search_dialog.h\
            search_item_dialog.h\
+           search_model.h\
            mainWindow.h
 SOURCES += db.cpp \
 					 itemDialog.cpp\
