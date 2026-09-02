@@ -253,11 +253,19 @@ void MainWindow::setup_balanceModelView() {
   balanceModel->setHeaderData(3, Qt::Horizontal, "Quantity");
   balanceModel->setEditStrategy(QSqlTableModel::OnManualSubmit);
 	balanceModel->setSort(1,Qt::AscendingOrder);
+//------------------------------create "Model" for search	
+	search_model=new QSqlQueryModel(this);
+  search_model->setHeaderData(0, Qt::Horizontal, "Op_id");
+  search_model->setHeaderData(1, Qt::Horizontal, "Date");
+  search_model->setHeaderData(2, Qt::Horizontal, "Op_number");
+  search_model->setHeaderData(3, Qt::Horizontal, "Op_type");
+  search_model->setHeaderData(4, Qt::Horizontal, "Status");
+  search_model->setHeaderData(5, Qt::Horizontal, "Cell");
+  search_model->setHeaderData(6, Qt::Horizontal, "Item");
+  search_model->setHeaderData(7, Qt::Horizontal, "Quantity");
 //------------------------------create "View" for balance table
-
   balanceView=new QTableView();
 	balanceView->setModel(balanceModel);
-	
   balanceView->sortByColumn(1,Qt::AscendingOrder); /*finded out that view needed sort too*/
 	balanceView->setSelectionMode(QAbstractItemView::SingleSelection);
   balanceView->setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -265,8 +273,8 @@ void MainWindow::setup_balanceModelView() {
 	balanceView->resizeColumnsToContents();
   balanceView->setColumnHidden(0,true);
   balanceView->verticalHeader()->setVisible(false);
-//------------------------------some design tweaks for "balanceView" 
-  balanceView->setStyleSheet(
+  
+	balanceView->setStyleSheet(
     "QTableView {"
 			"gridline-color: #7F8CAA;  border: 2px solid #7F8CAA;"
     	"background: #E8F9FF;  selection-background-color: #6D94C5;}"
@@ -305,6 +313,12 @@ void MainWindow::setup_balanceModelView() {
 	non_empty_cells_lineedit->setReadOnly(true);
 	non_empty_cells_label->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	non_empty_cells_lineedit->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	search_by_cell_PB=new QPushButton("Search by cell");
+	search_by_cell_PB->setStyleSheet("background-color: #2F4F4F");
+	search_by_cell_PB->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	search_by_item_PB=new QPushButton("Search by item");
+	search_by_item_PB->setStyleSheet("background-color: #2F4F4F");
+	search_by_item_PB->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
 	balanceModelView_widget_buttons_layout->addWidget(date_filter);
 	balanceModelView_widget_buttons_layout->addWidget(generate);
@@ -314,7 +328,9 @@ void MainWindow::setup_balanceModelView() {
 	balanceModelView_widget_buttons_layout->addWidget(pieces_lineedit);
 	balanceModelView_widget_buttons_layout->addWidget(non_empty_cells_label);
 	balanceModelView_widget_buttons_layout->addWidget(non_empty_cells_lineedit);
-	balanceModelView_widget_buttons_layout->addStretch();
+	balanceModelView_widget_buttons_layout->addStretch(2);
+	balanceModelView_widget_buttons_layout->addWidget(search_by_cell_PB);
+	balanceModelView_widget_buttons_layout->addWidget(search_by_item_PB);
 
 	balanceModelView_widget_mainLayout->addLayout(balanceModelView_widget_buttons_layout);
 	balanceModelView_widget_mainLayout->addWidget(balanceView);

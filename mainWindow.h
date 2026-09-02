@@ -12,6 +12,7 @@
 #include <QtSql>
 #include <QSqlQuery>
 #include <QSqlTableModel>
+#include <QSqlQueryModel>
 #include <QSortFilterProxyModel>
 #include <QTableView>
 #include <QDataWidgetMapper>
@@ -26,6 +27,8 @@
 #include "itemDialog.h"
 #include "incomeDialog.h"
 #include "outcomeDialog.h"
+#include "search_dialog.h"
+#include "search_item_dialog.h"
 
 
 class MainWindow:public QMainWindow {
@@ -101,6 +104,9 @@ private:
 	QLineEdit 						*non_empty_cells_lineedit;
 	QVBoxLayout 					*balanceModelView_widget_mainLayout;
 	QHBoxLayout 					*balanceModelView_widget_buttons_layout;
+	QSqlQueryModel				*search_model;
+	QPushButton 					*search_by_cell_PB;
+	QPushButton						*search_by_item_PB;
 //--------------------------pointer to "Database" object	
 	Database 							*dbPointer;
 //--------------------------member functions Level 0
@@ -144,6 +150,8 @@ private slots:
 	int slot_generate_balance();
 	void slot_call_generate_balance();
 	void slot_write_balance_into_file();
+	void slot_show_search_dialog();
+	void slot_show_search_item_dialog();
 };
 
 #endif

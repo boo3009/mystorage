@@ -1,5 +1,8 @@
 unnecessary/
+DONT_*
+print*
 mystorageProject
+tags
 *_corrected*
 *.o
 *.a

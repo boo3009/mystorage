@@ -21,6 +21,8 @@ HEADERS += db.h \
 					 incomeDialog.h\
 					 outcomeDialog.h\
 					 proxy_models.h\
+           search_dialog.h\
+           search_item_dialog.h\
            mainWindow.h
 SOURCES += db.cpp \
 					 itemDialog.cpp\
@@ -30,5 +32,7 @@ SOURCES += db.cpp \
 					 slots.cpp\
 					 proxy_models.cpp\
            mainWindow.cpp\
+           search_dialog.cpp\
+           search_item_dialog.cpp\
            main.cpp 
 # RESOURCES += resources.qrc

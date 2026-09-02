@@ -132,12 +132,24 @@ void OutcomeDialog::setup_ModelandMapper() {
 
 void OutcomeDialog::func_addOutcome() {
 //---Insert row and set mapper to it
-  int row=ptr_outcomesModel->rowCount();
+  QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+	QSqlQuery query(retrieveDB);
+	if(!query.exec("select max(result_set)"
+								 "from(select distinct convert(substring_index(operation_number,'-',-1),unsigned)"
+								 "as result_set from outcome) as max")) {
+		qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': Cant calculate number for new row.";
+		return;
+	}
+	int max_row_number=-1;
+	if(query.next())
+		max_row_number=query.value(0).toInt();
+	
+	int row=ptr_outcomesModel->rowCount();
 	ptr_outcomesModel->insertRow(row);
 	row_added=true;
 	mapper->setCurrentModelIndex(ptr_outcomesModel->index(row,1));
 //---Get the string for operation_number and set it to lineedit op_number
-	QString num="out-"+QString::number(row+1);
+	QString num="out-"+QString::number(max_row_number+1);
 	op_number->setText(num);
 //---Set filter for operations proxymodel to show operations considered to new op_number
 	operations_proxymodel->setFilterPattern(op_number->text());
@@ -347,6 +359,7 @@ void OutcomeDialog::slot_saveOutcome() {
 	}
 }
 
+//  set dates for operations within outcome based on dates from field "date", not on current dates
 void OutcomeDialog::set_operation_dates() {
 	QModelIndex source_index;
 	for(int row=0;row!=operations_proxymodel->rowCount();++row) {

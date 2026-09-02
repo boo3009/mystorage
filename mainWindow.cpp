@@ -117,4 +117,6 @@ void MainWindow::setup_SignalSlots() {
 //-------------------------balanceModelView connects
 	connect(generate,&QPushButton::clicked,this,&MainWindow::slot_call_generate_balance);
 	connect(write_into_file,&QPushButton::clicked,this,&MainWindow::slot_write_balance_into_file);
+	connect(search_by_cell_PB,&QPushButton::clicked,this,&MainWindow::slot_show_search_dialog);
+	connect(search_by_item_PB,&QPushButton::clicked,this,&MainWindow::slot_show_search_item_dialog);
 }

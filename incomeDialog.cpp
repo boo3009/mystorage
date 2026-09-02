@@ -119,7 +119,7 @@ void IncomeDialog::setup_Widget() {
 	connect(operations_addPB,&QPushButton::clicked,this,&IncomeDialog::slot_add_operation);
 	connect(operations_copyPB,&QPushButton::clicked,this,&IncomeDialog::slot_copy_operation);
 	connect(operations_removePB,&QPushButton::clicked,this,&IncomeDialog::slot_remove_operation);
-} 
+}
 
 void IncomeDialog::setup_ModelandMapper() {
   mapper=new QDataWidgetMapper(this);
@@ -132,12 +132,24 @@ void IncomeDialog::setup_ModelandMapper() {
 
 void IncomeDialog::func_addIncome() {
 //---Insert row and set mapper to it
+  QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
+	QSqlQuery query(retrieveDB);
+	if(!query.exec("select max(result_set)"
+								 "from(select distinct convert(substring_index(operation_number,'-',-1),unsigned)"
+								 "as result_set from income) as max")) {
+		qDebug()<<"("<<__LINE__<<") "<<"error in work of 'query.exec': Cant calculate number for new row.";
+		return;
+	}
+	int max_row_number=-1;
+	if(query.next())
+		max_row_number=query.value(0).toInt();
+	
   int row=ptr_incomesModel->rowCount();
 	ptr_incomesModel->insertRow(row);
 	row_added=true;
 	mapper->setCurrentModelIndex(ptr_incomesModel->index(row,1));
 //---Get the string for operation_number and set it to lineedit op_number
-	QString num="in-"+QString::number(row+1);
+	QString num="in-"+QString::number(max_row_number+1);
 	op_number->setText(num);
 //---Set filter for operations proxymodel to show operations considered to new op_number
 	operations_proxymodel->setFilterPattern(op_number->text());
