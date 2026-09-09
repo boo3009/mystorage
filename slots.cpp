@@ -560,15 +560,8 @@ void MainWindow::slot_write_balance_into_file() {
 	file.close();
 }
 
-void MainWindow::slot_show_search_dialog() {
-	search_dialog *search=new search_dialog(search_model,this);
-	search->exec();
-	delete search;
-	search=nullptr;
-}
-
-void MainWindow::slot_show_search_item_dialog() {
-	search_item_dialog *search=new search_item_dialog(search_model,this);
+void MainWindow::slot_show_search_dialog(int mode) {
+	search_dialog *search=new search_dialog(search_model,mode,this);
 	search->exec();
 	delete search;
 	search=nullptr;

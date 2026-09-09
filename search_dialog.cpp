@@ -1,7 +1,7 @@
 #include "search_dialog.h"
 
-search_dialog::search_dialog(QSqlQueryModel *search_model,QWidget *parent) : QDialog(parent),
-											 ptr_search_model(search_model) { 
+search_dialog::search_dialog(QSqlQueryModel *search_model,int mode,QWidget *parent) : 
+	QDialog(parent), ptr_search_model(search_model), cell_or_item_mode(mode) { 
 	setup_dialog(ptr_search_model); 
 }
 
@@ -49,24 +49,65 @@ void search_dialog::setup_dialog(QSqlQueryModel *ptr_search_model) {
 	date_to_DE->setDisplayFormat("dd.MM.yyyy");
 	date_to_DE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	date_to_L=new QLabel("Date to: ");
-	cell_LE=new QLineEdit();
-	cell_LE->clear();
-	cell_LE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-	cell_L=new QLabel("Cell");
-	cell_L->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	cell_or_item_LE=new QLineEdit();
+	cell_or_item_LE->clear();
+	cell_or_item_LE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	cell_or_item_L=new QLabel();
+	cell_or_item_L->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	if(cell_or_item_mode==0)
+		cell_or_item_L->setText("Cell");
+	if(cell_or_item_mode==1)
+		cell_or_item_L->setText("Item");
 	balance_button_layout=new QHBoxLayout();
-	balance_L=new QLabel("Current balance: ");
-	balance_L->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-	balance_LE=new QLineEdit();
-	balance_LE->setReadOnly(true);
-	balance_LE->clear();
-	balance_LE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-	balance_button_layout->addWidget(balance_L);
-	balance_button_layout->addWidget(balance_LE);
+	
+	inc_balance_L=new QLabel("Incomes: ");
+	inc_balance_L->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	inc_balance_LE=new QLineEdit();
+	inc_balance_LE->setReadOnly(true);
+	inc_balance_LE->setAlignment(Qt::AlignCenter);
+	inc_balance_LE->setFixedWidth(70);
+	inc_balance_LE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	inc_balance_LE->clear();
+	
+	out_balance_L=new QLabel("Outcomes: ");
+	out_balance_L->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	out_balance_LE=new QLineEdit();
+	out_balance_LE->setReadOnly(true);
+	out_balance_LE->setAlignment(Qt::AlignCenter);
+	out_balance_LE->setFixedWidth(70);
+	out_balance_LE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	out_balance_LE->clear();
+	
+	filtered_balance_L=new QLabel("Filtered: ");
+	filtered_balance_L->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	filtered_balance_LE=new QLineEdit();
+	filtered_balance_LE->setReadOnly(true);
+	filtered_balance_LE->setAlignment(Qt::AlignCenter);
+	filtered_balance_LE->setFixedWidth(70);
+	filtered_balance_LE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	filtered_balance_LE->clear();
+	
+	current_balance_L=new QLabel("Current: ");
+	current_balance_L->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	current_balance_LE=new QLineEdit();
+	current_balance_LE->setReadOnly(true);
+	current_balance_LE->setAlignment(Qt::AlignCenter);
+	current_balance_LE->setFixedWidth(70);
+	current_balance_LE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
+	current_balance_LE->clear();
+	
+	balance_button_layout->addWidget(inc_balance_L);
+	balance_button_layout->addWidget(inc_balance_LE);
+	balance_button_layout->addWidget(out_balance_L);
+	balance_button_layout->addWidget(out_balance_LE);
+	balance_button_layout->addWidget(filtered_balance_L);
+	balance_button_layout->addWidget(filtered_balance_LE);
+	balance_button_layout->addWidget(current_balance_L);
+	balance_button_layout->addWidget(current_balance_LE);
 	balance_button_layout->addStretch();
 	balance_button_layout->setAlignment(Qt::AlignBottom);
-	search_dialog_button_layout->addWidget(cell_L);
-	search_dialog_button_layout->addWidget(cell_LE);
+	search_dialog_button_layout->addWidget(cell_or_item_L);
+	search_dialog_button_layout->addWidget(cell_or_item_LE);
 	search_dialog_button_layout->addWidget(date_from_L);
 	search_dialog_button_layout->addWidget(date_from_DE);
 	search_dialog_button_layout->addWidget(date_to_L);
@@ -87,27 +128,31 @@ void search_dialog::setup_dialog(QSqlQueryModel *ptr_search_model) {
 }
 
 void search_dialog::slot_search_filtered() {
-	if(cell_LE->text().isEmpty()) {
-    QMessageBox::information(nullptr,"Warning message","Please, set the 'Cell' field!");
+	if(cell_or_item_LE->text().isEmpty()) {
+    QMessageBox::information(nullptr,"Warning message","Provide with cell or an item please");
 		return;
 	}
 	QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
 	QSqlQuery query(retrieveDB);
-	query.prepare("select * from operations where status like 'SAVED' and date>=? and date<=? and cell like ?");
+	if(cell_or_item_mode==0)
+		query.prepare("select * from operations where status like 'SAVED'"
+									"and date>=? and date<=? and cell like ?");
+	if(cell_or_item_mode==1)
+		query.prepare("select * from operations where status like 'SAVED'" 
+									"and date>=? and date<=? and item REGEXP ?");
 	query.addBindValue(date_from_DE->date().toString("yyyy-MM-dd"));
 	query.addBindValue(date_to_DE->date().toString("yyyy-MM-dd"));
-	query.addBindValue(cell_LE->text());
+	query.addBindValue(cell_or_item_LE->text());
 	if(query.exec()) {
 		if(!query.next()) {
 			search_view->setVisible(false);
-			balance_LE->setText(get_search_balance(1));
-			QMessageBox::information(nullptr,"Info","There is no movement related with specified cell");
+			get_search_balance();
+			QMessageBox::information(nullptr,"Info","No movement related with specified cell or item");
 			return;
 		}
-	}	else {
+	}	else
 		qDebug()<<"FAILED to exec query in slot_search_filtered!";
-	}
-	balance_LE->setText(get_search_balance(0));
+	get_search_balance();
 	ptr_search_model->setQuery(query);
 	if(ptr_search_model->lastError().isValid())
 		qDebug()<<"select from operations FAILED"<<ptr_search_model->lastError().text();
@@ -122,40 +167,71 @@ void search_dialog::slot_search_filtered() {
 	search_view->setVisible(true);
 }
 
-QString search_dialog::get_search_balance(int mode) {
+void search_dialog::get_search_balance() {
 	QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
-	QSqlQuery sum_query(retrieveDB);
-	QString str;
-	if(mode==1)
-		str=R"(select
-		sum(case when operation_type like 'income operation' and cell like ? then quantity else 0 end) -
-		sum(case when operation_type like 'outcome operation' and cell like ? then quantity else 0 end)
-		from operations)";
-	if(mode==0)
-		str=R"(select
-		sum(case when operation_type like 'income operation' and cell like ? 
-				and date>= ? and date<= ? then quantity else 0 end) -
-		sum(case when operation_type like 'outcome operation' and cell like ? 
-				and date>= ? and date<= ? then quantity else 0 end)
-		from operations)";
-	sum_query.prepare(str);
-	sum_query.addBindValue(cell_LE->text());
-	if(mode==0) {
-		sum_query.addBindValue(date_from_DE->date().toString("yyyy-MM-dd"));
-		sum_query.addBindValue(date_to_DE->date().toString("yyyy-MM-dd"));
+	QSqlQuery inc_query(retrieveDB);
+	QSqlQuery out_query(retrieveDB);
+	QSqlQuery bal_cur_query(retrieveDB);
+	QString inc_str,out_str,cur_bal_str;
+	
+	if(cell_or_item_mode==0) {
+		inc_str=R"(select sum(case when operation_type like 'income operation' and cell like ? 
+							 and date>= ? and date<= ? then quantity else 0 end) from operations 
+							 where status like 'SAVED')";
+		out_str=R"(select sum(case when operation_type like 'outcome operation' and cell like ? 
+							 and date>= ? and date<= ? then quantity else 0 end) from operations
+							 where status like 'SAVED')";
+		cur_bal_str=R"(select
+			sum(case when operation_type like 'income operation' and cell like ? then quantity else 0 end) -
+			sum(case when operation_type like 'outcome operation' and cell like ? then quantity else 0 end)
+			from operations where status like 'SAVED')";
 	}
-	sum_query.addBindValue(cell_LE->text());
-	if(mode==0) {
-		sum_query.addBindValue(date_from_DE->date().toString("yyyy-MM-dd"));
-		sum_query.addBindValue(date_to_DE->date().toString("yyyy-MM-dd"));
+	if(cell_or_item_mode==1) {
+		inc_str=R"(select sum(case when operation_type like 'income operation' and item REGEXP ? 
+							 and date>= ? and date<= ? then quantity else 0 end) from operations
+							 where status like 'SAVED')";
+		out_str=R"(select sum(case when operation_type like 'outcome operation' and item REGEXP ? 
+							 and date>= ? and date<= ? then quantity else 0 end) from operations
+							 where status like 'SAVED')";
+		cur_bal_str=R"(select
+			sum(case when operation_type like 'income operation' and item REGEXP ? then quantity else 0 end) -
+			sum(case when operation_type like 'outcome operation' and item REGEXP ? then quantity else 0 end)
+			from operations where status like 'SAVED')";
 	}
-  if(sum_query.exec()) {
-		if(!sum_query.next()) {
-			QMessageBox::information(nullptr,"Info","There is no balance");
-			return "0";
-		}
-	} else {
-		qDebug()<<"FAILED to balance for searched cell";
-	}
-	return sum_query.value(0).toString();
+	inc_query.prepare(inc_str);
+	inc_query.addBindValue(cell_or_item_LE->text());
+	inc_query.addBindValue(date_from_DE->date().toString("yyyy-MM-dd"));
+	inc_query.addBindValue(date_to_DE->date().toString("yyyy-MM-dd"));
+	if(inc_query.exec()) {
+		if(inc_query.next())
+			inc_balance_LE->setText(inc_query.value(0).toString());
+		else
+			inc_balance_LE->setText("-");
+	} else
+		qDebug()<<"FAILED to sum incomes balance";
+	out_query.prepare(out_str);
+	out_query.addBindValue(cell_or_item_LE->text());
+	out_query.addBindValue(date_from_DE->date().toString("yyyy-MM-dd"));
+	out_query.addBindValue(date_to_DE->date().toString("yyyy-MM-dd"));
+	if(out_query.exec()) {
+		if(out_query.next())
+			out_balance_LE->setText(out_query.value(0).toString());
+		else
+			out_balance_LE->setText("-");
+	} else
+		qDebug()<<"FAILED to sum outcomes balance";
+	bal_cur_query.prepare(cur_bal_str);
+	bal_cur_query.addBindValue(cell_or_item_LE->text());
+	bal_cur_query.addBindValue(cell_or_item_LE->text());
+	if(bal_cur_query.exec()) {
+		if(bal_cur_query.next())
+			current_balance_LE->setText(bal_cur_query.value(0).toString());
+		else
+			current_balance_LE->setText("-");
+	} else
+		qDebug()<<"FAILED to sum current balance";
+	if(inc_query.value(0).toString()!="-" && out_query.value(0).toString()!="-")
+		filtered_balance_LE->setText(QString::number(inc_query.value(0).toInt()-out_query.value(0).toInt()));
+	else
+		filtered_balance_LE->setText("-");
 }

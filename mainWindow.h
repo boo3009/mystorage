@@ -28,8 +28,6 @@
 #include "incomeDialog.h"
 #include "outcomeDialog.h"
 #include "search_dialog.h"
-#include "search_item_dialog.h"
-#include "search_model.h"
 
 
 class MainWindow:public QMainWindow {
@@ -151,8 +149,7 @@ private slots:
 	int slot_generate_balance();
 	void slot_call_generate_balance();
 	void slot_write_balance_into_file();
-	void slot_show_search_dialog();
-	void slot_show_search_item_dialog();
+	void slot_show_search_dialog(int mode);
 };
 
 #endif
