@@ -14,7 +14,7 @@ IncomeDialog::IncomeDialog(QSqlTableModel *model,QTableView *view,QSqlTableModel
 }
 
 void IncomeDialog::setup_Widget() {
-  setWindowTitle("Creating new income");
+  setWindowTitle(CREATE_INCOME_RU);
   setFixedSize(600,800);
 //	this->setWindowFlags(Qt::FramelessWindowHint); //title bar disabling, but focus messed up
 //	this->setWindowModality(Qt::ApplicationModal);
@@ -27,18 +27,18 @@ void IncomeDialog::setup_Widget() {
   buttonsLayout=new QHBoxLayout();
   operations_buttons_layout=new QHBoxLayout();
   
-	op_number_label=new	QLabel("Operation Number");
+	op_number_label=new	QLabel(NUM_RU);
 	op_number=new QLineEdit();
 	op_number->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	op_number->setReadOnly(true);
 
-	date_label=new QLabel("Date");
+	date_label=new QLabel(DATE_RU);
 	date=new QDateEdit();
 	date->setDate(QDate::currentDate());
 	date->setDisplayFormat("dd.MM.yyyy");
 	date->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 
-	note_label=new QLabel("Note");
+	note_label=new QLabel(NOTE_RU);
 	note=new QLineEdit();
 
 //---------------------operations part-------------------
@@ -57,15 +57,17 @@ void IncomeDialog::setup_Widget() {
 //	operationsView_header->setSectionResizeMode(QHeaderView::ResizeToContents);
 	operationsView->setColumnWidth(5,80);
 	operationsView->setColumnWidth(6,400);
+	cell_delegate *delegate=new cell_delegate(operationsView);
+	operationsView->setItemDelegateForColumn(5,delegate);
 
 	operations_proxymodel=new Proxy_op_number(this);
 	operations_proxymodel->setSourceModel(ptr_operationsModel);
 	operations_proxymodel->setFilterKeyColumn(ptr_operationsModel->fieldIndex("operation_number"));
 	operationsView->setModel(operations_proxymodel);
 
-	operations_addPB=new QPushButton("Add");
-	operations_copyPB=new QPushButton("Copy");
-	operations_removePB=new QPushButton("Remove");
+	operations_addPB=new QPushButton(ADD_RU);
+	operations_copyPB=new QPushButton(COPY_RU);
+	operations_removePB=new QPushButton(REMOVE_RU);
 	operations_buttons_layout=new QHBoxLayout();
 	operations_buttons_layout->addWidget(operations_addPB);
 	operations_buttons_layout->addWidget(operations_copyPB);
@@ -75,8 +77,8 @@ void IncomeDialog::setup_Widget() {
 	operations_copyPB->setStyleSheet("background-color: #FFC50F");
 	operations_removePB->setStyleSheet("background-color: #FFC50F");
 //---------------------saving buttons-------------------
-	save_incomePB=new QPushButton("Save");
-  cancel_incomePB=new QPushButton("Cancel");
+	save_incomePB=new QPushButton(SAVE_RU);
+  cancel_incomePB=new QPushButton(CANCEL_RU);
   buttonsLayout->addWidget(save_incomePB);
   buttonsLayout->addWidget(cancel_incomePB);
 	
@@ -167,21 +169,21 @@ int IncomeDialog::func_check_correctness(const QSortFilterProxyModel *proxy,int 
   QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
 	QSqlQuery query(retrieveDB);
   if(proxy->rowCount()==0) {
-    QMessageBox::information(nullptr,"Warning message","No operations added!");
+    QMessageBox::information(nullptr,WARN_NO_OP_ADDED_RU);
   	return -1;
 	}
 	for(int row=0;row!=proxy->rowCount();++row) {
 		for(int column=1;column!=proxy->columnCount();++column) {
 //------------------------------------------------------------------------------------
 			if((proxy->index(row,column)).data().isNull()) {
-				QMessageBox::information(nullptr,"Warning message","Some fields leaved empty!");
+				QMessageBox::information(nullptr,WARN_EMPTY_FIELDS_RU);
 				return -1;
 			}
 //------------------------------------------------------------------------------------
 			if(column==ptr_operationsModel->fieldIndex("quantity") && !operationsView->isRowHidden(row)) {
 				int local_quantity=proxy->index(row,column).data().toInt();
 				if(local_quantity<=0) {
-					QMessageBox::information(nullptr,"Warning message",QString("%1 %2").arg("Quantity is less or equal '0': ").arg(local_quantity));
+					QMessageBox::information(nullptr,WARN_RU,QString("%1 %2").arg(WARN_QUANTITY_RU).arg(local_quantity));
 					return -1;
 				}
 				*sum=*sum+local_quantity;
@@ -200,11 +202,11 @@ int IncomeDialog::func_check_correctness(const QSortFilterProxyModel *proxy,int 
 				}
 				if(query.next()) {
 					if(local_cell.isEmpty()) {
-						QMessageBox::information(nullptr,"Warning message","Some fields leaved empty!");
+						QMessageBox::information(nullptr,WARN_EMPTY_FIELDS_RU);
 						return -1;
 					}
 					if(0==query.value(0).toInt()) {
-						QMessageBox::information(nullptr,"Warning message",QString("%1 %2").arg("Wrong cell number: ").arg(local_cell));
+						QMessageBox::information(nullptr,WARN_RU,QString("%1 %2").arg(WARN_WRONG_CELL_NUM_RU).arg(local_cell));
 						return -1;
 					}
 				}
@@ -255,11 +257,11 @@ void IncomeDialog::slot_open_itemsList(QModelIndex index) {
 												"background-color: #ABE7B2; color: black;"
 												"border: 1px solid #427A76; }");
 
-	items_proxymodel=new QSortFilterProxyModel(this); //----experimental
-	items_proxymodel->setSourceModel(ptr_itemsModel); //----experimental
-	items_proxymodel->setFilterKeyColumn(ptr_itemsModel->fieldIndex("item_name")); //----experimental
+	items_proxymodel=new QSortFilterProxyModel(this);
+	items_proxymodel->setSourceModel(ptr_itemsModel);
+	items_proxymodel->setFilterKeyColumn(ptr_itemsModel->fieldIndex("item_name"));
 	items_proxymodel->setFilterCaseSensitivity(Qt::CaseInsensitive);
-	items_proxymodel->setDynamicSortFilter(true); //----experimental
+	items_proxymodel->setDynamicSortFilter(true);
 
 	items_view=new QTableView();
 	items_view->setModel(items_proxymodel);
@@ -286,9 +288,9 @@ void IncomeDialog::slot_open_itemsList(QModelIndex index) {
 	items_widget_layout=new QVBoxLayout(items_widget);
 
 	items_filter_layout=new QHBoxLayout();
-	items_filter_label=new QLabel("Search item");
+	items_filter_label=new QLabel(SEARCH_ITEM_RU);
 	items_filter_lineedit=new QLineEdit();
-	items_filter_clearPB=new QPushButton("Clear filter");
+	items_filter_clearPB=new QPushButton(CLEAR_FILTER_RU);
 	items_filter_label->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	items_filter_lineedit->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	items_filter_clearPB->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
@@ -297,8 +299,8 @@ void IncomeDialog::slot_open_itemsList(QModelIndex index) {
 	items_filter_layout->addWidget(items_filter_clearPB);
 
 	items_buttons_layout=new QHBoxLayout();
-	select_itemPB=new QPushButton("Select");
-	cancel_itemPB=new QPushButton("Cancel");
+	select_itemPB=new QPushButton(SELECT_RU);
+	cancel_itemPB=new QPushButton(CANCEL_RU);
 	items_buttons_layout->addWidget(select_itemPB);
 	items_buttons_layout->addWidget(cancel_itemPB);
 	
@@ -329,7 +331,7 @@ void IncomeDialog::slot_passSelectedItem() {
 //	QModelIndex item_index=ptr_itemsModel->index(items_view->currentIndex().row(),ptr_itemsModel->fieldIndex("item_name"));
 	QModelIndex proxy_index=items_proxymodel->index(items_view->currentIndex().row(),ptr_itemsModel->fieldIndex("item_name"));
 	if(!proxy_index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Nothing selected, pick an item please!");
+    QMessageBox::information(nullptr,WARN_NOTHING_SELECTED_RU);
   	return;
 	}
 //---Get the text from selected item
@@ -341,7 +343,7 @@ void IncomeDialog::slot_passSelectedItem() {
 //---Get the correspond index in main operations model
 	QModelIndex correspond_index=operations_proxymodel->mapToSource(op_index);
 	if(!op_index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Nothing selected, select a row please!");
+    QMessageBox::information(nullptr,WARN_NO_ROW_SELECTED_RU);
   	return;
 	}
 //---Set the selected items text by index in operations model
@@ -372,11 +374,11 @@ void IncomeDialog::slot_add_operation() {
 
 void IncomeDialog::slot_copy_operation() {
 	if(operations_proxymodel->rowCount()==0) {
-    QMessageBox::information(nullptr,"Warning message","Empty table, nothing to copy!");
+    QMessageBox::information(nullptr,WARN_EMPTY_TABLE_RU);
 		return;
 	}
 	if(!operationsView->currentIndex().isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Select row before copying!");
+    QMessageBox::information(nullptr,WARN_SELECT_ROW_RU);
 		return;
 	}
 	QModelIndex source_index=operationsView->currentIndex();
@@ -399,7 +401,7 @@ void IncomeDialog::slot_remove_operation() {
 //   get the index of removing row. check validness
 	QModelIndex op_index=operations_proxymodel->index(operationsView->currentIndex().row(),operationsView->currentIndex().column());
 	if(!op_index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Select row before deletion!");
+    QMessageBox::information(nullptr,WARN_SELECT_BEFORE_DELETEION_RU);
 		return;
 	}
 //   set that row hidden 

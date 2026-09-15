@@ -56,23 +56,21 @@ SOURCES       = db.cpp \
 		itemDialog.cpp \
 		incomeDialog.cpp \
 		outcomeDialog.cpp \
-		proxy_models.cpp \
 		search_dialog.cpp \
 		mainWindow.cpp \
 		modelViews.cpp \
 		slots.cpp \
 		main.cpp moc_db.cpp \
 		moc_itemDialog.cpp \
+		moc_delegates_proxies.cpp \
 		moc_incomeDialog.cpp \
 		moc_outcomeDialog.cpp \
-		moc_proxy_models.cpp \
 		moc_search_dialog.cpp \
 		moc_mainWindow.cpp
 OBJECTS       = db.o \
 		itemDialog.o \
 		incomeDialog.o \
 		outcomeDialog.o \
-		proxy_models.o \
 		search_dialog.o \
 		mainWindow.o \
 		modelViews.o \
@@ -80,9 +78,9 @@ OBJECTS       = db.o \
 		main.o \
 		moc_db.o \
 		moc_itemDialog.o \
+		moc_delegates_proxies.o \
 		moc_incomeDialog.o \
 		moc_outcomeDialog.o \
-		moc_proxy_models.o \
 		moc_search_dialog.o \
 		moc_mainWindow.o
 DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
@@ -164,15 +162,14 @@ DIST          = /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/spec_pre.prf \
 		/usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/lex.prf \
 		mystorageProject.pro db.h \
 		itemDialog.h \
+		delegates_proxies.h \
 		incomeDialog.h \
 		outcomeDialog.h \
-		proxy_models.h \
 		search_dialog.h \
 		mainWindow.h db.cpp \
 		itemDialog.cpp \
 		incomeDialog.cpp \
 		outcomeDialog.cpp \
-		proxy_models.cpp \
 		search_dialog.cpp \
 		mainWindow.cpp \
 		modelViews.cpp \
@@ -361,8 +358,8 @@ distdir: FORCE
 	@test -d $(DISTDIR) || mkdir -p $(DISTDIR)
 	$(COPY_FILE) --parents $(DIST) $(DISTDIR)/
 	$(COPY_FILE) --parents /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp $(DISTDIR)/
-	$(COPY_FILE) --parents db.h itemDialog.h incomeDialog.h outcomeDialog.h proxy_models.h search_dialog.h mainWindow.h $(DISTDIR)/
-	$(COPY_FILE) --parents db.cpp itemDialog.cpp incomeDialog.cpp outcomeDialog.cpp proxy_models.cpp search_dialog.cpp mainWindow.cpp modelViews.cpp slots.cpp main.cpp $(DISTDIR)/
+	$(COPY_FILE) --parents db.h itemDialog.h delegates_proxies.h incomeDialog.h outcomeDialog.h search_dialog.h mainWindow.h $(DISTDIR)/
+	$(COPY_FILE) --parents db.cpp itemDialog.cpp incomeDialog.cpp outcomeDialog.cpp search_dialog.cpp mainWindow.cpp modelViews.cpp slots.cpp main.cpp $(DISTDIR)/
 
 
 clean: compiler_clean 
@@ -394,9 +391,9 @@ compiler_moc_predefs_clean:
 moc_predefs.h: /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 	g++ -pipe -g -Wall -Wextra -dM -E -o moc_predefs.h /usr/lib/x86_64-linux-gnu/qt5/mkspecs/features/data/dummy.cpp
 
-compiler_moc_header_make_all: moc_db.cpp moc_itemDialog.cpp moc_incomeDialog.cpp moc_outcomeDialog.cpp moc_proxy_models.cpp moc_search_dialog.cpp moc_mainWindow.cpp
+compiler_moc_header_make_all: moc_db.cpp moc_itemDialog.cpp moc_delegates_proxies.cpp moc_incomeDialog.cpp moc_outcomeDialog.cpp moc_search_dialog.cpp moc_mainWindow.cpp
 compiler_moc_header_clean:
-	-$(DEL_FILE) moc_db.cpp moc_itemDialog.cpp moc_incomeDialog.cpp moc_outcomeDialog.cpp moc_proxy_models.cpp moc_search_dialog.cpp moc_mainWindow.cpp
+	-$(DEL_FILE) moc_db.cpp moc_itemDialog.cpp moc_delegates_proxies.cpp moc_incomeDialog.cpp moc_outcomeDialog.cpp moc_search_dialog.cpp moc_mainWindow.cpp
 moc_db.cpp: db.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
@@ -404,31 +401,35 @@ moc_db.cpp: db.h \
 
 moc_itemDialog.cpp: itemDialog.h \
 		db.h \
+		translations.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include itemDialog.h -o moc_itemDialog.cpp
 
+moc_delegates_proxies.cpp: delegates_proxies.h \
+		moc_predefs.h \
+		/usr/lib/qt5/bin/moc
+	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include delegates_proxies.h -o moc_delegates_proxies.cpp
+
 moc_incomeDialog.cpp: incomeDialog.h \
 		db.h \
-		proxy_models.h \
+		delegates_proxies.h \
+		translations.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include incomeDialog.h -o moc_incomeDialog.cpp
 
 moc_outcomeDialog.cpp: outcomeDialog.h \
 		db.h \
-		proxy_models.h \
+		delegates_proxies.h \
+		translations.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include outcomeDialog.h -o moc_outcomeDialog.cpp
 
-moc_proxy_models.cpp: proxy_models.h \
-		moc_predefs.h \
-		/usr/lib/qt5/bin/moc
-	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include proxy_models.h -o moc_proxy_models.cpp
-
 moc_search_dialog.cpp: search_dialog.h \
 		db.h \
+		translations.h \
 		moc_predefs.h \
 		/usr/lib/qt5/bin/moc
 	/usr/lib/qt5/bin/moc $(DEFINES) --include /home/william/Desktop/mydir/mystorageProject/moc_predefs.h -I/usr/lib/x86_64-linux-gnu/qt5/mkspecs/linux-g++ -I/home/william/Desktop/mydir/mystorageProject -I/home/william/Desktop/mydir/mystorageProject -I/usr/include/x86_64-linux-gnu/qt5 -I/usr/include/x86_64-linux-gnu/qt5/QtWidgets -I/usr/include/x86_64-linux-gnu/qt5/QtGui -I/usr/include/x86_64-linux-gnu/qt5/QtSql -I/usr/include/x86_64-linux-gnu/qt5/QtCore -I/usr/include/c++/14 -I/usr/include/x86_64-linux-gnu/c++/14 -I/usr/include/c++/14/backward -I/usr/lib/gcc/x86_64-linux-gnu/14/include -I/usr/local/include -I/usr/include/x86_64-linux-gnu -I/usr/include search_dialog.h -o moc_search_dialog.cpp
@@ -436,8 +437,9 @@ moc_search_dialog.cpp: search_dialog.h \
 moc_mainWindow.cpp: mainWindow.h \
 		db.h \
 		itemDialog.h \
+		translations.h \
 		incomeDialog.h \
-		proxy_models.h \
+		delegates_proxies.h \
 		outcomeDialog.h \
 		search_dialog.h \
 		moc_predefs.h \
@@ -464,31 +466,33 @@ db.o: db.cpp db.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o db.o db.cpp
 
 itemDialog.o: itemDialog.cpp itemDialog.h \
-		db.h
+		db.h \
+		translations.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o itemDialog.o itemDialog.cpp
 
 incomeDialog.o: incomeDialog.cpp incomeDialog.h \
 		db.h \
-		proxy_models.h
+		delegates_proxies.h \
+		translations.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o incomeDialog.o incomeDialog.cpp
 
 outcomeDialog.o: outcomeDialog.cpp outcomeDialog.h \
 		db.h \
-		proxy_models.h
+		delegates_proxies.h \
+		translations.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o outcomeDialog.o outcomeDialog.cpp
 
-proxy_models.o: proxy_models.cpp proxy_models.h
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o proxy_models.o proxy_models.cpp
-
 search_dialog.o: search_dialog.cpp search_dialog.h \
-		db.h
+		db.h \
+		translations.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o search_dialog.o search_dialog.cpp
 
 mainWindow.o: mainWindow.cpp mainWindow.h \
 		db.h \
 		itemDialog.h \
+		translations.h \
 		incomeDialog.h \
-		proxy_models.h \
+		delegates_proxies.h \
 		outcomeDialog.h \
 		search_dialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o mainWindow.o mainWindow.cpp
@@ -496,8 +500,9 @@ mainWindow.o: mainWindow.cpp mainWindow.h \
 modelViews.o: modelViews.cpp mainWindow.h \
 		db.h \
 		itemDialog.h \
+		translations.h \
 		incomeDialog.h \
-		proxy_models.h \
+		delegates_proxies.h \
 		outcomeDialog.h \
 		search_dialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o modelViews.o modelViews.cpp
@@ -505,8 +510,9 @@ modelViews.o: modelViews.cpp mainWindow.h \
 slots.o: slots.cpp mainWindow.h \
 		db.h \
 		itemDialog.h \
+		translations.h \
 		incomeDialog.h \
-		proxy_models.h \
+		delegates_proxies.h \
 		outcomeDialog.h \
 		search_dialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o slots.o slots.cpp
@@ -514,8 +520,9 @@ slots.o: slots.cpp mainWindow.h \
 main.o: main.cpp mainWindow.h \
 		db.h \
 		itemDialog.h \
+		translations.h \
 		incomeDialog.h \
-		proxy_models.h \
+		delegates_proxies.h \
 		outcomeDialog.h \
 		search_dialog.h
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o main.o main.cpp
@@ -526,14 +533,14 @@ moc_db.o: moc_db.cpp
 moc_itemDialog.o: moc_itemDialog.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_itemDialog.o moc_itemDialog.cpp
 
+moc_delegates_proxies.o: moc_delegates_proxies.cpp 
+	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_delegates_proxies.o moc_delegates_proxies.cpp
+
 moc_incomeDialog.o: moc_incomeDialog.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_incomeDialog.o moc_incomeDialog.cpp
 
 moc_outcomeDialog.o: moc_outcomeDialog.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_outcomeDialog.o moc_outcomeDialog.cpp
-
-moc_proxy_models.o: moc_proxy_models.cpp 
-	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_proxy_models.o moc_proxy_models.cpp
 
 moc_search_dialog.o: moc_search_dialog.cpp 
 	$(CXX) -c $(CXXFLAGS) $(INCPATH) -o moc_search_dialog.o moc_search_dialog.cpp

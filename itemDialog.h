@@ -16,6 +16,7 @@
 #include <QDebug>
 
 #include "db.h"
+#include "translations.h"
 
 class ItemDialog : public QDialog {
   Q_OBJECT

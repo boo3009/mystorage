@@ -25,11 +25,11 @@ void ItemDialog::setup_Widget() {
 
   mainLayout=new QVBoxLayout(this);
   buttonsLayout=new QHBoxLayout();
-  label=new QLabel("Item name");
+  label=new QLabel(ITEM_NAME_RU);
   lineEdit=new QLineEdit();
 	lineEdit->setStyleSheet("background-color: white;");
-  savePB=new QPushButton("Save");
-  cancelPB=new QPushButton("Cancel");
+  savePB=new QPushButton(SAVE_RU);
+  cancelPB=new QPushButton(CANCEL_RU);
   
   label->setBuddy(lineEdit);
   mainLayout->addWidget(label);
@@ -86,11 +86,11 @@ void ItemDialog::func_copyItem(int row) {
 
 void ItemDialog::slot_saveItem() {
   if(lineEdit->text().isEmpty()) {
-    QMessageBox::information(nullptr,"Warning message","Empty line, fill it out please!");
+    QMessageBox::information(nullptr,WARN_EMPTY_LINE_RU);
   	return;
 	}
 	if(func_isItemRepeated(lineEdit->text()) && row_added) {
-    QMessageBox::information(nullptr,"Warning message","Item with that name already exists,insert the new one!");
+    QMessageBox::information(nullptr,WARN_ITEM_EXISTS_RU);
 		return;
 	}
 	if(row_added) {

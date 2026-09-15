@@ -18,16 +18,15 @@ CONFIG+=debug
 # Input
 HEADERS += db.h \
 					 itemDialog.h\
+					 delegates_proxies.h\
 					 incomeDialog.h\
 					 outcomeDialog.h\
-					 proxy_models.h\
            search_dialog.h\
            mainWindow.h
 SOURCES += db.cpp \
 					 itemDialog.cpp\
 					 incomeDialog.cpp\
 					 outcomeDialog.cpp\
-					 proxy_models.cpp\
            search_dialog.cpp\
            mainWindow.cpp\
 					 modelViews.cpp\

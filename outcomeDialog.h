@@ -19,9 +19,14 @@
 #include <QSqlQuery>
 #include <QSqlRecord>
 #include <QDebug>
+#include <QStyledItemDelegate>
+#include <QRegularExpression>
+#include <QRegularExpressionValidator>
 
 #include "db.h"
-#include "proxy_models.h"
+#include "delegates_proxies.h"
+#include "translations.h"
+
 
 class OutcomeDialog : public QDialog {
   Q_OBJECT
@@ -106,5 +111,6 @@ private slots:
 	void slot_clear_items_filter();
 	void slot_set_items_filter();
 };
+
 
 #endif

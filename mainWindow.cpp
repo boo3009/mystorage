@@ -1,7 +1,7 @@
 #include "mainWindow.h"
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent) {
-  setWindowTitle("My Storage");
+  setWindowTitle(TITLE_RU);
   setFixedSize(1400,900);
 //  showFullScreen();
 	setWindowFlags(Qt::Window | Qt::FramelessWindowHint);
@@ -30,15 +30,30 @@ void MainWindow::setup_CoreWidgets() {
   mainWidget=new QWidget(this);
   setCentralWidget(mainWidget);
 //------------------------------setting "left" side of mainLayout
-  mainLayout_left_incomePB=new QPushButton("List of incomes");
-  mainLayout_left_outcomePB=new QPushButton("List of outcomes");
-  mainLayout_left_itemsPB=new QPushButton("List of Items");
-  mainLayout_left_balancePB=new QPushButton("Balance");
-  mainLayout_left_quitPB=new QPushButton("Quit My Storage");
-	mainLayout_left_incomePB->setStyleSheet("background-color: #9ECFD4; text-align:left;");
-	mainLayout_left_outcomePB->setStyleSheet("background-color: #9ECFD4; text-align:left;");
-	mainLayout_left_itemsPB->setStyleSheet("background-color: #9ECFD4; text-align:left;");
-	mainLayout_left_balancePB->setStyleSheet("background-color: #9ECFD4; text-align:left;");
+  mainLayout_left_incomePB=new QPushButton(INCOME_MAIN_RU);
+  mainLayout_left_outcomePB=new QPushButton(OUTCOME_MAIN_RU);
+  mainLayout_left_itemsPB=new QPushButton(ITEMS_MAIN_RU);
+  mainLayout_left_balancePB=new QPushButton(BALANCE_MAIN_RU);
+  mainLayout_left_quitPB=new QPushButton(QUIT_MAIN_RU);
+	mainLayout_left_incomePB->setCheckable(true);
+	mainLayout_left_outcomePB->setCheckable(true);
+	mainLayout_left_itemsPB->setCheckable(true);
+	mainLayout_left_balancePB->setCheckable(true);
+	
+	QButtonGroup* main_button_group=new QButtonGroup(this);
+	main_button_group->setExclusive(true);
+	main_button_group->addButton(mainLayout_left_incomePB);
+	main_button_group->addButton(mainLayout_left_outcomePB);
+	main_button_group->addButton(mainLayout_left_itemsPB);
+	main_button_group->addButton(mainLayout_left_balancePB);
+	QString style=R"(
+			QPushButton {background-color: #9ECFD4; text-align: left;}
+			QPushButton:checked {background-color: #4169E1; text-align: left;})";
+	mainLayout_left_incomePB->setStyleSheet(style);
+	mainLayout_left_outcomePB->setStyleSheet(style);
+	mainLayout_left_itemsPB->setStyleSheet(style);
+	mainLayout_left_balancePB->setStyleSheet(style);
+
 	mainLayout_left_quitPB->setStyleSheet("background-color: #948979; text-align:left;");
   mainLayout_left=new QVBoxLayout();
 	mainLayout_left->addSpacing(50);
@@ -70,25 +85,17 @@ void MainWindow::setup_SignalSlots() {
 //-------------------------mainLayouts left side PB's connects
 	connect(mainLayout_left_quitPB,&QPushButton::clicked,this,&QApplication::quit);
 	connect(mainLayout_left_incomePB,&QPushButton::clicked,
-	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(0);
-									set_selected_button_dark(mainLayout_left_outcomePB,mainLayout_left_itemsPB,
-																					 mainLayout_left_balancePB,mainLayout_left_incomePB); });
+	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(0); });
 	connect(mainLayout_left_outcomePB,&QPushButton::clicked,
-	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(1);
-									set_selected_button_dark(mainLayout_left_incomePB,mainLayout_left_itemsPB,
-																					 mainLayout_left_balancePB,mainLayout_left_outcomePB); });
+	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(1); });
 	connect(mainLayout_left_itemsPB,&QPushButton::clicked,
 	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(2);
- 									items_filter_lineedit->clear();
-									set_selected_button_dark(mainLayout_left_incomePB,mainLayout_left_outcomePB,
-																					 mainLayout_left_balancePB,mainLayout_left_itemsPB); });
+ 									items_filter_lineedit->clear(); });
 	connect(mainLayout_left_balancePB,&QPushButton::clicked,
 	/*----*/[=]() { this->mainLayout_middle_stack->setCurrentIndex(3);
 									balanceView->setVisible(false);
 								  pieces_lineedit->clear();	
-									non_empty_cells_lineedit->clear();
-									set_selected_button_dark(mainLayout_left_incomePB,mainLayout_left_outcomePB,
-																					 mainLayout_left_itemsPB,mainLayout_left_balancePB); });
+									non_empty_cells_lineedit->clear(); });
 //-------------------------itemsModelView connects
 	connect(itemsModelView_widget_addItemPB,&QPushButton::clicked,
   /*----*/this,&MainWindow::slot_itemDialog_add);

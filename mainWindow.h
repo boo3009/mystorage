@@ -7,6 +7,7 @@
 #include <QStackedWidget>
 #include <QVBoxLayout>
 #include <QHBoxLayout>
+#include <QButtonGroup>
 #include <QPushButton>
 
 #include <QtSql>
@@ -21,16 +22,16 @@
 #include <QDebug>
 #include <QSizePolicy>
 #include <QDateTime>
-#include <QRegExp>
 
 #include "db.h"
 #include "itemDialog.h"
 #include "incomeDialog.h"
 #include "outcomeDialog.h"
 #include "search_dialog.h"
+#include "translations.h"
 
 
-class MainWindow:public QMainWindow {
+class MainWindow : public QMainWindow {
 	Q_OBJECT
 public:
 	MainWindow(QWidget *parent=nullptr);
@@ -123,8 +124,8 @@ signals:
 /*----------------------------------------*/
 private slots:
 	void slot_updateModels();
-	void set_selected_button_dark(QPushButton*,QPushButton*,
-																QPushButton*,QPushButton*);
+//	void set_selected_button_dark(QPushButton*,QPushButton*,
+//																QPushButton*,QPushButton*);
 //--------------------------slots for items
 	void slot_itemDialog_add();
 	void slot_itemDialog_edit();
@@ -151,5 +152,5 @@ private slots:
 	void slot_write_balance_into_file();
 	void slot_show_search_dialog(int mode);
 };
-
+ 
 #endif

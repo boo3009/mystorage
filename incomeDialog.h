@@ -21,7 +21,9 @@
 #include <QDebug>
 
 #include "db.h"
-#include "proxy_models.h"
+#include "delegates_proxies.h"
+#include "translations.h"
+
 
 class IncomeDialog : public QDialog {
   Q_OBJECT
@@ -104,5 +106,6 @@ private slots:
 	void slot_clear_items_filter();
 	void slot_set_items_filter();
 };
+
 
 #endif

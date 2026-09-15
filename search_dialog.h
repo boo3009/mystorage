@@ -18,6 +18,8 @@
 #include <QColor>
 
 #include "db.h"
+#include "delegates_proxies.h"
+#include "translations.h"
 
 class search_dialog : public QDialog {
 	Q_OBJECT

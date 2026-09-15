@@ -1,4 +1,5 @@
 #include "mainWindow.h"
+#include "translations.h"
 
 
 void MainWindow::slot_updateModels() {
@@ -9,12 +10,12 @@ void MainWindow::slot_updateModels() {
 	balanceModel->select();
 }
 
-void MainWindow::set_selected_button_dark(QPushButton *pb1,QPushButton *pb2, QPushButton *pb3,QPushButton *button_selected) {
-	pb1->setStyleSheet("background-color: #9ECFD4; text-align:left;");
-	pb2->setStyleSheet("background-color: #9ECFD4; text-align:left;");
-	pb3->setStyleSheet("background-color: #9ECFD4; text-align:left;");
-	button_selected->setStyleSheet("background-color: #336D82; text-align:left;");
-}
+//void MainWindow::set_selected_button_dark(QPushButton *pb1,QPushButton *pb2, QPushButton *pb3,QPushButton *button_selected) {
+//	pb1->setStyleSheet("background-color: #9ECFD4; text-align:left;");
+//	pb2->setStyleSheet("background-color: #9ECFD4; text-align:left;");
+//	pb3->setStyleSheet("background-color: #9ECFD4; text-align:left;");
+//	button_selected->setStyleSheet("background-color: #336D82; text-align:left;");
+//}
 
 //=================================ITEMS PART START=========================================
 
@@ -29,7 +30,7 @@ void MainWindow::slot_itemDialog_add() {
 
 /*   create dialog and execute it   */
 	ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,-1,false,this);
-  obj_itemDialog->setWindowTitle("Adding an item");
+  obj_itemDialog->setWindowTitle(ADD_ITEM_RU);
   obj_itemDialog->exec();
 
 /*   check if row added, then select it if so. Otherwise select the old one   */
@@ -45,11 +46,11 @@ void MainWindow::slot_itemDialog_add() {
 
 void MainWindow::slot_editItemByDoubleClick(QModelIndex index) {
   if(!index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
+    QMessageBox::information(nullptr,WARN_SELECT_ITEM_RU);
 		return;
 	}
   ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,index.row(),false,this);
-  obj_itemDialog->setWindowTitle("Editing an item");
+  obj_itemDialog->setWindowTitle(EDIT_ITEM_RU);
   obj_itemDialog->exec();
   itemsView->setCurrentIndex(items_proxymodel->index(index.row(),1)); //select edited row (after editing)
 
@@ -61,11 +62,11 @@ void MainWindow::slot_editItemByDoubleClick(QModelIndex index) {
 void MainWindow::slot_itemDialog_edit() {
   QModelIndex index=itemsView->currentIndex(); 
   if(!index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Please, select an item before editing!");
+    QMessageBox::information(nullptr,WARN_SELECT_ITEM_RU);
 		return;
 	}
   ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,index.row(),false,this);
-  obj_itemDialog->setWindowTitle("Editing an item");
+  obj_itemDialog->setWindowTitle(EDIT_ITEM_RU);
   obj_itemDialog->exec();
   itemsView->setCurrentIndex(items_proxymodel->index(index.row(),1)); //select edited row (after editing)
 
@@ -77,11 +78,11 @@ void MainWindow::slot_itemDialog_edit() {
 void MainWindow::slot_itemDialog_copy() {
   QModelIndex index=itemsView->currentIndex(); 
   if(!index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Please, select an item before copying!");
+    QMessageBox::information(nullptr,WARN_SELECT_BEFORE_COPY_RU);
 		return;
 	}
   ItemDialog *obj_itemDialog=new ItemDialog(itemsModel,itemsView,items_proxymodel,index.row(),true,this);
-  obj_itemDialog->setWindowTitle("Copying an item");
+  obj_itemDialog->setWindowTitle(COPY_ITEM_RU);
   obj_itemDialog->exec();
   itemsView->setCurrentIndex(items_proxymodel->index(index.row(),1)); //select the same row, dont change the focus
 
@@ -93,7 +94,7 @@ void MainWindow::slot_itemDialog_copy() {
 void MainWindow::slot_itemsModelView_remove() {
 	QModelIndex index=itemsView->currentIndex();
   if(!index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Please, select an item before removing!");
+    QMessageBox::information(nullptr,WARN_SELECT_REMOVE_RU);
 		return;
 	}
 
@@ -143,12 +144,12 @@ void MainWindow::slot_incomeDialog_add() {
 
 void MainWindow::slot_editIncomeByDoubleClick(QModelIndex index) {
   if(!index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Please, select an income before editing!");
+    QMessageBox::information(nullptr,WARN_SELECT_INCOME_RU);
 		return;
 	}
   IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,
 		operationsModel,balanceModel,index.row(),this);
-  obj_incomeDialog->setWindowTitle("Editing an income");
+  obj_incomeDialog->setWindowTitle(EDIT_INCOME_RU);
   obj_incomeDialog->exec();
   incomeView->setCurrentIndex(index); //select edited row (after editing)
 	connect(obj_incomeDialog,&IncomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
@@ -159,12 +160,12 @@ void MainWindow::slot_editIncomeByDoubleClick(QModelIndex index) {
 void MainWindow::slot_incomeDialog_edit() {
   QModelIndex index=incomeView->currentIndex(); 
   if(!index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Please, select an income before editing!");
+    QMessageBox::information(nullptr,WARN_SELECT_INCOME_EDIT_RU);
 		return;
 	}
   IncomeDialog *obj_incomeDialog=new IncomeDialog(incomeModel,incomeView,itemsModel,
 		operationsModel,balanceModel,index.row(),this);
-  obj_incomeDialog->setWindowTitle("Editing an income");
+  obj_incomeDialog->setWindowTitle(EDIT_INCOME_RU);
   obj_incomeDialog->exec();
   incomeView->setCurrentIndex(index); //select edited row (after editing)
 	connect(obj_incomeDialog,&IncomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
@@ -175,7 +176,7 @@ void MainWindow::slot_incomeDialog_edit() {
 void MainWindow::slot_incomeModelView_remove() {
 	QModelIndex index=incomeView->currentIndex();
   if(!index.isValid() || incomeModel->index(index.row(),incomeModel->fieldIndex("status")).data().toString()=="REMOVED") {
-    QMessageBox::information(nullptr,"Warning message","Income not selected or has status REMOVED!");
+    QMessageBox::information(nullptr,WARN_NOT_SEL_INC_OR_REMOVED_RU);
 		return;
 	}
 	index=incomeModel->index(index.row(),incomeModel->fieldIndex("status"));
@@ -214,7 +215,7 @@ void MainWindow::slot_incomeModelView_remove() {
 void MainWindow::slot_incomeModelView_cancel_remove() {
 	QModelIndex index=incomeView->currentIndex();
   if(!index.isValid() || incomeModel->index(index.row(),incomeModel->fieldIndex("status")).data().toString()=="SAVED") {
-    QMessageBox::information(nullptr,"Warning message","Income not selected or has status SAVED!");
+    QMessageBox::information(nullptr,WARN_NOT_SEL_INC_OR_SAVED_RU);
 		return;
 	}
 	index=incomeModel->index(index.row(),incomeModel->fieldIndex("status"));
@@ -273,13 +274,13 @@ void MainWindow::slot_outcomeDialog_add() {
 
 void MainWindow::slot_editOutcomeByDoubleClick(QModelIndex index) {
   if(!index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Please, select an outcome before editing!");
+    QMessageBox::information(nullptr,WARN_SELECT_OUTCOME_RU);
 		return;
 	}
 	if(slot_generate_balance()==-1)
 		return;
   OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,operationsModel,balanceModel,index.row(),this);
-  obj_outcomeDialog->setWindowTitle("Editing an outcome");
+  obj_outcomeDialog->setWindowTitle(EDIT_OUTCOME_RU);
   obj_outcomeDialog->exec();
   outcomeView->setCurrentIndex(index); //select edited row (after editing)
 	connect(obj_outcomeDialog,&OutcomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
@@ -290,13 +291,13 @@ void MainWindow::slot_editOutcomeByDoubleClick(QModelIndex index) {
 void MainWindow::slot_outcomeDialog_edit() {
   QModelIndex index=outcomeView->currentIndex(); 
   if(!index.isValid()) {
-    QMessageBox::information(nullptr,"Warning message","Please, select an outcome before editing!");
+    QMessageBox::information(nullptr,WARN_SELECT_OUTCOME_EDIT_RU);
 		return;
 	}
 	if(slot_generate_balance()==-1)
 		return;
   OutcomeDialog *obj_outcomeDialog=new OutcomeDialog(outcomeModel,outcomeView,itemsModel,operationsModel,balanceModel,index.row(),this);
-  obj_outcomeDialog->setWindowTitle("Editing an outcome");
+  obj_outcomeDialog->setWindowTitle(EDIT_OUTCOME_RU);
   obj_outcomeDialog->exec();
   outcomeView->setCurrentIndex(index); //select edited row (after editing)
 	connect(obj_outcomeDialog,&OutcomeDialog::signal_ready,this,&MainWindow::slot_updateModels);
@@ -307,7 +308,7 @@ void MainWindow::slot_outcomeDialog_edit() {
 void MainWindow::slot_outcomeModelView_remove() {
 	QModelIndex index=outcomeView->currentIndex();
   if(!index.isValid() || outcomeModel->index(index.row(),outcomeModel->fieldIndex("status")).data().toString()=="REMOVED") {
-    QMessageBox::information(nullptr,"Warning message","Outcome not selected or has status REMOVED!");
+    QMessageBox::information(nullptr,WARN_NOT_SEL_OUT_OR_REMOVED_RU);
 		return;
 	}
 	index=outcomeModel->index(index.row(),outcomeModel->fieldIndex("status"));
@@ -346,7 +347,7 @@ void MainWindow::slot_outcomeModelView_remove() {
 void MainWindow::slot_outcomeModelView_cancel_remove() {
 	QModelIndex index=outcomeView->currentIndex();
   if(!index.isValid() || outcomeModel->index(index.row(),outcomeModel->fieldIndex("status")).data().toString()=="SAVED") {
-    QMessageBox::information(nullptr,"Warning message","Outcome not selected or has status SAVED!");
+    QMessageBox::information(nullptr,WARN_NOT_SEL_OUT_OR_SAVED_RU);
 		return;
 	}
 	index=outcomeModel->index(index.row(),outcomeModel->fieldIndex("status"));
@@ -388,7 +389,7 @@ void MainWindow::slot_call_generate_balance() {
 	if(slot_generate_balance()==-1)
 		qDebug()<<__LINE__<<"Error: Cant generate balance,soryan :)";
 	QMessageBox msg(this);
-	msg.setText("Balance generated :)");
+	msg.setText(BALANCE_GENERATED_RU);
 	msg.setStyleSheet("QMessageBox{background-color: #4B9DA9; border: 2px solid #778873}" 
 		"QLabel{min-width: 160px;}");
 	msg.exec();
@@ -484,7 +485,7 @@ int MainWindow::slot_generate_balance() {
 
 void MainWindow::slot_write_balance_into_file() {
 	if(balanceModel->rowCount()==0 || !balanceView->isVisible()) {
-    QMessageBox::information(nullptr,"Informational message","Balance table is empty, nothing to print out.");
+    QMessageBox::information(nullptr,BALANCE_EMPTY_RU);
 		return;
 	}
 //   some enums
@@ -553,10 +554,10 @@ void MainWindow::slot_write_balance_into_file() {
 	}
 //---------------------------------------------------------------------------------------------------------------------------------------
 	file_stream<<""<<Qt::endl;
-	file_stream<<"Pieces:  "<<pieces_lineedit->text()<<Qt::endl;
-	file_stream<<"Non-empty cells:  "<<non_empty_cells_lineedit->text()<<Qt::endl;
+	file_stream<<PIECES_RU<<pieces_lineedit->text()<<Qt::endl;
+	file_stream<<NON_EMPTY_RU<<non_empty_cells_lineedit->text()<<Qt::endl;
 //---------------------------------------------------------------------------------------------------------------------------------------
-	QMessageBox::information(nullptr,"Informational message",QString("%1 %2").arg("Done buddy. File created: ").arg(filename));
+	QMessageBox::information(nullptr,INFO_RU,QString("%1 %2").arg(DONE_RU).arg(filename));
 	file.close();
 }
 

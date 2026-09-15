@@ -6,7 +6,7 @@ search_dialog::search_dialog(QSqlQueryModel *search_model,int mode,QWidget *pare
 }
 
 void search_dialog::setup_dialog(QSqlQueryModel *ptr_search_model) {
-  setWindowTitle("Search");
+  setWindowTitle(SEARCH_RU);
   setFixedSize(700,700);
 	this->setObjectName("borders_for_search_dialog");
 	this->setStyleSheet("QWidget#borders_for_search_dialog {" 
@@ -36,31 +36,35 @@ void search_dialog::setup_dialog(QSqlQueryModel *ptr_search_model) {
 
   search_dialog_layout=new QVBoxLayout(this);
   search_dialog_button_layout=new QHBoxLayout();
-	search_PB=new QPushButton("Search");
+	search_PB=new QPushButton(SEARCH_RU);
 	search_PB->setStyleSheet("background-color: #8A2BE2");
 	search_PB->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	date_from_DE=new QDateEdit();
 	date_from_DE->setDate(QDate::currentDate());
 	date_from_DE->setDisplayFormat("dd.MM.yyyy");
 	date_from_DE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-	date_from_L=new QLabel("Date from: ");
+	date_from_L=new QLabel(DATE_FROM_RU);
 	date_to_DE=new QDateEdit();
 	date_to_DE->setDate(QDate::currentDate());
 	date_to_DE->setDisplayFormat("dd.MM.yyyy");
 	date_to_DE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-	date_to_L=new QLabel("Date to: ");
+	date_to_L=new QLabel(DATE_TO_RU);
 	cell_or_item_LE=new QLineEdit();
 	cell_or_item_LE->clear();
 	cell_or_item_LE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	cell_or_item_L=new QLabel();
 	cell_or_item_L->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
-	if(cell_or_item_mode==0)
-		cell_or_item_L->setText("Cell");
+	if(cell_or_item_mode==0) {
+		cell_or_item_L->setText(CELL_RU);
+		QRegularExpression regexp("^[a-zA-Z]{1}\\-[0-9]{2}\\-[0-9]{2}$");
+		hypen_validator *validator=new hypen_validator(regexp,cell_or_item_LE);
+		cell_or_item_LE->setValidator(validator);
+	}
 	if(cell_or_item_mode==1)
-		cell_or_item_L->setText("Item");
+		cell_or_item_L->setText(ITEM_RU);
 	balance_button_layout=new QHBoxLayout();
 	
-	inc_balance_L=new QLabel("Incomes: ");
+	inc_balance_L=new QLabel(INCOMES_RU);
 	inc_balance_L->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	inc_balance_LE=new QLineEdit();
 	inc_balance_LE->setReadOnly(true);
@@ -69,7 +73,7 @@ void search_dialog::setup_dialog(QSqlQueryModel *ptr_search_model) {
 	inc_balance_LE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	inc_balance_LE->clear();
 	
-	out_balance_L=new QLabel("Outcomes: ");
+	out_balance_L=new QLabel(OUTCOMES_RU);
 	out_balance_L->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	out_balance_LE=new QLineEdit();
 	out_balance_LE->setReadOnly(true);
@@ -78,7 +82,7 @@ void search_dialog::setup_dialog(QSqlQueryModel *ptr_search_model) {
 	out_balance_LE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	out_balance_LE->clear();
 	
-	filtered_balance_L=new QLabel("Filtered: ");
+	filtered_balance_L=new QLabel(FILTERED_RU);
 	filtered_balance_L->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	filtered_balance_LE=new QLineEdit();
 	filtered_balance_LE->setReadOnly(true);
@@ -87,7 +91,7 @@ void search_dialog::setup_dialog(QSqlQueryModel *ptr_search_model) {
 	filtered_balance_LE->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	filtered_balance_LE->clear();
 	
-	current_balance_L=new QLabel("Current: ");
+	current_balance_L=new QLabel(CURRENT_RU);
 	current_balance_L->setSizePolicy(QSizePolicy::Fixed,QSizePolicy::Fixed);
 	current_balance_LE=new QLineEdit();
 	current_balance_LE->setReadOnly(true);
@@ -129,7 +133,7 @@ void search_dialog::setup_dialog(QSqlQueryModel *ptr_search_model) {
 
 void search_dialog::slot_search_filtered() {
 	if(cell_or_item_LE->text().isEmpty()) {
-    QMessageBox::information(nullptr,"Warning message","Provide with cell or an item please");
+    QMessageBox::information(nullptr,WARN_PROVIDE_CELL_ITEM_RU);
 		return;
 	}
 	QSqlDatabase retrieveDB=QSqlDatabase::database(DB_NAME);
@@ -147,7 +151,7 @@ void search_dialog::slot_search_filtered() {
 		if(!query.next()) {
 			search_view->setVisible(false);
 			get_search_balance();
-			QMessageBox::information(nullptr,"Info","No movement related with specified cell or item");
+			QMessageBox::information(nullptr,INFO_NO_MOVEMENT_RU);
 			return;
 		}
 	}	else
@@ -173,7 +177,6 @@ void search_dialog::get_search_balance() {
 	QSqlQuery out_query(retrieveDB);
 	QSqlQuery bal_cur_query(retrieveDB);
 	QString inc_str,out_str,cur_bal_str;
-	
 	if(cell_or_item_mode==0) {
 		inc_str=R"(select sum(case when operation_type like 'income operation' and cell like ? 
 							 and date>= ? and date<= ? then quantity else 0 end) from operations 
